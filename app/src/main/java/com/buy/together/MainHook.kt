@@ -1,0 +1,21 @@
+package com.buy.together
+
+import android.text.TextUtils
+import com.buy.together.utils.Constant
+import de.robv.android.xposed.IXposedHookLoadPackage
+import de.robv.android.xposed.callbacks.XC_LoadPackage
+
+class MainHook:IXposedHookLoadPackage{
+    override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam?) {
+        val packageName = lpparam?.packageName
+
+        if(TextUtils.isEmpty(packageName))
+            return
+
+        //只拦截拼多多这个应用
+        if(packageName.equals(Constant.BUY_TOGETHER_PKG))
+        {
+
+        }else return
+    }
+}
