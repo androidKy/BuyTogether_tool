@@ -1,10 +1,7 @@
 package com.buy.together
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.tbruyelle.rxpermissions2.RxPermissions
-import me.goldze.mvvmhabit.utils.SPUtils
-import retrofit2.Retrofit
+import android.support.v7.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
 
