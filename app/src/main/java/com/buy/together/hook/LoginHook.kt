@@ -1,22 +1,20 @@
 package com.buy.together.hook
 
-import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
-import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 
 class LoginHook : HookListener {
     private val tag: String = LoginHook::class.java.simpleName
 
     private val mLoginFragmentClassName = "com.xunmeng.pinduoduo.login.LoginFragment"
+    private val mTencentLogin = "com.tencent.mobileqq.activity.LoginActivity"
 
     override fun hook(loadPkgParam: XC_LoadPackage.LoadPackageParam) {
-        HookUtil.hookMethod(loadPkgParam, mLoginFragmentClassName, "onClick",
+        HookUtil.hookMethod(loadPkgParam, mTencentLogin, "onClick",
             View::class.java, object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam?) {
                     try {
@@ -34,7 +32,8 @@ class LoginHook : HookListener {
                 }
             })
 
-        HookUtil.hookMethod(loadPkgParam,mLoginFragmentClassName,"onCreate", Bundle::class.java,
+
+       /* HookUtil.hookMethod(loadPkgParam,mLoginFragmentClassName,"onCreate", Bundle::class.java,
             object:XC_MethodHook(){
                 override fun afterHookedMethod(param: MethodHookParam?) {
                     try {
@@ -44,6 +43,6 @@ class LoginHook : HookListener {
                         XposedBridge.log("$tag : exception:${e.message}")
                     }
                 }
-            })
+            })*/
     }
 }
