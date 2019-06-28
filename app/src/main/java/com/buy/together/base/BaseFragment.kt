@@ -17,10 +17,13 @@ abstract class BaseFragment : Fragment() {
 
     public var mRootView: View? = null
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         mRootView = inflater.inflate(getLayoutId(),container,false)
-
+        initView()
         return mRootView
     }
 }
