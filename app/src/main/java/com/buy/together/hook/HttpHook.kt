@@ -34,10 +34,9 @@ class HttpHook : HookListener {
                 val paramSize = param?.args?.size
 
                 if (paramSize != null) {
-                    if(paramSize > 1) {
-                        (0..paramSize - 1).forEach { i ->
-                            XposedBridge.log("$tag string format param[$i]=${param.args[i]}")
-                        }
+                    if(paramSize > 1) (0 until paramSize).forEach { i ->
+                        //TODO when param is object
+                       // XposedBridge.log("$tag string format param[$i]=${param.args[i]}")
                     }
                 }
 
