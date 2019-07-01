@@ -15,6 +15,10 @@ import java.lang.reflect.Constructor;
  */
 public class HookUtil {
 
+    static void log(String tag, String msg) {
+        XposedBridge.log(tag + ": " + msg);
+    }
+
     static void hookMethod(XC_LoadPackage.LoadPackageParam loadPackageParam, String className, String methodName,
                            Object... parameterTypesAndCallback) {
         Class<?> classObj = XposedHelpers.findClassIfExists(className, loadPackageParam.classLoader);

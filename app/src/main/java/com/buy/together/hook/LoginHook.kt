@@ -1,9 +1,7 @@
 package com.buy.together.hook
 
 import android.os.Bundle
-import android.view.View
-import android.widget.Button
-import android.widget.TextView
+import com.buy.together.utils.Constant
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
@@ -35,75 +33,120 @@ class LoginHook : HookListener {
                       }
                   }
               })*/
+        if (loadPkgParam.packageName == Constant.QQ_TIM_PKG) {
+            val simpleAccountClass = XposedHelpers.findClassIfExists(
+                "com.tencent.qphone.base.remote.SimpleAccount",
+                loadPkgParam.classLoader
+            )
+            if (simpleAccountClass != null) {
+                HookUtil.log(tag, "SimpleAccount was exited")
+                HookUtil.hookMethod(loadPkgParam, "mqq.app.AppRuntime",
+                    "login", simpleAccountClass, object : XC_MethodHook() {
+                        override fun afterHookedMethod(param: MethodHookParam?) {
+                            HookUtil.log(tag, "AppRuntime login")
+                        }
+                    })
 
+                HookUtil.hookMethod(loadPkgParam, "com.tencent.qphone.base.remote.SimpleAccount",
+                    "toStoreString", object : XC_MethodHook() {
+                        override fun afterHookedMethod(param: MethodHookParam?) {
+                            HookUtil.log(tag, "SimpleAccount toStoreString result: ${param?.result}")
+                        }
+                    })
 
-        HookUtil.hookMethod(loadPkgParam, "com.tencent.qqconnect.wtlogin.Login", "onCreate",
-            Bundle::class.java, object : XC_MethodHook() {
-                override fun afterHookedMethod(param: MethodHookParam?) {
-                    XposedBridge.log("$tag : Login hooked")
-                    val SSOAccountObserver =
-                        XposedHelpers.findClassIfExists("mqq.observer.SSOAccountObserver", loadPkgParam.classLoader)
-                    if (SSOAccountObserver != null) {
-                        XposedBridge.log("$tag: SSOAccountObserver exited")
-                        HookUtil.hookMethod(loadPkgParam,
-                            mTencentLogin,
-                            "ssoLogin",
-                            String::class.java,
-                            String::class.java,
-                            Int::class.java,
-                            SSOAccountObserver,
-                            object : XC_MethodHook() {
-                                override fun afterHookedMethod(param: MethodHookParam?) {
-                                    val args = param?.args
-                                    for (arg in args!!) {
+                HookUtil.hookMethod(loadPkgParam, "com.tencent.qphone.base.remote.SimpleAccount",
+                    "toString", object : XC_MethodHook() {
+                        override fun afterHookedMethod(param: MethodHookParam?) {
+                            HookUtil.log(tag, "SimpleAccount toString result: ${param?.result}")
+                        }
+                    })
+            } else {
+                HookUtil.log(tag, "SimpleAccount not existed")
+            }
 
-                                        XposedBridge.log("$tag : ssoLogin arg = $arg")
+            HookUtil.hookMethod(loadPkgParam, "com.tencent.qqconnect.wtlogin.Login", "onCreate",
+                Bundle::class.java, object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam?) {
+                        XposedBridge.log("$tag : Login hooked")
+                        val ssoAccountObserverClass =
+                            XposedHelpers.findClassIfExists("mqq.observer.SSOAccountObserver", loadPkgParam.classLoader)
+                        if (ssoAccountObserverClass != null) {
+                            XposedBridge.log("$tag: SSOAccountObserver exited")
+                            HookUtil.hookMethod(loadPkgParam,
+                                mTencentLogin,
+                                "ssoLogin",
+                                String::class.java,
+                                String::class.java,
+                                Int::class.java,
+                                ssoAccountObserverClass,
+                                object : XC_MethodHook() {
+                                    override fun afterHookedMethod(param: MethodHookParam?) {
+                                        val args = param?.args
 
-                                    }
-
-                                }
-                            })
-
-                        HookUtil.hookMethod(loadPkgParam,"mqq.app.AppRuntime","login",
-                            String::class.java,ByteArray::class.java,Bundle::class.java,SSOAccountObserver,object:XC_MethodHook(){
-                                override fun afterHookedMethod(param: MethodHookParam?) {
-                                    val args = param?.args
-                                    for(arg in args!!)
-                                    {
-                                        if(arg is String)
-                                        {
-                                            XposedBridge.log("$tag : login arg string = $arg")
-                                        }else if(arg is ByteArray)
-                                        {
-                                            XposedBridge.log("$tag : login arg byteArray = ${String(arg)}")
-                                        }else if(arg is Bundle)
-                                        {
-                                            for(key in arg.keySet())
-                                            {
-                                                XposedBridge.log("$tag : login arg bundle key=$key value=${arg.get(key)}")
-                                            }
+                                        for (i in 0 until args!!.size) {
+                                            XposedBridge.log("$tag : ssoLogin arg[$i] = ${args[i]}")
                                         }
                                     }
-                                }
-                            })
-                    }else{
-                        XposedBridge.log("$tag: SSOAccountObserver not exited")
+                                })
+
+                            HookUtil.hookMethod(loadPkgParam, "mqq.app.ServletContainer", "getServlet",
+                                String::class.java, object : XC_MethodHook() {
+                                    override fun afterHookedMethod(param: MethodHookParam?) {
+                                        HookUtil.log(tag, "ServletContainer getServlet result: ${param?.args!![0]}")
+                                    }
+                                })
+
+                            val toServiceMsg = XposedHelpers.findClassIfExists(
+                                "com.tencent.qphone.base.remote.ToServiceMsg",
+                                loadPkgParam.classLoader
+                            )
+                            if (toServiceMsg != null) {
+                                HookUtil.log(tag, "ToServiceMsg was exited")
+                                HookUtil.hookMethod(loadPkgParam,
+                                    "com.tencent.mobileqq.msf.sdk.k",
+                                    "sendMsg",
+                                    toServiceMsg,
+                                    object : XC_MethodHook() {
+                                        override fun afterHookedMethod(param: MethodHookParam?) {
+                                            HookUtil.log(tag, "IMsfProxy sendMsg")
+
+                                        }
+                                    })
+                            }else HookUtil.log(tag,"ToServiceMsg was not exit")
+
+
+                            /* HookUtil.hookMethod(loadPkgParam,"mqq.app.AppRuntime","login",
+                                 String::class.java,ByteArray::class.java,Bundle::class.java,SSOAccountObserver,object:XC_MethodHook(){
+                                     override fun afterHookedMethod(param: MethodHookParam?) {
+                                         val args = param?.args
+                                         for(arg in args!!)
+                                         {
+                                             if(arg is String)
+                                             {
+                                                 XposedBridge.log("$tag : login arg string = $arg")
+                                             }else if(arg is ByteArray)
+                                             {
+                                                 XposedBridge.log("$tag : login arg byteArray = ${String(arg)}")
+                                             }else if(arg is Bundle)
+                                             {
+                                                 for(key in arg.keySet())
+                                                 {
+                                                     XposedBridge.log("$tag : login arg bundle key=$key value=${arg.get(key)}")
+                                                 }
+                                             }
+                                         }
+                                     }
+                                 })*/
+                        } else {
+                            XposedBridge.log("$tag: SSOAccountObserver not exited")
+                        }
+
                     }
-
-                }
-            })
+                })
 
 
-        /* HookUtil.hookMethod(loadPkgParam,mLoginFragmentClassName,"onCreate", Bundle::class.java,
-             object:XC_MethodHook(){
-                 override fun afterHookedMethod(param: MethodHookParam?) {
-                     try {
-                         val fragment = param?.thisObject is Fragment
-                         val field = XposedHelpers.findFieldIfExists(fragment.javaClass, "a")
-                     } catch (e: Exception) {
-                         XposedBridge.log("$tag : exception:${e.message}")
-                     }
-                 }
-             })*/
+        }
+
+
     }
 }
