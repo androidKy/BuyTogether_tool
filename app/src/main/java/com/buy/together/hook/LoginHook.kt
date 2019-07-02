@@ -109,10 +109,9 @@ class LoginHook : HookListener {
                                     object : XC_MethodHook() {
                                         override fun afterHookedMethod(param: MethodHookParam?) {
                                             HookUtil.log(tag, "IMsfProxy sendMsg")
-
                                         }
                                     })
-                            }else HookUtil.log(tag,"ToServiceMsg was not exit")
+                            } else HookUtil.log(tag, "ToServiceMsg was not exit")
 
 
                             /* HookUtil.hookMethod(loadPkgParam,"mqq.app.AppRuntime","login",
@@ -143,6 +142,29 @@ class LoginHook : HookListener {
 
                     }
                 })
+
+            val errorMsgClass = XposedHelpers.findClassIfExists("oicq.wlogin_sdk.tools.ErrMsg",loadPkgParam.classLoader)
+            if(errorMsgClass != null)
+            {
+
+                HookUtil.hookMethod(loadPkgParam,"mqq.observer.WtloginObserver","OnVerifyCode",
+                    String::class.java,ByteArray::class.java,Long::class.java,ArrayList::class.java,ByteArray::class.java,
+                    Int::class.java,errorMsgClass,object:XC_MethodHook(){
+                        override fun afterHookedMethod(param: MethodHookParam?) {
+                            HookUtil.log(tag,"OnVerifyCode param size = ${param?.args!!.size}")
+
+
+                        }
+                    })
+
+                HookUtil.hookMethod(loadPkgParam,"mqq.observer.WtloginObserver","onReceive",
+                    Int::class.java,Boolean::class.java,Bundle::class.java,object:XC_MethodHook(){
+                        override fun afterHookedMethod(param: MethodHookParam?) {
+                            HookUtil.log(tag,"onReceive param size = ${param?.args!!.size}")
+                        }
+                    })
+            }
+
 
 
         }
