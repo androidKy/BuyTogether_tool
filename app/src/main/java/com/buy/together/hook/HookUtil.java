@@ -2,6 +2,7 @@ package com.buy.together.hook;
 
 import android.text.TextUtils;
 import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XC_MethodHook.MethodHookParam;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
@@ -14,6 +15,37 @@ import java.lang.reflect.Constructor;
  * date: 2019/4/26
  */
 public class HookUtil {
+
+    static void logParam(String tag, MethodHookParam methodHookParam) {
+        if (methodHookParam != null) {
+            Object[] args = methodHookParam.args;
+            if (args != null) {
+                log(tag,"params size = " + args.length);
+                for (int i = 0; i < args.length; i++) {
+                    Object obj = args[i];
+                    if (obj == null) continue;
+
+                    if (obj instanceof String) {
+                        log(tag, "args[" + i + "] = " + obj.toString());
+                    } else if (obj instanceof byte[]) {
+                        byte[] bytes = (byte[]) obj;
+                        log(tag, "args[" + i + "] = " + new String(bytes));
+                    } else if (obj instanceof Integer) {
+                        log(tag, "args[" + i + "] = " + obj);
+                    } else if (obj instanceof Long) {
+                        log(tag, "args[" + i + "] = " + obj);
+                    } else {
+                        log(tag, "object : " + obj.toString());
+                    }
+                }
+            } else {
+                log(tag, "args is null");
+            }
+
+        } else {
+            log(tag, "MethodHookParam is null");
+        }
+    }
 
     static void log(String tag, String msg) {
         XposedBridge.log(tag + ": " + msg);

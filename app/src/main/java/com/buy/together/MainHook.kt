@@ -17,7 +17,7 @@ class MainHook : IXposedHookLoadPackage {
 
         //只拦截拼多多这个应用
         if (packageName.equals(Constant.BUY_TOGETHER_PKG) || packageName.equals(Constant.QQ_TIM_PKG) ||
-            packageName.equals(Constant.QQ_LIATE_PKG)
+            packageName.equals(Constant.QQ_LIATE_PKG) || packageName.equals(Constant.QQ_FULL_PKG)
         ) {
             CloakHook().hook(lpparam!!)
             //HttpHook().hook(lpparam)

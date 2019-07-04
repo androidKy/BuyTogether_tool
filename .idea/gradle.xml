@@ -8,7 +8,10 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/accessibility_service" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/login" />
+            <option value="$PROJECT_DIR$/otherlogin" />
             <option value="$PROJECT_DIR$/saf-log" />
           </set>
         </option>
