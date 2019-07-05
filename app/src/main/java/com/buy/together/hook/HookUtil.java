@@ -16,7 +16,7 @@ import java.lang.reflect.Constructor;
  */
 public class HookUtil {
 
-    static void logParam(String tag, MethodHookParam methodHookParam) {
+    public void logParam(String tag, MethodHookParam methodHookParam) {
         if (methodHookParam != null) {
             Object[] args = methodHookParam.args;
             if (args != null) {
@@ -47,11 +47,11 @@ public class HookUtil {
         }
     }
 
-    static void log(String tag, String msg) {
+    public void log(String tag, String msg) {
         XposedBridge.log(tag + ": " + msg);
     }
 
-    static void hookMethod(XC_LoadPackage.LoadPackageParam loadPackageParam, String className, String methodName,
+    public void hookMethod(XC_LoadPackage.LoadPackageParam loadPackageParam, String className, String methodName,
                            Object... parameterTypesAndCallback) {
         Class<?> classObj = XposedHelpers.findClassIfExists(className, loadPackageParam.classLoader);
         if (classObj != null) {
@@ -67,7 +67,7 @@ public class HookUtil {
         }
     }
 
-    public static void hookField(XC_LoadPackage.LoadPackageParam loadPackageParam, String className, String filedName,
+    public  void hookField(XC_LoadPackage.LoadPackageParam loadPackageParam, String className, String filedName,
                                  String value) {
         Class<?> classObj = XposedHelpers.findClassIfExists(className, loadPackageParam.classLoader);
         if (classObj != null) {
@@ -84,7 +84,7 @@ public class HookUtil {
         }
     }
 
-    public static void hookField(XC_LoadPackage.LoadPackageParam loadPackageParam, String className, String filedName,
+    public  void hookField(XC_LoadPackage.LoadPackageParam loadPackageParam, String className, String filedName,
                                  long value) {
         Class<?> classObj = XposedHelpers.findClassIfExists(className, loadPackageParam.classLoader);
         if (classObj != null) {
@@ -100,7 +100,7 @@ public class HookUtil {
         }
     }
 
-    public static void hookConstructor(XC_LoadPackage.LoadPackageParam loadPackageParam, XC_MethodHook xcMethodHook, Class<?> classZz,
+    public  void hookConstructor(XC_LoadPackage.LoadPackageParam loadPackageParam, XC_MethodHook xcMethodHook, Class<?> classZz,
                                        Class<?>... parameterTypes) {
         try {
             XposedBridge.log("hookConstructor packageName: " + loadPackageParam.packageName + " className : " + classZz.getSimpleName());

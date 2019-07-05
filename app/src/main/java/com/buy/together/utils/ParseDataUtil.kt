@@ -9,9 +9,11 @@ import com.buy.together.bean.TaskBean
 class ParseDataUtil {
     companion object {
         val task_id = "task_id"
+        val task_status = "task_status"
         val ip_address = "ip_address"
-        val accountName = "accountName"
-        val accountPsw = "accountPsw"
+        val login_channel = "login_channel"
+        val account_name = "account_name"
+        val account_psw = "account_psw"
         val task_type = "task_type"
         val goods_size = "goods_size"
         val goods_id = "goods_id"
@@ -29,15 +31,17 @@ class ParseDataUtil {
 
         fun parseTaskBean2HashMap(taskBean: TaskBean): HashMap<String, String> {
 
-            val task = taskBean.task
+            val taskData = taskBean.task
             val hashMap = HashMap<String, String>()
-            hashMap[task_id] = task.task_id.toString()
-            hashMap[ip_address] = task.ip.content
-            hashMap[accountName] = task.account.qq.name
-            hashMap[accountPsw] = task.account.buy_together.psw
-            hashMap[task_type] = task.task_type.toString()
+            hashMap[task_id] = taskData.task_id.toString()
+            hashMap[task_status] = taskData.task_status.toString()
+            hashMap[login_channel] = taskData.login_channel.toString()
+            hashMap[ip_address] = taskData.ip.content
+            hashMap[account_name] = taskData.account.qq.name
+            hashMap[account_psw] = taskData.account.buy_together.psw
+            hashMap[task_type] = taskData.task_type.toString()
 
-            val goods = task.goods
+            val goods = taskData.goods
             hashMap[goods_size] = goods.size.toString()
             for (i in 0 until goods.size) {
                 hashMap["$goods_id[$i]"] = goods[i].goods_id.toString()

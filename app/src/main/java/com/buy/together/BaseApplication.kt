@@ -3,7 +3,7 @@ package com.buy.together
 import me.goldze.mvvmhabit.base.BaseApplication
 import me.goldze.mvvmhabit.crash.CaocConfig
 import me.goldze.mvvmhabit.utils.KLog
-
+import me.goldze.mvvmhabit.utils.SPUtils
 
 
 class BaseApplication :BaseApplication() {

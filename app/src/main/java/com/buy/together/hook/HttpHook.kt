@@ -57,20 +57,24 @@ class HttpHook : HookListener {
     }
 
     private fun hookOutputStream(loadPkgParam: XC_LoadPackage.LoadPackageParam) {
-        HookUtil.hookMethod(loadPkgParam, HookClassName.JAVA_IO_OUTPUTSTREAMWRITER, "write",
-            ByteArray::class.java, Integer.TYPE, Integer.TYPE, object : XC_MethodHook() {
-                override fun beforeHookedMethod(param: MethodHookParam?) {
-                    val os = param?.thisObject as OutputStream
-                    if (!os.toString().contains("internal.http"))
-                        return
-                    val print = String(param.args[0] as ByteArray)
-                    val pt = Pattern.compile("(\\w+=.*)")
-                    val match = pt.matcher(print)
-                    if (match.matches()) {
-                        XposedBridge.log("$tag outputStream POST DATA: $print")
+
+        HookUtil().run {
+            hookMethod(loadPkgParam, HookClassName.JAVA_IO_OUTPUTSTREAMWRITER, "write",
+                ByteArray::class.java, Integer.TYPE, Integer.TYPE, object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam?) {
+                        val os = param?.thisObject as OutputStream
+                        if (!os.toString().contains("internal.http"))
+                            return
+                        val print = String(param.args[0] as ByteArray)
+                        val pt = Pattern.compile("(\\w+=.*)")
+                        val match = pt.matcher(print)
+                        if (match.matches()) {
+                            XposedBridge.log("$tag outputStream POST DATA: $print")
+                        }
                     }
-                }
-            })
+                })
+        }
+
     }
 
     private fun hookGetStream(loadPkgParam: XC_LoadPackage.LoadPackageParam) {
@@ -126,18 +130,24 @@ class HttpHook : HookListener {
 
 
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+                HookUtil().run {
+                    hookMethod(loadPkgParam, "libcore.net.http.HttpURLConnectionImpl",
+                        "getOutputStream", requestHook)
 
-                HookUtil.hookMethod(loadPkgParam, "libcore.net.http.HttpURLConnectionImpl",
-                    "getOutputStream", requestHook)
+                    hookMethod(loadPkgParam,"libcore.net.http.HttpURLConnectionImpl",
+                        "getInputStream",responseHook)
+                }
 
-                HookUtil.hookMethod(loadPkgParam,"libcore.net.http.HttpURLConnectionImpl",
-                    "getInputStream",responseHook)
+
             } else {
-                HookUtil.hookMethod(loadPkgParam, "com.android.okhttp.internal.http.HttpURLConnectionImpl",
-                    "getOutputStream", requestHook)
+                HookUtil().run{
+                    hookMethod(loadPkgParam, "com.android.okhttp.internal.http.HttpURLConnectionImpl",
+                        "getOutputStream", requestHook)
 
-                HookUtil.hookMethod(loadPkgParam,"com.android.okhttp.internal.http.HttpURLConnectionImpl",
-                    "getInputStream",responseHook)
+                    hookMethod(loadPkgParam,"com.android.okhttp.internal.http.HttpURLConnectionImpl",
+                        "getInputStream",responseHook)
+                }
+
 
             }
         } catch (e: Error) {

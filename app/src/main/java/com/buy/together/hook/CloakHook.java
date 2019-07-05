@@ -68,7 +68,7 @@ public class CloakHook implements HookListener {
      * @param loadPackageParam
      */
     private void hideXposedException(final XC_LoadPackage.LoadPackageParam loadPackageParam) {
-        HookUtil.hookMethod(loadPackageParam, HookClassName.JAVA_LANG_THROWABLE, "getStackTrace",
+        new HookUtil().hookMethod(loadPackageParam, HookClassName.JAVA_LANG_THROWABLE, "getStackTrace",
                 new XC_MethodHook() {
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
@@ -131,7 +131,7 @@ public class CloakHook implements HookListener {
                 }
             }
         });*/
-        HookUtil.hookMethod(loadPackageParam, HookClassName.JAVA_LANG_CLASSLOADER, "loadClass", String.class,
+        new HookUtil().hookMethod(loadPackageParam, HookClassName.JAVA_LANG_CLASSLOADER, "loadClass", String.class,
                 new XC_MethodHook() {
                     @Override
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
@@ -150,7 +150,7 @@ public class CloakHook implements HookListener {
      * @param loadPackageParam
      */
     private void hideXposedShell(final XC_LoadPackage.LoadPackageParam loadPackageParam) {
-        HookUtil.hookMethod(loadPackageParam, HookClassName.JAVA_IO_BUFFEREDREADER, "readLine", new XC_MethodHook() {
+        new HookUtil().hookMethod(loadPackageParam, HookClassName.JAVA_IO_BUFFEREDREADER, "readLine", new XC_MethodHook() {
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                 String result = (String) param.getResult();
@@ -170,7 +170,7 @@ public class CloakHook implements HookListener {
      * 处理方式
      */
     private void hideXposedNative(final XC_LoadPackage.LoadPackageParam loadPackageParam) {
-        HookUtil.hookMethod(loadPackageParam, HookClassName.JAVA_LANG_REFLECT_MODIFIER, "isNative", Integer.TYPE,
+        new HookUtil().hookMethod(loadPackageParam, HookClassName.JAVA_LANG_REFLECT_MODIFIER, "isNative", Integer.TYPE,
                 new XC_MethodHook() {
                     @Override
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
@@ -181,7 +181,7 @@ public class CloakHook implements HookListener {
     }
 
     private void hideXposedSystemProperty(final XC_LoadPackage.LoadPackageParam loadPackageParam) {
-        HookUtil.hookMethod(loadPackageParam, HookClassName.JAVA_LANG_SYSTEM, "getProperty", String.class,
+       new HookUtil().hookMethod(loadPackageParam, HookClassName.JAVA_LANG_SYSTEM, "getProperty", String.class,
                 new XC_MethodHook() {
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {

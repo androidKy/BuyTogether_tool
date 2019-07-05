@@ -5,6 +5,7 @@ import com.buy.together.base.BaseView
 import com.buy.together.base.BaseViewModel
 import com.buy.together.bean.*
 import com.buy.together.fragment.view.MainView
+import com.buy.together.utils.Constant
 import com.buy.together.utils.ParseDataUtil
 import com.buy.together.utils.TestData
 import com.google.gson.Gson
@@ -13,6 +14,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import me.goldze.mvvmhabit.utils.SPUtils
 
 /**
  * Description:
@@ -22,6 +24,9 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
 
     private val mSubscribeList = ArrayList<Disposable>()
 
+    /**
+     * 获取任务
+     */
     fun getTask() {
         L.init(MainViewModel::class.java.simpleName)
 
@@ -65,17 +70,22 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         mSubscribeList.add(disposable)
     }
 
+    /**
+     * 解析数据为键值对，显示到表格上
+     */
     fun parseTask(taskBean: TaskBean) {
         val subscribe = Observable.just(taskBean)
             .flatMap {
 
                 val datas = try {
-                    ParseDataUtil.parseHashMap2ArrayList(ParseDataUtil.parseTaskBean2HashMap(it)).reversed()
+                    val hashMapData = ParseDataUtil.parseTaskBean2HashMap(it)
+                    saveTaskData2SP(hashMapData)
+
+                    ParseDataUtil.parseHashMap2ArrayList(hashMapData).reversed()
                 } catch (e: Exception) {
                     L.e(e.message)
                     ArrayList<ArrayList<String>>()
                 }
-
 
                 val arrayList = ArrayList<ArrayList<String>>()
                 arrayList.addAll(datas)
@@ -90,13 +100,25 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         mSubscribeList.add(subscribe)
     }
 
+    /**
+     * 释放订阅
+     */
     override fun clearSubscribes() {
-        if(mSubscribeList.size > 0)
-        {
-            for(sub in mSubscribeList)
-            {
+        if (mSubscribeList.size > 0) {
+            for (sub in mSubscribeList) {
                 sub.dispose()
             }
+        }
+    }
+
+    /**
+     * 保存任务数据到SP
+     */
+    private fun saveTaskData2SP(hashMapData: HashMap<String, String>) {
+        val spUtils = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+
+        for (key in hashMapData.keys) {
+            spUtils.put(key, hashMapData[key]!!)
         }
     }
 }

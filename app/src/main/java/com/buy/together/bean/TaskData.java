@@ -20,9 +20,19 @@ public class TaskData {
     private int task_id;
     private int task_type;
     private int task_status;
+    private int login_channel;
     private IpBean ip;
     private AccountBean account;
     private List<GoodsBean> goods;
+
+    public int getLogin_channel(){
+        return login_channel;
+    }
+
+    public void setLogin_channel(int login_channel)
+    {
+        this.login_channel = login_channel;
+    }
 
     public int getTask_status(){
         return task_status;

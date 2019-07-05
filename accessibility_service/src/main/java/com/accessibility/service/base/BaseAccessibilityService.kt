@@ -2,9 +2,12 @@ package com.accessibility.service.base
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.text.TextUtils
 import android.view.accessibility.AccessibilityNodeInfo
+import com.accessibility.service.page.PageEnum
 import com.safframework.log.L
 import java.util.*
 
@@ -13,7 +16,10 @@ import java.util.*
  * Created by Quinin on 2019-07-02.
  **/
 abstract class BaseAccessibilityService : AccessibilityService() {
+    var mCurPageType = PageEnum.START_PAGE
+    var mIsLogined = false
 
+    val mHandler = Handler(Looper.getMainLooper())
 
     public companion object {
 
@@ -121,6 +127,35 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         }
 
         return null
+    }
+
+    /**
+     * 模拟点击事件
+     *
+     * @param nodeInfo nodeInfo
+     */
+    fun performViewClick(nodeInfo: AccessibilityNodeInfo?) {
+
+        var nodeInfo1: AccessibilityNodeInfo? = nodeInfo ?: return
+        while (nodeInfo1 != null) {
+            if (nodeInfo1.isClickable) {
+                nodeInfo1.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                break
+            }
+            nodeInfo1 = nodeInfo1.parent
+        }
+    }
+
+    /**
+     * 延迟点击事件
+     *
+     * @param nodeInfo
+     * @param delayTime
+     */
+    fun performViewClick(nodeInfo: AccessibilityNodeInfo?, delayTime: Long) {
+        mHandler.postDelayed({
+            performViewClick(nodeInfo)
+        }, delayTime*1000L)
     }
 
 }

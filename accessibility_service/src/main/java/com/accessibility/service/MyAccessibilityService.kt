@@ -11,8 +11,7 @@ import com.accessibility.service.page.PageEnum
  **/
 class MyAccessibilityService : BaseAccessibilityService() {
 
-    private var mCurPageType = PageEnum.INDEX_PAGE
-    private var mIsLogined = false
+
 
     companion object {
         const val PKG_PINDUODUO = "com.xunmeng.pinduoduo"
@@ -50,7 +49,27 @@ class MyAccessibilityService : BaseAccessibilityService() {
         if (eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ||
             eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED
         ) {
+            chooseLogin()
+        }
+    }
 
+
+    private fun chooseLogin() {
+        if (mCurPageType != PageEnum.CHOOSE_LOGIN_PAGE) {
+            findViewByText("请使用其它方式登录")?.let {
+                mCurPageType = PageEnum.CHOOSE_LOGIN_PAGE
+
+                //todo 判断是哪种登录
+                performViewClick(it,1)
+            }
+        }
+
+        if(mCurPageType != PageEnum.CHOOSING_LOGIN_PAGE)
+        {
+            findViewByText("QQ登录")?.let{
+                mCurPageType = PageEnum.CHOOSING_LOGIN_PAGE
+                performViewClick(it,1)
+            }
         }
     }
 }

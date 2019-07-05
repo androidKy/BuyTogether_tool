@@ -9,5 +9,7 @@ class Constant {
 
         val URL_GET_TASK : String = ""
 
+        val SP_TASK_FILE_NAME = "pinduoduo_task_sp"
+
     }
 }
