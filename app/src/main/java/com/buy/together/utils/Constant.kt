@@ -1,15 +1,16 @@
 package com.buy.together.utils
 
 class Constant {
-    companion object{
-        val BUY_TOGETHER_PKG : String = "com.xunmeng.pinduoduo"
-        val QQ_TIM_PKG: String = "com.tencent.tim"
-        val QQ_LIATE_PKG:String = "com.tencent.qqlite"
-        val QQ_FULL_PKG:String = "com.tencent.mobileqq"
+    companion object {
+        const val BUY_TOGETHER_PKG: String = "com.xunmeng.pinduoduo"
+        const val QQ_TIM_PKG: String = "com.tencent.tim"
+        const val QQ_LIATE_PKG: String = "com.tencent.qqlite"
+        const val QQ_FULL_PKG: String = "com.tencent.mobileqq"
 
-        val URL_GET_TASK : String = ""
+        const val URL_GET_TASK: String = ""
 
-        val SP_TASK_FILE_NAME = "pinduoduo_task_sp"
+        const val SP_TASK_FILE_NAME = "pinduoduo_task_sp"
+        const val KEY_TASK_DATA = "task_data"
 
     }
 }

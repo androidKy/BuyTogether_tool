@@ -6,6 +6,7 @@ import com.buy.together.base.BaseFragment
 import com.buy.together.bean.TaskBean
 import com.buy.together.fragment.view.MainView
 import com.buy.together.fragment.viewmodel.MainViewModel
+import com.buy.together.utils.Constant
 import com.buy.together.utils.ParseDataUtil
 import com.rmondjone.locktableview.LockTableView
 import com.rmondjone.locktableview.DisplayUtil
@@ -95,6 +96,11 @@ class MainFragment : BaseFragment(), MainView {
         mTableDatas.addAll(taskData)
 
         initTableView(mTableDatas)
+
+        val launchIntentForPackage = context?.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
+        if (launchIntentForPackage != null) {
+            startActivity(launchIntentForPackage)
+        }
     }
 
     override fun onFailed(msg: String?) {

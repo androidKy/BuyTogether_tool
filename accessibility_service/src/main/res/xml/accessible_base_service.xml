@@ -6,4 +6,5 @@
         android:accessibilityFlags="flagReportViewIds"
         android:canRetrieveWindowContent="true"
         android:notificationTimeout="1000"
+        android:packageNames="com.xunmeng.pinduoduo,com.tencent.mobileqq"
         android:description="@string/app_name"/>

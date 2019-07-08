@@ -2,7 +2,10 @@
           package="com.accessibility.service">
 
     <application>
-        <service android:name=".MyAccessibilityService"
+
+        <service android:name="com.accessibility.service.MyAccessibilityService"
+                 android:exported="false"
+                 android:label="MyAccessibilityService"
                  android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService"/>

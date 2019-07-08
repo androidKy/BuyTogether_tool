@@ -55,4 +55,7 @@ dependencies {
 
     //table
     implementation 'com.github.RmondJone:LockTableView:1.1.2'
+
+    //无障碍
+    implementation project(":accessibility_service")
 }

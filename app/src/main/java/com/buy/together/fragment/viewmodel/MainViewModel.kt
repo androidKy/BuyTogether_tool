@@ -51,8 +51,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
 
         val disposable = Observable.just(TestData.taskBean_str)
             .flatMap {
-                val taskBean: TaskBean?
-                taskBean = try {
+               val taskBean = try {
                     Gson().fromJson(it, TaskBean::class.java)
                 } catch (e: Exception) {
                     L.e(e.message)
@@ -61,6 +60,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                     exceptionTask.code = 400
                     exceptionTask
                 }
+                saveTaskData2SP(it)
                 Observable.just(taskBean)
             }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -79,7 +79,6 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
 
                 val datas = try {
                     val hashMapData = ParseDataUtil.parseTaskBean2HashMap(it)
-                    saveTaskData2SP(hashMapData)
 
                     ParseDataUtil.parseHashMap2ArrayList(hashMapData).reversed()
                 } catch (e: Exception) {
@@ -114,11 +113,9 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     /**
      * 保存任务数据到SP
      */
-    private fun saveTaskData2SP(hashMapData: HashMap<String, String>) {
+    private fun saveTaskData2SP(strData:String) {
         val spUtils = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
 
-        for (key in hashMapData.keys) {
-            spUtils.put(key, hashMapData[key]!!)
-        }
+        spUtils.put(Constant.KEY_TASK_DATA,strData)
     }
 }

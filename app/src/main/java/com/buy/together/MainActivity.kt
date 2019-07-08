@@ -3,7 +3,10 @@ package com.buy.together
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.support.v7.app.AppCompatActivity
+import com.accessibility.service.MyAccessibilityService
+import com.accessibility.service.base.BaseAccessibilityService
 import com.buy.together.fragment.MainFragment
 import com.buy.together.service.KeepLiveService
 
@@ -18,10 +21,22 @@ class MainActivity : AppCompatActivity() {
         }else{
             startService(Intent(this,KeepLiveService::class.java))
         }
+
+
     }
 
     override fun onStart() {
         super.onStart()
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (!BaseAccessibilityService.isAccessibilitySettingsOn(this, MyAccessibilityService::class.java.canonicalName!!)) {
+            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+            startActivity(intent)
+            return
+        }
         initFragment()
     }
 
