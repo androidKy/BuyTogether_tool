@@ -38,6 +38,7 @@ class QQloginService(accessibilityService: MyAccessibilityService, event: Access
             WidgetConstant.EDITTEXT,
             object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo) {
+                    L.i("account edittext was found.")
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         val arguments = Bundle()
                         arguments.putCharSequence(
@@ -69,7 +70,8 @@ class QQloginService(accessibilityService: MyAccessibilityService, event: Access
         accessibilityService.findViewByClassName(accessibilityService.rootInActiveWindow, WidgetConstant.IMAGEVIEW,
             object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo) {
-                    accessibilityService.performViewClick(nodeInfo, 2)
+                    L.i("login btn was found.")
+                   // accessibilityService.performViewClick(nodeInfo, 2)
                 }
 
             })

@@ -28,8 +28,8 @@ class TestData {
                 "      },\n" +
                 "      \"qq\": {\n" +
                 "        \"qq_id\": 24,\n" +
-                "        \"name\": \"qq_name\",\n" +
-                "        \"psw\": \"qq_psw\"\n" +
+                "        \"name\": \"2408973767\",\n" +
+                "        \"psw\": \"lqy12021004\"\n" +
                 "      },\n" +
                 "      \"buy_together\": {\n" +
                 "        \"buttogether_id\": 53,\n" +

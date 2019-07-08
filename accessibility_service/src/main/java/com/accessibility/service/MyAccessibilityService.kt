@@ -35,7 +35,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
              it.packageNames = arrayOf(PKG_PINDUODUO, PKG_QQ)
              serviceInfo = it
          }*/
-        initTaskData()
         super.onServiceConnected()
     }
 
@@ -69,6 +68,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
     private fun chooseLogin(event: AccessibilityEvent?) {
         if (mCurPageType == PageEnum.START_PAGE) {
             findViewByText("请使用其它方式登录")?.let {
+                initTaskData()
                 setCurPageType(PageEnum.CHOOSE_LOGIN_PAGE)
                 L.i("当前界面：选择登录")
                 if (TaskDataUtil.instance.getLogin_channel() != 1)    //不是微信登录
@@ -94,7 +94,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
             postDelay(Runnable {
                 QQloginService(this, event!!).doOnEvent()
-            }, 5)
+            }, 15)
         }
 
         L.i("mCurPageType = ${mCurPageType.name}")
@@ -104,7 +104,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
             postDelay(Runnable {
                 QQloginService(this, event!!).login()
-            }, 7)
+            }, 20)
         }
     }
 

@@ -23,6 +23,7 @@ import java.util.*
 abstract class BaseAccessibilityService : AccessibilityService() {
     var mCurPageType = PageEnum.START_PAGE
     var mIsLogined = false
+    var mIsInited = false
 
     val mHandler = Handler(Looper.getMainLooper())
 
@@ -77,9 +78,11 @@ abstract class BaseAccessibilityService : AccessibilityService() {
      */
     fun initTaskData() {
         try {
+            if (mIsInited) return
             getSharedPreferences("pinduoduo_task_sp", Context.MODE_PRIVATE).getString("task_data", "")
                 .let {
                     if (!TextUtils.isEmpty(it)) {
+                        mIsInited = true
                         val taskServiceData = Gson().fromJson(it, TaskServiceData::class.java)
                         TaskDataUtil.instance.initData(taskServiceData)
                     }
