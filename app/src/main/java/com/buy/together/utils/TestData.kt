@@ -28,8 +28,8 @@ class TestData {
                 "      },\n" +
                 "      \"qq\": {\n" +
                 "        \"qq_id\": 24,\n" +
-                "        \"name\": \"2408973767\",\n" +
-                "        \"psw\": \"lqy12021004\"\n" +
+                "        \"name\": \"2231535961\",\n" +
+                "        \"psw\": \"qqqq8888\"\n" +
                 "      },\n" +
                 "      \"buy_together\": {\n" +
                 "        \"buttogether_id\": 53,\n" +
@@ -41,7 +41,7 @@ class TestData {
                 "      {\n" +
                 "        \"goods_id\": 2014825,\n" +
                 "        \"goods_type\": 12,\n" +
-                "        \"name\": \"商品全名称\",\n" +
+                "        \"name\": \"薄荷茶\",\n" +
                 "        \"keyword\": \"夏季新款悠闲男装中短裤\",\n" +
                 "        \"delivery_address\": \"收货地址\",\n" +
                 "        \"talk_msg\": \"老板你好，这条裤子的尺码是怎么样的\",\n" +
@@ -58,7 +58,7 @@ class TestData {
                 "      {\n" +
                 "        \"goods_id\": 2014826,\n" +
                 "        \"goods_type\": 13,\n" +
-                "        \"name\": \"商品全名称\",\n" +
+                "        \"name\": \"洁柔纸巾\",\n" +
                 "        \"keyword\": \"夏季新款悠闲女装\",\n" +
                 "        \"delivery_address\": \"收货地址\",\n" +
                 "        \"talk_msg\": \"老板你好，这条裤子的尺码是怎么样的\",\n" +

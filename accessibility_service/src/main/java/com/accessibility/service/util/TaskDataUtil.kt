@@ -1,10 +1,15 @@
-package com.accessibility.service.data
+package com.accessibility.service.util
+
+import android.os.Build
+import android.os.Bundle
+import android.view.accessibility.AccessibilityNodeInfo
+import com.accessibility.service.data.TaskServiceData
 
 /**
  * Description:
  * Created by Quinin on 2019-07-08.
  **/
-class TaskDataUtil {
+class TaskDataUtil private constructor() {
 
     private var mTaskServiceData: TaskServiceData? = null
 
@@ -50,6 +55,35 @@ class TaskDataUtil {
         }
 
         return ""
+    }
+
+    /**
+     * 获取商品名字
+     */
+    fun getGoods_name(): String? {
+        mTaskServiceData?.apply {
+            return task?.goods?.get(0)?.name
+        }
+
+        return ""
+    }
+
+    /**
+     * 获取任务类型
+     * {
+     *  1：刷浏览数
+     *  2：与卖家沟通
+     *  3：刷收藏数
+     *  4：刷订单数
+     *  12：刷浏览和沟通
+     * }
+     */
+    fun getTask_type(): Int? {
+        mTaskServiceData?.apply {
+            return task?.task_type
+        }
+
+        return 1
     }
 
 }

@@ -2,26 +2,24 @@ package com.accessibility.service.base
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Context
-import android.content.SharedPreferences
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.text.TextUtils
 import android.view.accessibility.AccessibilityNodeInfo
-import com.accessibility.service.data.TaskDataUtil
+import com.accessibility.service.util.TaskDataUtil
 import com.accessibility.service.data.TaskServiceData
 import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.page.PageEnum
 import com.google.gson.Gson
 import com.safframework.log.L
-import java.util.*
 
 /**
  * Description:
  * Created by Quinin on 2019-07-02.
  **/
 abstract class BaseAccessibilityService : AccessibilityService() {
-    var mCurPageType = PageEnum.START_PAGE
+    var mCurPageType = PageEnum.INDEX_PAGE
     var mIsLogined = false
     var mIsInited = false
 
@@ -67,10 +65,16 @@ abstract class BaseAccessibilityService : AccessibilityService() {
 
     }
 
-
+    /**
+     * 设置当前处于哪一个页面
+     */
     fun setCurPageType(pageEnum: PageEnum) {
         // L.i("setCurPageType mCurPageType = ${pageEnum.name}")
         this.mCurPageType = pageEnum
+    }
+
+    fun setIsLogined(loginStatus: Boolean) {
+        this.mIsLogined = loginStatus
     }
 
     /**
@@ -125,7 +129,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         L.i("className: ${nodeInfo.className} childCount: $childCount")
 
         for (i in 0 until childCount) {
-            val childNode = nodeInfo.getChild(i)
+            val childNode = nodeInfo.getChild(i) ?: continue
             if (childNode.className != null && childNode.className == className) {
                 nodeFoundListener.onNodeFound(childNode)
                 return
@@ -134,31 +138,6 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         }
     }
 
-    /**
-     * 根据view className和text获取节点·
-     */
-    fun findViewByNameAndText(
-        nodeInfo: AccessibilityNodeInfo,
-        className: String,
-        text: String
-    ): AccessibilityNodeInfo? {
-        L.i("className: ${nodeInfo.className} text: ${nodeInfo.text}")
-
-        if (nodeInfo.className != null && nodeInfo.className == className
-            && nodeInfo.text != null && nodeInfo.text == text
-        ) {
-            return nodeInfo
-        }
-
-        val childCount = nodeInfo.childCount
-        if (childCount > 0) {
-            for (i in 0 until childCount) {
-                return findViewByNameAndText(nodeInfo.getChild(i), className, text)
-            }
-        }
-
-        return null
-    }
 
     /**
      * 根据
