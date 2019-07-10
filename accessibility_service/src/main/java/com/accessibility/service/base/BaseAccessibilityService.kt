@@ -9,6 +9,7 @@ import android.text.TextUtils
 import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.util.TaskDataUtil
 import com.accessibility.service.data.TaskServiceData
+import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.page.PageEnum
 import com.google.gson.Gson
@@ -149,6 +150,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         return null
     }
 
+
     /**
      * 根据view className获取节点
      */
@@ -186,13 +188,22 @@ abstract class BaseAccessibilityService : AccessibilityService() {
          return nodeInfo*/
     }
 
+    fun performBackClick() {
+        performBackClick(0)
+    }
+
+    fun performBackClick(delayTime: Int) {
+        mHandler.postDelayed({
+            performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
+        }, delayTime * 1000L)
+    }
+
     /**
      * 模拟点击事件
      *
      * @param nodeInfo nodeInfo
      */
     fun performViewClick(nodeInfo: AccessibilityNodeInfo?) {
-
         var nodeInfo1: AccessibilityNodeInfo? = nodeInfo ?: return
         while (nodeInfo1 != null) {
             if (nodeInfo1.isClickable) {
@@ -216,13 +227,8 @@ abstract class BaseAccessibilityService : AccessibilityService() {
      * 模拟向上滑动事件
      */
     fun performScrollBackward(nodeInfo: AccessibilityNodeInfo?) {
-        try {
-            nodeInfo?.run {
-                Thread.sleep(500)
-                performAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD)
-            }
-        } catch (e: Exception) {
-            L.e(e.message, e)
+        nodeInfo?.run {
+            performAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD)
         }
     }
 
@@ -233,8 +239,16 @@ abstract class BaseAccessibilityService : AccessibilityService() {
      * @param delayTime
      */
     fun performViewClick(nodeInfo: AccessibilityNodeInfo?, delayTime: Long) {
+        performViewClick(nodeInfo, delayTime, null)
+    }
+
+    fun performViewClick(nodeInfo: AccessibilityNodeInfo?, delayTime: Long, clickedListener: AfterClickedListener?) {
         mHandler.postDelayed({
             performViewClick(nodeInfo)
+
+            postDelay(Runnable {
+                clickedListener?.onClicked()
+            }, 1)
         }, delayTime * 1000L)
     }
 

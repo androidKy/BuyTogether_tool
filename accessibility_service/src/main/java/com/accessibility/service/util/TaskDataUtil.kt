@@ -27,45 +27,37 @@ class TaskDataUtil private constructor() {
     /**
      * 获取登录渠道方式,默认是0
      */
-    fun getLogin_channel(): Int {
-        mTaskServiceData?.apply {
-            return task?.login_channel ?: 0
+    fun getLogin_channel(): Int? {
+        return mTaskServiceData?.run {
+            task?.login_channel ?: 0
         }
-
-        return 0
     }
 
     /**
      * 获取账号名字
      */
     fun getLogin_name(): String? {
-        mTaskServiceData?.apply {
-            return task?.account?.qq?.name
+        return mTaskServiceData?.run {
+            task?.account?.qq?.name
         }
-
-        return ""
     }
 
     /**
      * 获取账号密码
      */
     fun getLogin_psw(): String? {
-        mTaskServiceData?.apply {
-            return task?.account?.qq?.psw
+        return mTaskServiceData?.run {
+            task?.account?.qq?.psw
         }
-
-        return ""
     }
 
     /**
      * 获取商品名字
      */
     fun getGoods_name(): String? {
-        mTaskServiceData?.apply {
-            return task?.goods?.get(0)?.name
+        return mTaskServiceData?.run {
+            task?.goods?.get(0)?.name
         }
-
-        return ""
     }
 
     /**
@@ -79,11 +71,17 @@ class TaskDataUtil private constructor() {
      * }
      */
     fun getTask_type(): Int? {
-        mTaskServiceData?.apply {
-            return task?.task_type
+        return mTaskServiceData?.run {
+            task?.task_type ?: 1
         }
-
-        return 1
     }
 
+    /**
+     * 获取聊天信息
+     */
+    fun getTalk_msg(): String? {
+        return mTaskServiceData?.run {
+            task?.goods?.get(0)?.talk_msg ?: "老板你好"
+        }
+    }
 }

@@ -31,7 +31,7 @@ class SearchGoodsService private constructor(nodeService: MyAccessibilityService
                     nodeService.apply {
                         setCurPageType(PageEnum.SEARCH_PAGE)
                         L.i("搜索className: ${nodeInfo?.className} \n parentClassName: ${nodeInfo?.parent?.className}")
-                        performViewClick(nodeInfo?.parent, 1)
+                        performViewClick(nodeInfo.parent, 1)
                     }
                 }
             })
@@ -91,7 +91,6 @@ class SearchGoodsService private constructor(nodeService: MyAccessibilityService
             for (i in 0 until nodeList.size) {
                 L.i("node text = ${nodeList[i].text}")
             }
-
         }*/
 
         NodeUtils.instance
