@@ -2,12 +2,15 @@ package com.accessibility.service
 
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.function.*
+import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.util.TaskDataUtil
 import com.accessibility.service.login.QQloginService
 import com.accessibility.service.login.WXloginService
 import com.accessibility.service.page.PageEnum
+import com.accessibility.service.util.NodeUtils
 import com.safframework.log.L
 
 /**
@@ -53,6 +56,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
             chooseLogin()
             startLogin()
             searchGoods()
+            //doTask()
         }
     }
 
@@ -104,10 +108,13 @@ class MyAccessibilityService : BaseAccessibilityService() {
      */
     private fun searchGoods() {
         when (mCurPageType) {
-            PageEnum.INDEX_PAGE, PageEnum.AUTH_LOGIN_PAGE -> SearchGoodsService.getInstance(this).doOnEvent()
+            PageEnum.INDEX_PAGE, PageEnum.QQ_LOGIN_PAGE, PageEnum.AUTH_LOGIN_PAGE -> SearchGoodsService.getInstance(this).doOnEvent()
             PageEnum.SEARCH_PAGE -> SearchGoodsService.getInstance(this).jump2search()
             PageEnum.SERARCHING_PAGE -> SearchGoodsService.getInstance(this).searching()
-            PageEnum.SEARCH_RESULT_PAGE -> SearchGoodsService.getInstance(this).chooseGood()
+            PageEnum.SEARCH_RESULT_PAGE -> {
+                SearchGoodsService.getInstance(this).chooseGood()
+                setPage2Goods_info_page()
+            }
 
             else -> return
         }
@@ -120,6 +127,22 @@ class MyAccessibilityService : BaseAccessibilityService() {
         if (mCurPageType == PageEnum.GOODS_INFO_PAGE) {
             TaskService.getInstance(this).doOnEvent()
         }
+    }
+
+    /**
+     * 设置搜索结果界面状态
+     */
+    fun setPage2Goods_info_page() {
+        NodeUtils.instance
+            .setNodeFoundListener(object : NodeFoundListener {
+                override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
+                    nodeInfo?.apply {
+                        setCurPageType(PageEnum.GOODS_INFO_PAGE)
+                        doTask()
+                    }
+                }
+            })
+            .getNodeByFullText(this, "发起拼单")
     }
 
 }

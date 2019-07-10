@@ -85,16 +85,28 @@ class SearchGoodsService private constructor(nodeService: MyAccessibilityService
      */
     fun chooseGood() {
         //todo 根据商品名称寻找特定的商品
+       /* TaskDataUtil.instance.getGoods_name()?.run {
+            val nodeList = NodeUtils.instance.getNodesByText(nodeService, this)
+            L.i("nodeSize = ${nodeList.size}")
+            for (i in 0 until nodeList.size) {
+                L.i("node text = ${nodeList[i].text}")
+            }
+
+        }*/
+
         NodeUtils.instance
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
+                    L.i("选择商品：$nodeInfo")
                     nodeInfo?.let {
-                        L.i("选择商品：${it.text}")
-                        nodeService.setCurPageType(PageEnum.GOODS_INFO_PAGE)
-                        nodeService.performViewClick(it, 2)
+                        nodeService.apply {
+                            performViewClick(it, 2)
+                        }
                     }
                 }
             })
-            .getNodeByText(nodeService, "3罐装恋绿干薄荷叶茶新鲜")
+            .getNodeByFullText(nodeService, "9.9")
     }
+
+
 }

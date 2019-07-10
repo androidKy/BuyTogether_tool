@@ -77,6 +77,10 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         this.mIsLogined = loginStatus
     }
 
+    fun getHandler(): Handler {
+        return mHandler
+    }
+
     /**
      * 获取任务数据
      */
@@ -96,11 +100,40 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         }
     }
 
+    /**
+     * 查找符合条件的node集合
+     */
+    fun findViewsByText(text: String): List<AccessibilityNodeInfo> {
+        return rootInActiveWindow.run {
+            findAccessibilityNodeInfosByText(text)
+        }
+    }
+
 
     /**
      * 根据text获取节点
      */
     fun findViewByText(text: String): AccessibilityNodeInfo? {
+        val accessibilityNodeInfo = rootInActiveWindow ?: return null
+
+        val nodeList = accessibilityNodeInfo.findAccessibilityNodeInfosByText(text)
+        L.i("nodeList size = ${nodeList.size} text = $text ")
+        if (nodeList.size > 0) {
+            for (node in nodeList) {
+                L.i("nodeList text = ${node.text} className = ${node.className}")
+                if (node.text == text)
+                    return node
+            }
+            return nodeList[0]
+        }
+        L.i("$text not found")
+        return null
+    }
+
+    /**
+     * 查找与text完全相同的节点
+     */
+    fun findViewByFullText(text: String): AccessibilityNodeInfo? {
         val accessibilityNodeInfo = rootInActiveWindow ?: return null
 
         val nodeList = accessibilityNodeInfo.findAccessibilityNodeInfosByText(text)
@@ -111,7 +144,6 @@ abstract class BaseAccessibilityService : AccessibilityService() {
                 if (node.text == text)
                     return node
             }
-            return nodeList[0]
         }
         L.i("$text not found")
         return null
@@ -140,7 +172,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
 
 
     /**
-     * 根据
+     * 根据view id获取节点
      */
     fun findViewById(id: String): AccessibilityNodeInfo? {
         val nodeList = rootInActiveWindow.findAccessibilityNodeInfosByViewId(id)
@@ -168,6 +200,29 @@ abstract class BaseAccessibilityService : AccessibilityService() {
                 break
             }
             nodeInfo1 = nodeInfo1.parent
+        }
+    }
+
+    /**
+     * 模拟向下滑动事件
+     */
+    fun performScrollForward(nodeInfo: AccessibilityNodeInfo?) {
+        nodeInfo?.apply {
+            performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)
+        }
+    }
+
+    /**
+     * 模拟向上滑动事件
+     */
+    fun performScrollBackward(nodeInfo: AccessibilityNodeInfo?) {
+        try {
+            nodeInfo?.run {
+                Thread.sleep(500)
+                performAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD)
+            }
+        } catch (e: Exception) {
+            L.e(e.message, e)
         }
     }
 

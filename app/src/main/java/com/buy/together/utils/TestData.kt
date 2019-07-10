@@ -11,7 +11,7 @@ class TestData {
                 "  \"code\": 200,\n" +
                 "  \"task\": {\n" +
                 "    \"task_id\": 1000,\n" +
-                "    \"task_type\": 1234,\n" +
+                "    \"task_type\": 12,\n" +
                 "    \"task_status\":0,\n" +
                 "    \"login_channel\":0,\n" +
                 "    \"ip\": {\n" +
@@ -41,7 +41,7 @@ class TestData {
                 "      {\n" +
                 "        \"goods_id\": 2014825,\n" +
                 "        \"goods_type\": 12,\n" +
-                "        \"name\": \"薄荷茶\",\n" +
+                "        \"name\": \"3罐装恋绿干薄荷叶茶新鲜薄荷茶天然食用清凉茶清新口气夏季花茶\",\n" +
                 "        \"keyword\": \"夏季新款悠闲男装中短裤\",\n" +
                 "        \"delivery_address\": \"收货地址\",\n" +
                 "        \"talk_msg\": \"老板你好，这条裤子的尺码是怎么样的\",\n" +

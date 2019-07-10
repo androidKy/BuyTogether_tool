@@ -43,7 +43,7 @@ class QQloginService private constructor(nodeService: MyAccessibilityService) :
                     }
                 }
             })
-            .getNodeByText(nodeService, "登录")
+            .getNodeByFullText(nodeService, "登录")
     }
 
     /**
@@ -100,7 +100,7 @@ class QQloginService private constructor(nodeService: MyAccessibilityService) :
                     }
                 }
             })
-            .getNodeByText(nodeService, "登录")
+            .getNodeByFullText(nodeService, "登录")
 
     }
 }

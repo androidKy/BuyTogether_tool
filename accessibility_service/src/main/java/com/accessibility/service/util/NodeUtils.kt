@@ -1,7 +1,5 @@
 package com.accessibility.service.util
 
-import android.os.Build
-import android.os.Bundle
 import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.listener.NodeFoundListener
@@ -27,6 +25,9 @@ class NodeUtils private constructor() {
         return this
     }
 
+    /**
+     * 查找包含text的节点集合的第一个
+     */
     fun getNodeByText(nodeService: BaseAccessibilityService, text: String) {
         val nodeInfo = nodeService.findViewByText(text)
 
@@ -47,6 +48,36 @@ class NodeUtils private constructor() {
         }, 1)
     }
 
+    fun getNodesByText(nodeService: BaseAccessibilityService, text: String): List<AccessibilityNodeInfo> {
+        return nodeService.findViewsByText(text)
+    }
+
+    /**
+     * 查找与text完全匹配的节点
+     */
+    fun getNodeByFullText(nodeService: BaseAccessibilityService, text: String) {
+        val nodeInfo = nodeService.findViewByFullText(text)
+        if (nodeInfo != null) {
+            mTimeOut = 0
+            mNodeFoundListener?.onNodeFound(nodeInfo)
+            return
+        }
+
+        if (mTimeOut >= TIME_OUT_SECOND) {
+            mTimeOut = 0
+            mNodeFoundListener?.onNodeFound(null)
+            return
+        }
+
+        nodeService.postDelay(Runnable {
+            mTimeOut++
+            getNodeByFullText(nodeService, text)
+        }, 1)
+    }
+
+    /**
+     * 根据ID查找节点
+     */
     fun getNodeById(nodeService: BaseAccessibilityService, id: String) {
         val nodeInfo = nodeService.findViewById(id)
 
@@ -68,6 +99,9 @@ class NodeUtils private constructor() {
         }, 1)
     }
 
+    /**
+     * 根据className获取第一个符合条件的节点
+     */
     fun getSingleNodeByClassName(nodeService: BaseAccessibilityService, className: String) {
         nodeService.findViewByClassName(nodeService.rootInActiveWindow, className,
             object : NodeFoundListener {
@@ -93,4 +127,7 @@ class NodeUtils private constructor() {
     }
 
 
+    fun isNodeExisted(nodeService: BaseAccessibilityService, text: String, id: String) {
+
+    }
 }

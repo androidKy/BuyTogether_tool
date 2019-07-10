@@ -12,6 +12,7 @@ class WidgetConstant {
     companion object {
         const val EDITTEXT = "android.widget.EditText"
         const val IMAGEVIEW = "android.widget.ImageView"
+        const val RECYCLERVIEW = "android.support.v7.widget.RecyclerView"
 
         fun setEditText(text: String?, nodeInfo: AccessibilityNodeInfo) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
