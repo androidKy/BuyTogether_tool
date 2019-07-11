@@ -32,7 +32,16 @@ public class GoodsBean {
     private String comment_content;
     private boolean score_need;
     private int score_value;
+    private String choose_info;
     private StayTimeBean stay_time;
+
+    public String getChoose_info() {
+        return choose_info;
+    }
+
+    public void setChoose_info(String choose_info) {
+        this.choose_info = choose_info;
+    }
 
     public int getGoods_id() {
         return goods_id;

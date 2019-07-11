@@ -20,7 +20,7 @@ import com.safframework.log.L
  * Created by Quinin on 2019-07-02.
  **/
 abstract class BaseAccessibilityService : AccessibilityService() {
-    var mCurPageType = PageEnum.INDEX_PAGE
+    var mCurPageType = PageEnum.START_PAGE
     var mIsLogined = false
     var mIsInited = false
 
@@ -242,13 +242,18 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         performViewClick(nodeInfo, delayTime, null)
     }
 
+    fun performViewClick(nodeInfo: AccessibilityNodeInfo?, clickedListener: AfterClickedListener?) {
+        performViewClick(nodeInfo, 0, clickedListener)
+    }
+
     fun performViewClick(nodeInfo: AccessibilityNodeInfo?, delayTime: Long, clickedListener: AfterClickedListener?) {
         mHandler.postDelayed({
             performViewClick(nodeInfo)
-
+            L.i("${nodeInfo?.text} was clicked. clickedListener: $clickedListener")
             postDelay(Runnable {
+                L.i("clickedListener: $clickedListener")
                 clickedListener?.onClicked()
-            }, 1)
+            }, 2)
         }, delayTime * 1000L)
     }
 
@@ -259,4 +264,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         mHandler.postDelayed(runnable, delayTime * 1000L)
     }
 
+    /* fun removeMsg() {
+         mHandler.removeCallbacksAndMessages(null)
+     }*/
 }

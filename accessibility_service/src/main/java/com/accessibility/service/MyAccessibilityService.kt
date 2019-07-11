@@ -2,15 +2,14 @@ package com.accessibility.service
 
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
-import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.base.BaseAccessibilityService
-import com.accessibility.service.function.*
-import com.accessibility.service.listener.NodeFoundListener
-import com.accessibility.service.util.TaskDataUtil
+import com.accessibility.service.function.BuyGoodsService
+import com.accessibility.service.function.LoginService
+import com.accessibility.service.function.SearchGoodsService
+import com.accessibility.service.function.TaskService
+import com.accessibility.service.listener.TaskFinishedListener
 import com.accessibility.service.login.QQloginService
-import com.accessibility.service.login.WXloginService
 import com.accessibility.service.page.PageEnum
-import com.accessibility.service.util.NodeUtils
 import com.safframework.log.L
 
 /**
@@ -54,9 +53,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
             eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED
         ) {
             chooseLogin()
-            startLogin()
-            searchGoods()
-            //doTask()
         }
     }
 
@@ -64,42 +60,30 @@ class MyAccessibilityService : BaseAccessibilityService() {
      * 选择登录
      */
     private fun chooseLogin() {
-        when (mCurPageType) {
-            PageEnum.INDEX_PAGE -> {
-                initTaskData()
-                findViewByText("请使用其它方式登录")?.let {
-                    setCurPageType(PageEnum.CHOOSE_LOGIN_PAGE)
-                    L.i("当前界面：选择登录")
-                    if (TaskDataUtil.instance.getLogin_channel() != 1)    //不是微信登录
-                        performViewClick(it, 1)
-                    else {
-                        WXloginService(this).doOnEvent()
+        if (mCurPageType == PageEnum.START_PAGE) {
+            initTaskData()
+            LoginService.getInstance(this)
+                .setTaskFinishedListener(object : TaskFinishedListener {
+                    override fun onTaskFinished() {
+                        loginByQQ()
                     }
-                }
-            }
-
-            PageEnum.CHOOSE_LOGIN_PAGE -> {
-                findViewByText("QQ登录")?.let {
-                    L.i("当前界面：处于选择状态")
-                    setCurPageType(PageEnum.CHOOSING_LOGIN_PAGE)
-                    performViewClick(it, 1)
-                }
-            }
-
-            else -> return
+                })
+                .doOnEvent()
         }
     }
 
     /**
      * QQ输入账号和密码授权登录
      */
-    private fun startLogin() {
-        when (mCurPageType) {
-            PageEnum.CHOOSING_LOGIN_PAGE -> QQloginService.getInstance(this).doOnEvent()
-            PageEnum.QQ_LOGIN_PAGE -> QQloginService.getInstance(this).login()
-            PageEnum.QQ_LOGINING_PAGE -> QQloginService.getInstance(this).authLogin()
-
-            else -> return
+    private fun loginByQQ() {
+        if (mCurPageType == PageEnum.CHOOSING_LOGIN_PAGE) {
+            QQloginService.getInstance(this)
+                .setTaskFinishedListener(object : TaskFinishedListener {
+                    override fun onTaskFinished() {
+                        searchGoods()
+                    }
+                })
+                .doOnEvent()
         }
     }
 
@@ -107,16 +91,17 @@ class MyAccessibilityService : BaseAccessibilityService() {
      * 搜索商品
      */
     private fun searchGoods() {
-        when (mCurPageType) {
-            PageEnum.INDEX_PAGE, PageEnum.QQ_LOGIN_PAGE, PageEnum.AUTH_LOGIN_PAGE -> SearchGoodsService.getInstance(this).doOnEvent()
-            PageEnum.SEARCH_PAGE -> SearchGoodsService.getInstance(this).jump2search()
-            PageEnum.SERARCHING_PAGE -> SearchGoodsService.getInstance(this).searching()
-            PageEnum.SEARCH_RESULT_PAGE -> {
-                SearchGoodsService.getInstance(this).chooseGood()
-                setPage2Goods_info_page()
+        if (mCurPageType == PageEnum.INDEX_PAGE) {
+            L.i("mIsLogined : $mIsLogined")
+            if (mIsLogined) {
+                SearchGoodsService.getInstance(this)
+                    .setTaskFinishedListener(object : TaskFinishedListener {
+                        override fun onTaskFinished() {
+                            doTask()
+                        }
+                    })
+                    .doOnEvent()
             }
-
-            else -> return
         }
     }
 
@@ -125,24 +110,15 @@ class MyAccessibilityService : BaseAccessibilityService() {
      */
     private fun doTask() {
         if (mCurPageType == PageEnum.GOODS_INFO_PAGE) {
-            TaskService.getInstance(this).doOnEvent()
+            TaskService.getInstance(this)
+                .setTaskFinishedListener(object : TaskFinishedListener {
+                    override fun onTaskFinished() {
+                        BuyGoodsService.getInstance(this@MyAccessibilityService).doOnEvent()
+                    }
+                })
+                .doOnEvent()
         }
     }
 
-    /**
-     * 设置搜索结果界面状态
-     */
-    fun setPage2Goods_info_page() {
-        NodeUtils.instance
-            .setNodeFoundListener(object : NodeFoundListener {
-                override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
-                    nodeInfo?.apply {
-                        setCurPageType(PageEnum.GOODS_INFO_PAGE)
-                        doTask()
-                    }
-                }
-            })
-            .getNodeByFullText(this, "发起拼单")
-    }
 
 }

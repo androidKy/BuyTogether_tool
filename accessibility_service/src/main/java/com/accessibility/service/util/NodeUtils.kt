@@ -3,25 +3,31 @@ package com.accessibility.service.util
 import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.listener.NodeFoundListener
+import com.safframework.log.L
 
 /**
  * Description:
  * Created by Quinin on 2019-07-09.
  **/
-class NodeUtils private constructor() {
-    private val TIME_OUT_SECOND = 20
+class NodeUtils {
+    private var TIME_OUT_SECOND = 20
     private var mTimeOut = 0
     private var mNodeFoundListener: NodeFoundListener? = null
 
-    companion object {
-        val instance: NodeUtils by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
-            NodeUtils()
-        }
-    }
+    /* companion object {
+         val instance: NodeUtils by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
+             NodeUtils()
+         }
+     }*/
 
     fun setNodeFoundListener(nodeFoundListener: NodeFoundListener): NodeUtils {
         mNodeFoundListener = nodeFoundListener
 
+        return this
+    }
+
+    fun setTimeOut(timeOut: Int): NodeUtils {
+        this.TIME_OUT_SECOND = timeOut
         return this
     }
 
@@ -66,6 +72,7 @@ class NodeUtils private constructor() {
         if (mTimeOut >= TIME_OUT_SECOND) {
             mTimeOut = 0
             mNodeFoundListener?.onNodeFound(null)
+            //nodeService.removeMsg()
             return
         }
 
@@ -90,6 +97,7 @@ class NodeUtils private constructor() {
         if (mTimeOut >= TIME_OUT_SECOND) {
             mTimeOut = 0
             mNodeFoundListener?.onNodeFound(null)
+            //nodeService.removeMsg()
             return
         }
 
@@ -115,6 +123,7 @@ class NodeUtils private constructor() {
                     if (mTimeOut >= TIME_OUT_SECOND) {
                         mTimeOut = 0
                         mNodeFoundListener?.onNodeFound(null)
+                        //nodeService.removeMsg()
                         return
                     }
 
@@ -127,7 +136,4 @@ class NodeUtils private constructor() {
     }
 
 
-    fun isNodeExisted(nodeService: BaseAccessibilityService, text: String, id: String) {
-
-    }
 }

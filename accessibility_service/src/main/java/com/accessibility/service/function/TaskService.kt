@@ -2,6 +2,7 @@ package com.accessibility.service.function
 
 import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.MyAccessibilityService
+import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.base.BaseEventService
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.NodeFoundListener
@@ -17,7 +18,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
     companion object : SingletonHolder<TaskService, MyAccessibilityService>(::TaskService)
 
     private var mIsScaningGoods: Boolean = false    //判断是否正在浏览,控制同一时刻只有一个收到一个节点事件
-    private var mScaned: Boolean = false   //是否已浏览，控制允许是否继续收到事件
+    private var mAlreadyScaned: Boolean = false   //是否已浏览，控制允许是否继续收到事件
 
 
     override fun doOnEvent() {
@@ -34,15 +35,15 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
     /**
      * 开始做任务
      */
-    fun scanGoods() {
+    private fun scanGoods() {
         if (mIsScaningGoods)
             return
-        NodeUtils.instance
+        NodeUtils()
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                     nodeInfo?.apply {
                         L.i("recyclerView was found: ${nodeInfo.className}")
-                        if (!mScaned) {
+                        if (!mAlreadyScaned) {
                             mIsScaningGoods = true
                             ScrollUtils(nodeService, nodeInfo)
                                 .setForwardTotalTime(10)
@@ -70,7 +71,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
         override fun onScrollFinished(nodeInfo: AccessibilityNodeInfo) {
             L.i("浏览完成  ，根据任务类型是否需要进行下一步任务")
             mIsScaningGoods = false
-            mScaned = true
+            mAlreadyScaned = true
             TaskDataUtil.instance.getTask_type()?.apply {
                 when (this) {
                     12, 123, 124, 1234 -> talkWithSaler()
@@ -84,8 +85,8 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
     /**
      * 2:与卖家沟通
      */
-    fun talkWithSaler() {
-        NodeUtils.instance
+    private fun talkWithSaler() {
+        NodeUtils()
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                     nodeInfo?.apply {
@@ -97,8 +98,8 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             .getNodeByFullText(nodeService, "客服")
     }
 
-    fun startTalked() {
-        NodeUtils.instance
+    private fun startTalked() {
+        NodeUtils()
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                     L.i("聊天输入框：$nodeInfo")
@@ -107,7 +108,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
                         nodeService.apply {
                             //performViewClick(nodeInfo)
                             postDelay(Runnable {
-                                performViewClick(findViewByFullText("发送"), 1, afterTalkFinished())
+                                performViewClick(findViewByFullText("发送"), 1, AfterTalkFinished())
                             }, 2)
                         }
                     }
@@ -120,7 +121,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
     /**
      * 聊完天后
      */
-    inner class afterTalkFinished : AfterClickedListener {
+    inner class AfterTalkFinished : AfterClickedListener {
         override fun onClicked() {
             //返回商品信息详情界面
             nodeService.performBackClick(1)
@@ -137,19 +138,19 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
     /**
      * 3:收藏商品
      */
-    fun collectGoods() {
-        NodeUtils.instance
+    private fun collectGoods() {
+        NodeUtils()
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                     nodeInfo?.apply {
-                        nodeService.performViewClick(this, 2, afterCollected())
+                        nodeService.performViewClick(this, 2, AfterCollected())
                     }
                 }
             })
             .getNodeByFullText(nodeService, "收藏")
     }
 
-    inner class afterCollected : AfterClickedListener {
+    inner class AfterCollected : AfterClickedListener {
         override fun onClicked() {
             TaskDataUtil.instance.getTask_type()?.apply {
                 when (this) {
@@ -163,9 +164,9 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
     /**
      * 4:购买商品
      */
-    fun buyGoods() {
+    private fun buyGoods() {
         L.i("购买商品")
-        NodeUtils.instance
+        NodeUtils()
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                     nodeInfo?.apply {
@@ -173,6 +174,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
                             performViewClick(nodeInfo, 1, object : AfterClickedListener {
                                 override fun onClicked() {  //选择商品类型
                                     L.i("发起拼单,选择商品型号")
+                                    chooseGoodstype()
                                 }
                             })
                         }
@@ -181,4 +183,66 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             })
             .getNodeByFullText(nodeService, "发起拼单")  //todo 是拼单还是单独购买
     }
+
+
+    /**
+     * 选择商品类型
+     */
+    private fun chooseGoodstype() {
+        nodeService.apply {
+            chooseGoodsInfo(nodeService)
+
+            GetNodeUtils.getNodeByFullText(this, "确定", object : NodeFoundListener {
+                override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
+                    L.i("商品类型已选好 。。。$nodeInfo")
+                    nodeInfo?.let {
+                        performViewClick(it, 1, object : AfterClickedListener {
+                            override fun onClicked() {
+                                L.i("选择商品类型完成 ... ")
+                                mTaskFinishedListener?.onTaskFinished()
+                            }
+                        })
+                    }
+                }
+            })
+        }
+    }
+
+
+    /**
+     * 选择商品的型号和款式
+     */
+    fun chooseGoodsInfo(nodeService: BaseAccessibilityService) {
+        TaskDataUtil.instance.getChoose_info()?.run {
+            for (type in this) {
+                L.i("type: $type")
+                val nodeInfo = nodeService.findViewByFullText(type)
+                if (nodeInfo == null) { //商品选择信息不显示在当前界面，向下拉进行选取
+                    nodeService.findViewByClassName(nodeService.rootInActiveWindow, WidgetConstant.RECYCLERVIEW,
+                        object : NodeFoundListener {
+                            override fun onNodeFound(recyclerView: AccessibilityNodeInfo?) {
+                                recyclerView?.let {
+                                    ScrollUtils(nodeService, it)
+                                        .setForwardTotalTime(5)
+                                        .setNodeText(type)
+                                        .setNodeFoundListener(object : NodeFoundListener {
+                                            override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
+                                                nodeInfo?.apply {
+                                                    L.i("scroll found node text: $text")
+                                                    nodeService.performViewClick(this)
+                                                }
+                                            }
+                                        })
+                                        .scrollForward()
+                                }
+                            }
+                        })
+                } else {
+                    nodeService.performViewClick(nodeInfo)
+                }
+            }
+        }
+    }
+
+
 }

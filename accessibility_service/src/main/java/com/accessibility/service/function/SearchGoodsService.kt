@@ -3,6 +3,7 @@ package com.accessibility.service.function
 import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.base.BaseEventService
+import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.NodeUtils
@@ -19,36 +20,67 @@ class SearchGoodsService private constructor(nodeService: MyAccessibilityService
 
     companion object : SingletonHolder<SearchGoodsService, MyAccessibilityService>(::SearchGoodsService)
 
+    private var mIsDoing = false
+
     /**
      * 导航栏点击搜索跳转到搜索界面
      */
     override fun doOnEvent() {
-        L.i("mCurPageType == PageEnum.INDEX_PAGE")
-        NodeUtils.instance
+        if (mIsDoing) {
+            L.i("搜索任务已经开始 ... ")
+            return
+        }
+
+        //搜索按钮在导航栏显示
+        NodeUtils()
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
-                    if (nodeInfo == null) return
-                    nodeService.apply {
-                        setCurPageType(PageEnum.SEARCH_PAGE)
-                        L.i("搜索className: ${nodeInfo?.className} \n parentClassName: ${nodeInfo?.parent?.className}")
-                        performViewClick(nodeInfo.parent, 1)
+                    nodeInfo?.apply {
+                        L.i("搜索className: $className \n parentClassName: ${parent?.className}")
+                        nodeService.performViewClick(nodeInfo.parent, 1, object : AfterClickedListener {
+                            override fun onClicked() {
+                                mIsDoing = true
+                                jump2search()
+                            }
+                        })
                     }
                 }
             })
-            .getNodeByText(nodeService, "搜索")
+            .getNodeByFullText(nodeService, "搜索")
+
+        //搜索框在主页显示
+        NodeUtils()
+            .setNodeFoundListener(object : NodeFoundListener {
+                override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
+                    nodeInfo?.apply {
+                        nodeService.performViewClick(this, 1, object : AfterClickedListener {
+                            override fun onClicked() {
+                                mIsDoing = true
+                                searching()
+                            }
+                        })
+                    }
+                }
+            })
+            .getNodeById(nodeService, "com.xunmeng.pinduoduo:id/a8f")
+        //.getSingleNodeByClassName(nodeService, WidgetConstant.EDITTEXT)
     }
+
 
     /**
      * 处于搜索界面
      */
     fun jump2search() {
-        NodeUtils.instance
+        NodeUtils()
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                     if (nodeInfo == null) return
                     nodeService.apply {
-                        setCurPageType(PageEnum.SERARCHING_PAGE)
-                        performViewClick(nodeInfo, 1)
+                        performViewClick(nodeInfo, 1, object : AfterClickedListener {
+                            override fun onClicked() {
+                                searching()
+                            }
+                        })
                     }
                 }
             })
@@ -59,20 +91,23 @@ class SearchGoodsService private constructor(nodeService: MyAccessibilityService
      * 开始搜索商品
      */
     fun searching() {
-        NodeUtils.instance
+        NodeUtils()
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                     if (nodeInfo == null) return
                     nodeService.apply {
-                        setCurPageType(PageEnum.SEARCH_RESULT_PAGE)
                         L.i(
                             "开始搜索商品：${TaskDataUtil.instance.getGoods_name()} \n" +
                                     "accountName: ${TaskDataUtil.instance.getLogin_name()}"
                         )
                         WidgetConstant.setEditText(TaskDataUtil.instance.getGoods_name(), nodeInfo)
 
-                        findViewById("com.xunmeng.pinduoduo:id/lg").let {
-                            performViewClick(it, 2)
+                        findViewByFullText("搜索")?.let {
+                            performViewClick(it, 2, object : AfterClickedListener {
+                                override fun onClicked() {
+                                    chooseGood()
+                                }
+                            })
                         }
                     }
                 }
@@ -85,21 +120,18 @@ class SearchGoodsService private constructor(nodeService: MyAccessibilityService
      */
     fun chooseGood() {
         //todo 根据商品名称寻找特定的商品
-       /* TaskDataUtil.instance.getGoods_name()?.run {
-            val nodeList = NodeUtils.instance.getNodesByText(nodeService, this)
-            L.i("nodeSize = ${nodeList.size}")
-            for (i in 0 until nodeList.size) {
-                L.i("node text = ${nodeList[i].text}")
-            }
-        }*/
-
-        NodeUtils.instance
+        NodeUtils()
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                     L.i("选择商品：$nodeInfo")
                     nodeInfo?.let {
                         nodeService.apply {
-                            performViewClick(it, 2)
+                            performViewClick(it, 2, object : AfterClickedListener {
+                                override fun onClicked() {
+                                    setCurPageType(PageEnum.GOODS_INFO_PAGE)
+                                    mTaskFinishedListener?.onTaskFinished()
+                                }
+                            })
                         }
                     }
                 }

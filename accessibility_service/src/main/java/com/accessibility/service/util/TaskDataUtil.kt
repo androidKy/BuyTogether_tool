@@ -84,4 +84,15 @@ class TaskDataUtil private constructor() {
             task?.goods?.get(0)?.talk_msg ?: "老板你好"
         }
     }
+
+    /**
+     * 获取选择的商品信息
+     */
+    fun getChoose_info(): List<String>? {
+        return mTaskServiceData?.run {
+            task?.goods?.get(0)?.choose_info ?: ""
+        }.run {
+            this?.split(",")
+        }
+    }
 }
