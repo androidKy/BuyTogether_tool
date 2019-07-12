@@ -32,7 +32,8 @@ class SearchGoodsService private constructor(nodeService: MyAccessibilityService
         }
 
         //搜索按钮在导航栏显示
-        NodeUtils()
+        NodeUtils.instance
+            .setTimeOut(8)
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                     nodeInfo?.apply {
@@ -49,7 +50,7 @@ class SearchGoodsService private constructor(nodeService: MyAccessibilityService
             .getNodeByFullText(nodeService, "搜索")
 
         //搜索框在主页显示
-        NodeUtils()
+        NodeUtils.instance
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                     nodeInfo?.apply {
@@ -71,7 +72,7 @@ class SearchGoodsService private constructor(nodeService: MyAccessibilityService
      * 处于搜索界面
      */
     fun jump2search() {
-        NodeUtils()
+        NodeUtils.instance
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                     if (nodeInfo == null) return
@@ -91,7 +92,7 @@ class SearchGoodsService private constructor(nodeService: MyAccessibilityService
      * 开始搜索商品
      */
     fun searching() {
-        NodeUtils()
+        NodeUtils.instance
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                     if (nodeInfo == null) return
@@ -120,7 +121,7 @@ class SearchGoodsService private constructor(nodeService: MyAccessibilityService
      */
     fun chooseGood() {
         //todo 根据商品名称寻找特定的商品
-        NodeUtils()
+        NodeUtils.instance
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                     L.i("选择商品：$nodeInfo")

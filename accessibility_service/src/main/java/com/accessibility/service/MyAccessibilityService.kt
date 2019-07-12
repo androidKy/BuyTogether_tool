@@ -2,15 +2,22 @@ package com.accessibility.service
 
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.function.BuyGoodsService
 import com.accessibility.service.function.LoginService
 import com.accessibility.service.function.SearchGoodsService
 import com.accessibility.service.function.TaskService
+import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.listener.TaskFinishedListener
+import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.login.QQloginService
 import com.accessibility.service.page.PageEnum
+import com.accessibility.service.util.NodeUtils
+import com.accessibility.service.util.TaskDataUtil
+import com.accessibility.service.util.WidgetConstant
 import com.safframework.log.L
+import org.w3c.dom.Node
 
 /**
  * Description:无障碍服务最上层
@@ -62,13 +69,32 @@ class MyAccessibilityService : BaseAccessibilityService() {
     private fun chooseLogin() {
         if (mCurPageType == PageEnum.START_PAGE) {
             initTaskData()
-            LoginService.getInstance(this)
-                .setTaskFinishedListener(object : TaskFinishedListener {
+            L.i("拼多多登录界面")
+            setCurPageType(PageEnum.CHOOSING_LOGIN_PAGE)
+            NodeController.Builder()
+                .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {
+                        L.i("已跳转到QQ登录界面")
                         loginByQQ()
                     }
+
+                    override fun onTaskFailed(failedText: String) {
+                        L.i("$failedText was not found.")
+                    }
                 })
-                .doOnEvent()
+                .setNodeService(this)
+                .setNodeParams("请使用其它方式登录")
+                .setNodeParams("QQ登录")
+                .create()
+                .execute()
+
+            /*  LoginService.getInstance(this)
+                  .setTaskFinishedListener(object : TaskFinishedListener {
+                      override fun onTaskFinished() {
+                          loginByQQ()
+                      }
+                  })
+                  .doOnEvent()*/
         }
     }
 
@@ -77,13 +103,37 @@ class MyAccessibilityService : BaseAccessibilityService() {
      */
     private fun loginByQQ() {
         if (mCurPageType == PageEnum.CHOOSING_LOGIN_PAGE) {
-            QQloginService.getInstance(this)
-                .setTaskFinishedListener(object : TaskFinishedListener {
+            setCurPageType(PageEnum.INDEX_PAGE)
+
+            NodeController.Builder()
+                .setNodeService(this)
+                .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {
+                        L.i("登录成功")
+                        setIsLogined(true)
                         searchGoods()
                     }
+
+                    override fun onTaskFailed(failedText: String) {
+                        L.i("$failedText was not found.")
+                    }
                 })
-                .doOnEvent()
+                .setNodeParams("登录")
+                .setNodeFilter("首页")
+                .setNodeParams(WidgetConstant.EDITTEXT, 3, false, TaskDataUtil.instance.getLogin_name()!!)
+                .setNodeParams("com.tencent.mobileqq:id/password", 2, false, TaskDataUtil.instance.getLogin_psw()!!)
+                .setNodeParams("com.tencent.mobileqq:id/login", 2)
+                .setNodeParams("登录")
+                .create()
+                .execute()
+
+            /*   QQloginService.getInstance(this)
+                   .setTaskFinishedListener(object : TaskFinishedListener {
+                       override fun onTaskFinished() {
+                           searchGoods()
+                       }
+                   })
+                   .doOnEvent()*/
         }
     }
 
@@ -93,15 +143,28 @@ class MyAccessibilityService : BaseAccessibilityService() {
     private fun searchGoods() {
         if (mCurPageType == PageEnum.INDEX_PAGE) {
             L.i("mIsLogined : $mIsLogined")
-            if (mIsLogined) {
-                SearchGoodsService.getInstance(this)
-                    .setTaskFinishedListener(object : TaskFinishedListener {
-                        override fun onTaskFinished() {
-                            doTask()
-                        }
-                    })
-                    .doOnEvent()
-            }
+            setCurPageType(PageEnum.GOODS_INFO_PAGE)
+
+            NodeController.Builder()
+                .setNodeService(this)
+                .setTaskListener(object : TaskListener {
+                    override fun onTaskFinished() {
+                        L.i("搜索商品成功")
+                        doTask()
+                    }
+
+                    override fun onTaskFailed(failedText: String) {
+                        L.i("$failedText was not found.")
+                    }
+                })
+                .setNodeParams("搜索")
+                .setNodeParams("com.xunmeng.pinduoduo:id/a8f", 2)
+                .setNodeParams("com.xunmeng.pinduoduo:id/fq", 2)
+                .setNodeParams(WidgetConstant.EDITTEXT, 3, false, TaskDataUtil.instance.getGoods_name()!!)
+                .setNodeParams("搜索")
+                .setNodeParams("9.9", 0, isClicked = true, isScrolled = true)
+                .create()
+                .execute()
         }
     }
 
@@ -110,15 +173,22 @@ class MyAccessibilityService : BaseAccessibilityService() {
      */
     private fun doTask() {
         if (mCurPageType == PageEnum.GOODS_INFO_PAGE) {
+            setCurPageType(PageEnum.PAYING_PAGE)
+
             TaskService.getInstance(this)
                 .setTaskFinishedListener(object : TaskFinishedListener {
                     override fun onTaskFinished() {
-                        BuyGoodsService.getInstance(this@MyAccessibilityService).doOnEvent()
+                        //BuyGoodsService.getInstance(this@MyAccessibilityService).doOnEvent()
+                        NodeUtils.instance
+                            .setNodeFoundListener(object : NodeFoundListener {
+                                override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
+                                    L.i("手动添加收货地址 $nodeInfo")
+                                }
+                            })
+                            .getNodeByText(this@MyAccessibilityService, "手动添加收货地址")
                     }
                 })
                 .doOnEvent()
         }
     }
-
-
 }

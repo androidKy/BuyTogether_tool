@@ -32,7 +32,7 @@ class QQloginService private constructor(nodeService: MyAccessibilityService) :
             L.i("QQ登录任务已经开始 ... ")
             return
         }
-        NodeUtils()
+        NodeUtils.instance
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                     nodeInfo?.let {
@@ -61,7 +61,7 @@ class QQloginService private constructor(nodeService: MyAccessibilityService) :
      * 输入账号和密码，点击登录
      */
     fun login() {
-        NodeUtils()
+        NodeUtils.instance
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                     L.i("当前界面：输入账号和密码")
@@ -109,7 +109,7 @@ class QQloginService private constructor(nodeService: MyAccessibilityService) :
      * 授权登录界面
      */
     fun authLogin() {
-        NodeUtils()
+        NodeUtils.instance
             .setTimeOut(5)
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {

@@ -24,7 +24,7 @@ class BuyGoodsService private constructor(nodeService: MyAccessibilityService) :
      * 手动添加收货地址
      */
     private fun fillAddress() {
-        GetNodeUtils.getNodeByText(nodeService, "更多支付方式", object : NodeFoundListener {
+        GetNodeUtils.getNodeByText(nodeService, "手动添加收货地址", object : NodeFoundListener {
             override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                 nodeInfo?.let {
                     nodeService.apply {

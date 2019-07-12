@@ -180,12 +180,12 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         val nodeList = rootInActiveWindow.findAccessibilityNodeInfosByViewId(id)
 
         return if (nodeList.size > 0) nodeList[0] else null
-        /* nodeInfo.findAccessibilityNodeInfosByViewId(id).let {
+        /* recyclerViewNode.findAccessibilityNodeInfosByViewId(id).let {
              if (it.size > 0)
                  return it[0]
          }
 
-         return nodeInfo*/
+         return recyclerViewNode*/
     }
 
     fun performBackClick() {
@@ -193,15 +193,20 @@ abstract class BaseAccessibilityService : AccessibilityService() {
     }
 
     fun performBackClick(delayTime: Int) {
+        performBackClick(delayTime, null)
+    }
+
+    fun performBackClick(delayTime: Int, afterClickedListener: AfterClickedListener?) {
         mHandler.postDelayed({
             performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
+            afterClickedListener?.onClicked()
         }, delayTime * 1000L)
     }
 
     /**
      * 模拟点击事件
      *
-     * @param nodeInfo nodeInfo
+     * @param nodeInfo recyclerViewNode
      */
     fun performViewClick(nodeInfo: AccessibilityNodeInfo?) {
         var nodeInfo1: AccessibilityNodeInfo? = nodeInfo ?: return
@@ -250,10 +255,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         mHandler.postDelayed({
             performViewClick(nodeInfo)
             L.i("${nodeInfo?.text} was clicked. clickedListener: $clickedListener")
-            postDelay(Runnable {
-                L.i("clickedListener: $clickedListener")
-                clickedListener?.onClicked()
-            }, 2)
+            clickedListener?.onClicked()
         }, delayTime * 1000L)
     }
 
@@ -264,7 +266,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         mHandler.postDelayed(runnable, delayTime * 1000L)
     }
 
-    /* fun removeMsg() {
-         mHandler.removeCallbacksAndMessages(null)
-     }*/
+    fun removeMsg() {
+        //  mHandler.removeCallbacksAndMessages(null)
+    }
 }

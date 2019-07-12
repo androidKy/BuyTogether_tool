@@ -11,7 +11,7 @@ class GetNodeUtils {
 
     companion object {
         fun getNodeByText(nodeService: BaseAccessibilityService, text: String, nodeFoundListener: NodeFoundListener) {
-            NodeUtils()
+            NodeUtils.instance
                 .setNodeFoundListener(nodeFoundListener)
                 .getNodeByText(nodeService, text)
         }
@@ -22,7 +22,7 @@ class GetNodeUtils {
             text: String,
             nodeFoundListener: NodeFoundListener
         ) {
-            NodeUtils()
+            NodeUtils.instance
                 .setTimeOut(timeOut)
                 .setNodeFoundListener(nodeFoundListener)
                 .getNodeByText(nodeService, text)
@@ -33,7 +33,7 @@ class GetNodeUtils {
             text: String,
             nodeFoundListener: NodeFoundListener
         ) {
-            NodeUtils()
+            NodeUtils.instance
                 .setNodeFoundListener(nodeFoundListener)
                 .getNodeByFullText(nodeService, text)
         }
@@ -44,14 +44,14 @@ class GetNodeUtils {
             text: String,
             nodeFoundListener: NodeFoundListener
         ) {
-            NodeUtils()
+            NodeUtils.instance
                 .setTimeOut(timeOut)
                 .setNodeFoundListener(nodeFoundListener)
                 .getNodeByFullText(nodeService, text)
         }
 
         fun getNodeById(nodeService: BaseAccessibilityService, id: String, nodeFoundListener: NodeFoundListener) {
-            NodeUtils()
+            NodeUtils.instance
                 .setNodeFoundListener(nodeFoundListener)
                 .getNodeById(nodeService, id)
         }

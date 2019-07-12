@@ -3,22 +3,21 @@ package com.accessibility.service.util
 import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.listener.NodeFoundListener
-import com.safframework.log.L
 
 /**
  * Description:
  * Created by Quinin on 2019-07-09.
  **/
-class NodeUtils {
+class NodeUtils private constructor() {
     private var TIME_OUT_SECOND = 20
     private var mTimeOut = 0
     private var mNodeFoundListener: NodeFoundListener? = null
 
-    /* companion object {
-         val instance: NodeUtils by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
-             NodeUtils()
-         }
-     }*/
+    companion object {
+        val instance: NodeUtils by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
+            NodeUtils()
+        }
+    }
 
     fun setNodeFoundListener(nodeFoundListener: NodeFoundListener): NodeUtils {
         mNodeFoundListener = nodeFoundListener
@@ -136,4 +135,8 @@ class NodeUtils {
     }
 
 
+    private fun removeMsg(nodeService: BaseAccessibilityService)
+    {
+        nodeService.removeMsg()
+    }
 }

@@ -5,29 +5,28 @@ import android.os.Looper
 import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.listener.NodeFoundListener
-import kotlin.random.Random
 
 /**
  * Description:
  * Created by Quinin on 2019-07-10.
  **/
-class ScrollUtils constructor(val nodeService: BaseAccessibilityService, val nodeInfo: AccessibilityNodeInfo) {
+class ScrollUtils constructor(val nodeService: BaseAccessibilityService, val recyclerViewNode: AccessibilityNodeInfo) {
 
     /* companion object {
          var instance: ScrollUtils? = null
 
-         fun getInstance(nodeService: MyAccessibilityService, nodeInfo: AccessibilityNodeInfo) {
+         fun getInstance(nodeService: MyAccessibilityService, recyclerViewNode: AccessibilityNodeInfo) {
              if (instance == null) {
                  synchronized(this) {
                      if (instance == null)
-                         instance = ScrollUtils(nodeService, nodeInfo)
+                         instance = ScrollUtils(nodeService, recyclerViewNode)
                  }
              }
          }
      }*/
 
-    private var mForwardTime: Int = 0
-    private var mBackwardTime: Int = 0
+    private var mForwardTime: Int = 10
+    private var mBackwardTime: Int = 10
     private val MSG_FORWARD_WHAT: Int = 100
     private val MSG_BACKWARD_WHAT: Int = 200
     private var mScrollListener: ScrollListener? = null
@@ -97,28 +96,28 @@ class ScrollUtils constructor(val nodeService: BaseAccessibilityService, val nod
 
     fun scrollForward() {
         if (mForwardTime > 0) {
-            nodeService.performScrollForward(nodeInfo)
+            nodeService.performScrollForward(recyclerViewNode)
             mForwardTime--
 
             findNode()
 
             mHandler.sendEmptyMessageDelayed(MSG_FORWARD_WHAT, 1000)
         } else {
-            mScrollListener?.onScrollFinished(nodeInfo)
+            mScrollListener?.onScrollFinished(recyclerViewNode)
             mHandler.removeMessages(MSG_FORWARD_WHAT)
         }
     }
 
     fun scrollBackward() {
         if (mBackwardTime > 0) {
-            nodeService.performScrollBackward(nodeInfo)
+            nodeService.performScrollBackward(recyclerViewNode)
             mBackwardTime--
 
             findNode()
 
             mHandler.sendEmptyMessageDelayed(MSG_BACKWARD_WHAT, 1000)
         } else {
-            mScrollListener?.onScrollFinished(nodeInfo)
+            mScrollListener?.onScrollFinished(recyclerViewNode)
             mHandler.removeMessages(MSG_BACKWARD_WHAT)
         }
     }
