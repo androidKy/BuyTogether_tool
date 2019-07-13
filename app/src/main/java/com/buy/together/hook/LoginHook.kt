@@ -22,9 +22,9 @@ class LoginHook : HookListener {
                           XposedBridge.log("$tag : view id = ${view.id}")
 
                           if (view is TextView) {
-                              XposedBridge.log("$tag : TextView text = ${view.text}")
+                              XposedBridge.log("$tag : TextView textList = ${view.textList}")
                           } else if (view is Button) {
-                              XposedBridge.log("$tag : Button text = ${view.text}")
+                              XposedBridge.log("$tag : Button textList = ${view.textList}")
                           }
                       } catch (e: Exception) {
                           XposedBridge.log("$tag : ${e.message}")

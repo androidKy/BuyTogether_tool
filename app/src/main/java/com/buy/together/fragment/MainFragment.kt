@@ -1,6 +1,8 @@
 package com.buy.together.fragment
 
 import android.widget.FrameLayout
+import com.accessibility.service.function.ClearDataService
+import com.accessibility.service.listener.TaskListener
 import com.buy.together.R
 import com.buy.together.base.BaseFragment
 import com.buy.together.bean.TaskBean
@@ -99,7 +101,15 @@ class MainFragment : BaseFragment(), MainView {
 
         val launchIntentForPackage = context?.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
         if (launchIntentForPackage != null) {
-            startActivity(launchIntentForPackage)
+            ClearDataService().clearData(object: TaskListener {
+                override fun onTaskFinished() {
+                    startActivity(launchIntentForPackage)
+                }
+
+                override fun onTaskFailed(failedText: String) {
+                }
+            })
+
         }
     }
 

@@ -2,8 +2,8 @@ package com.accessibility.service.function
 
 import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.MyAccessibilityService
-import com.accessibility.service.NodeController
-import com.accessibility.service.base.BaseAccessibilityService
+import com.accessibility.service.auto.AdbScriptController
+import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseEventService
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.NodeFoundListener
@@ -30,7 +30,11 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             2, 23, 24, 234 -> talkWithSaler()
             3, 32, 34 -> collectGoods()
             4 -> buyGoods()
-            else -> scanGoods()
+            else -> {
+                nodeService.postDelay(Runnable {
+                    scanGoods()
+                }, 2)
+            }
         }
     }
 
@@ -162,10 +166,24 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
                 override fun onTaskFinished() {
                     L.i("商品选择完成，准备支付")
                     //createAddress()
+                    L.i("check nodes")
+                    AdbScriptController.Builder()
+                        .setXY("150,250")
+                        .setXY("150,650")
+                        .setText("中文输入")
+                        .create()
+                        .execute()
                     nodeService.postDelay(Runnable {
-                        L.i("check nodes")
-                        iteratorRootView(nodeService.rootInActiveWindow)
-                    }, 3)
+
+                        /*  CMDUtil().apply {
+                              //executeCMD("getevent -p")
+                              execCmd("input tap 150 250")
+                              execCmd("input tap 150 650 ")
+                              execCmd("am broadcast -a ADB_INPUT_TEXT --es msg '中文输入'")
+                              // executeCMD("input tap 100 250")
+                          }*/
+                        // iteratorRootView(nodeService.rootInActiveWindow)
+                    }, 2)
                 }
             })
             .setNodeParams("发起拼单")  //todo 是拼单还是单独购买
@@ -181,7 +199,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
 
         for (i in 0 until nodeView.childCount) {
             val childNode = nodeView.getChild(i)
-            L.i("childNode: ${childNode.className} text: ${childNode.text}")
+            L.i("childNode: ${childNode.className} textList: ${childNode.text}")
 
             if (childNode.childCount > 0) {
                 iteratorRootView(childNode)
@@ -189,20 +207,18 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
 /*
             for (j in 0 until childNode.childCount) {
                 val secondChildNode = childNode.getChild(j)
-                L.i("第三级 childNode: ${secondChildNode.className} text: ${secondChildNode.text}")
+                L.i("第三级 childNode: ${secondChildNode.className} textList: ${secondChildNode.textList}")
 
                 for (k in 0 until secondChildNode.childCount) {
                     val thirdChildNode = secondChildNode.getChild(k)
-                    L.i("第四级 childNode: ${thirdChildNode.className} text: ${thirdChildNode.text}")
+                    L.i("第四级 childNode: ${thirdChildNode.className} textList: ${thirdChildNode.textList}")
 
                     for (l in 0 until thirdChildNode.childCount)
                     {
                         L.i("")
                     }
                 }
-
             }*/
-
         }
     }
 

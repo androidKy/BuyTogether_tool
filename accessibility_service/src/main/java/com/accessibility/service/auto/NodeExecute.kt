@@ -1,4 +1,4 @@
-package com.accessibility.service
+package com.accessibility.service.auto
 
 import android.os.Handler
 import android.os.Looper
@@ -163,7 +163,7 @@ class NodeExecute(
             }
 
             if (isClicked)  //点击
-                nodeService.performViewClick(this, 2, object : AfterClickedListener {
+                nodeService.performViewClick(this, 1, object : AfterClickedListener {
                     override fun onClicked() {
                         L.i("$textOrId was clicked")
                         if (index == nodeTextList.size - 1) {

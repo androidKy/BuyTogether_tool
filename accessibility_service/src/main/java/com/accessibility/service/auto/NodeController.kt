@@ -1,7 +1,6 @@
-package com.accessibility.service
+package com.accessibility.service.auto
 
-import android.os.Build
-import android.view.inputmethod.EditorInfo
+import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.listener.TaskListener
 import com.safframework.log.L
@@ -27,7 +26,7 @@ class NodeController {
     var filterText: String? = null
 
     class Builder {
-        val DEFAULT_FOUND_TIME_OUT: Int = 5
+        val DEFAULT_FOUND_TIME_OUT: Int = 18
         var nodeService: BaseAccessibilityService? = null
         var nodeTextList: ArrayList<String> = ArrayList()
         var nodeClickedList: ArrayList<Boolean> = ArrayList()
@@ -111,7 +110,7 @@ class NodeController {
         }
 
         /**
-         * text:根据text来查找
+         * textList:根据text来查找
          * nodeFlag:根据这个字段来判断是哪种方式查找，0：根据view text全查找，1：根据view text半查找，2：根据ID查找，3：根据className查找
          * isClicked:判断是否点击查找的节点
          * editInputText:是否是EditText节点输入内容

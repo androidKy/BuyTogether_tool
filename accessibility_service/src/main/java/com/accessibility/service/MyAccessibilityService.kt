@@ -3,21 +3,19 @@ package com.accessibility.service
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseAccessibilityService
-import com.accessibility.service.function.BuyGoodsService
-import com.accessibility.service.function.LoginService
-import com.accessibility.service.function.SearchGoodsService
+import com.accessibility.service.function.ClearDataService
 import com.accessibility.service.function.TaskService
 import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.listener.TaskFinishedListener
 import com.accessibility.service.listener.TaskListener
-import com.accessibility.service.login.QQloginService
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.NodeUtils
 import com.accessibility.service.util.TaskDataUtil
+import com.accessibility.service.util.ThreadUtils
 import com.accessibility.service.util.WidgetConstant
 import com.safframework.log.L
-import org.w3c.dom.Node
 
 /**
  * Description:无障碍服务最上层
@@ -82,19 +80,11 @@ class MyAccessibilityService : BaseAccessibilityService() {
                         L.i("$failedText was not found.")
                     }
                 })
-                .setNodeService(this)
+                .setNodeService(this@MyAccessibilityService)
                 .setNodeParams("请使用其它方式登录")
                 .setNodeParams("QQ登录")
                 .create()
                 .execute()
-
-            /*  LoginService.getInstance(this)
-                  .setTaskFinishedListener(object : TaskFinishedListener {
-                      override fun onTaskFinished() {
-                          loginByQQ()
-                      }
-                  })
-                  .doOnEvent()*/
         }
     }
 
@@ -119,7 +109,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
                     }
                 })
                 .setNodeParams("登录")
-                .setNodeFilter("首页")
+                //.setNodeFilter("首页")
                 .setNodeParams(WidgetConstant.EDITTEXT, 3, false, TaskDataUtil.instance.getLogin_name()!!)
                 .setNodeParams("com.tencent.mobileqq:id/password", 2, false, TaskDataUtil.instance.getLogin_psw()!!)
                 .setNodeParams("com.tencent.mobileqq:id/login", 2)
@@ -157,9 +147,9 @@ class MyAccessibilityService : BaseAccessibilityService() {
                         L.i("$failedText was not found.")
                     }
                 })
-                .setNodeParams("搜索")
-                .setNodeParams("com.xunmeng.pinduoduo:id/a8f", 2)
-                .setNodeParams("com.xunmeng.pinduoduo:id/fq", 2)
+                .setNodeParams("搜索", 0, 5)
+                .setNodeParams("com.xunmeng.pinduoduo:id/a8f", 2, 5)
+                .setNodeParams("com.xunmeng.pinduoduo:id/fq", 2, 5)
                 .setNodeParams(WidgetConstant.EDITTEXT, 3, false, TaskDataUtil.instance.getGoods_name()!!)
                 .setNodeParams("搜索")
                 .setNodeParams("9.9", 0, isClicked = true, isScrolled = true)

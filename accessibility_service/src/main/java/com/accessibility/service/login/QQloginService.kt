@@ -39,7 +39,7 @@ class QQloginService private constructor(nodeService: MyAccessibilityService) :
                         mIsDoing = true
 
                         nodeService.apply {
-                            L.i("login text: ${it.text}")
+                            L.i("login textList: ${it.text}")
                             if (findViewByFullText("使用QQ登录") != null) { //如果QQ已登录
                                 authLogin()
                             } else

@@ -7,6 +7,8 @@ import android.provider.Settings
 import android.support.v7.app.AppCompatActivity
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.base.BaseAccessibilityService
+import com.accessibility.service.function.ClearDataService
+import com.accessibility.service.listener.TaskListener
 import com.buy.together.fragment.MainFragment
 import com.buy.together.service.KeepLiveService
 
@@ -21,8 +23,6 @@ class MainActivity : AppCompatActivity() {
         }else{
             startService(Intent(this,KeepLiveService::class.java))
         }
-
-
     }
 
     override fun onStart() {

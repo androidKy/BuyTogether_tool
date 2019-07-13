@@ -11,7 +11,7 @@ class TestData {
                 "  \"code\": 200,\n" +
                 "  \"task\": {\n" +
                 "    \"task_id\": 1000,\n" +
-                "    \"task_type\": 34,\n" +
+                "    \"task_type\": 4,\n" +
                 "    \"task_status\":0,\n" +
                 "    \"login_channel\":0,\n" +
                 "    \"ip\": {\n" +

@@ -118,10 +118,10 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         val accessibilityNodeInfo = rootInActiveWindow ?: return null
 
         val nodeList = accessibilityNodeInfo.findAccessibilityNodeInfosByText(text)
-        L.i("nodeList size = ${nodeList.size} text = $text ")
+        L.i("nodeList size = ${nodeList.size} textList = $text ")
         if (nodeList.size > 0) {
             for (node in nodeList) {
-                L.i("nodeList text = ${node.text} className = ${node.className}")
+                L.i("nodeList textList = ${node.text} className = ${node.className}")
                 if (node.text == text)
                     return node
             }
@@ -141,7 +141,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         L.i("nodeList size = ${nodeList.size}")
         if (nodeList.size > 0) {
             for (node in nodeList) {
-                L.i("nodeList text = ${node.text} className = ${node.className}")
+                L.i("nodeList textList = ${node.text} className = ${node.className}")
                 if (node.text == text)
                     return node
             }
