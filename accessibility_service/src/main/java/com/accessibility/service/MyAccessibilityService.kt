@@ -152,7 +152,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 .setNodeParams("com.xunmeng.pinduoduo:id/fq", 2, 5)
                 .setNodeParams(WidgetConstant.EDITTEXT, 3, false, TaskDataUtil.instance.getGoods_name()!!)
                 .setNodeParams("搜索")
-                .setNodeParams("9.9", 0, isClicked = true, isScrolled = true)
+                .setNodeParams("7.9", 0, isClicked = true, isScrolled = true)
                 .create()
                 .execute()
         }
@@ -168,17 +168,18 @@ class MyAccessibilityService : BaseAccessibilityService() {
             TaskService.getInstance(this)
                 .setTaskFinishedListener(object : TaskFinishedListener {
                     override fun onTaskFinished() {
-                        //BuyGoodsService.getInstance(this@MyAccessibilityService).doOnEvent()
-                        NodeUtils.instance
-                            .setNodeFoundListener(object : NodeFoundListener {
-                                override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
-                                    L.i("手动添加收货地址 $nodeInfo")
-                                }
-                            })
-                            .getNodeByText(this@MyAccessibilityService, "手动添加收货地址")
+                        L.i("任务完成，重新开始下一轮任务")
+                        initParams()
                     }
                 })
                 .doOnEvent()
         }
+    }
+
+    /**
+     * 开始任务之前初始化所有参数
+     */
+    private fun initParams() {
+        setCurPageType(PageEnum.START_PAGE)
     }
 }

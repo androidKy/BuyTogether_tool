@@ -12,5 +12,6 @@ class Constant {
         const val SP_TASK_FILE_NAME = "pinduoduo_task_sp"
         const val KEY_TASK_DATA = "task_data"
 
+        const val KEY_SCREEN_DENSITY = "SCREEN_DENSITY" //屏幕分辨率
     }
 }

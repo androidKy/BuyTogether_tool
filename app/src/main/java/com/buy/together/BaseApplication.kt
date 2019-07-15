@@ -3,11 +3,10 @@ package com.buy.together
 import me.goldze.mvvmhabit.base.BaseApplication
 import me.goldze.mvvmhabit.crash.CaocConfig
 import me.goldze.mvvmhabit.utils.KLog
-import me.goldze.mvvmhabit.utils.SPUtils
 import me.goldze.mvvmhabit.utils.Utils
 
 
-class BaseApplication :BaseApplication() {
+class BaseApplication : BaseApplication() {
     override fun onCreate() {
         super.onCreate()
 

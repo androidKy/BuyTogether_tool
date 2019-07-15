@@ -3,16 +3,17 @@ package com.buy.together.fragment
 import android.widget.FrameLayout
 import com.accessibility.service.function.ClearDataService
 import com.accessibility.service.listener.TaskListener
+import com.accessibility.service.util.DisplayUtils
 import com.buy.together.R
 import com.buy.together.base.BaseFragment
 import com.buy.together.bean.TaskBean
 import com.buy.together.fragment.view.MainView
 import com.buy.together.fragment.viewmodel.MainViewModel
 import com.buy.together.utils.Constant
-import com.buy.together.utils.ParseDataUtil
 import com.rmondjone.locktableview.LockTableView
 import com.rmondjone.locktableview.DisplayUtil
 import com.safframework.log.L
+import me.goldze.mvvmhabit.utils.SPUtils
 
 
 /**
@@ -23,7 +24,7 @@ class MainFragment : BaseFragment(), MainView {
 
     private var mTableDatas = ArrayList<ArrayList<String>>()
     private var mContainer: FrameLayout? = null
-    private var mViewModel:MainViewModel? = null
+    private var mViewModel: MainViewModel? = null
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_main
@@ -80,16 +81,15 @@ class MainFragment : BaseFragment(), MainView {
             .setTableHeadTextColor(R.color.beijin)//表头字体颜色
             .setTableContentTextColor(R.color.border_color)//单元格字体颜色
             .setCellPadding(5)//设置单元格内边距(dp)
-            //.setNullableString("N/A") //空值替换值
+        //.setNullableString("N/A") //空值替换值
 
         lockTableView.show()
     }
 
     override fun onResponTask(taskBean: TaskBean) {
-        if(taskBean.code == 200)
-        {
+        if (taskBean.code == 200) {
             mViewModel?.parseTask(taskBean)
-        }else{
+        } else {
             L.i("获取数据失败：${taskBean.msg}")
         }
     }
@@ -101,8 +101,10 @@ class MainFragment : BaseFragment(), MainView {
 
         val launchIntentForPackage = context?.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
         if (launchIntentForPackage != null) {
-            ClearDataService().clearData(object: TaskListener {
+            ClearDataService().clearData(object : TaskListener {
                 override fun onTaskFinished() {
+                    L.i("width = ${DisplayUtils.getRealWidth(activity!!)} height = ${DisplayUtils.getRealHeight(activity!!)}")
+                    saveScreenDensity()
                     startActivity(launchIntentForPackage)
                 }
 
@@ -121,6 +123,17 @@ class MainFragment : BaseFragment(), MainView {
     override fun onDestroyView() {
         super.onDestroyView()
         mViewModel?.clearSubscribes()
+    }
+
+    fun saveScreenDensity() {
+        val width = DisplayUtils.getRealWidth(activity!!)
+        val height = DisplayUtils.getRealHeight(activity!!)
+
+        SPUtils.getInstance().apply {
+            put(Constant.KEY_SCREEN_DENSITY, "$width,$height")
+        }
+
+
     }
 
 }

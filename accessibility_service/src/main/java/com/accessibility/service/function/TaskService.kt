@@ -2,6 +2,7 @@ package com.accessibility.service.function
 
 import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.MyAccessibilityService
+import com.accessibility.service.auto.ADB_XY
 import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseEventService
@@ -160,30 +161,14 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             .setNodeService(nodeService)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFailed(failedText: String) {
-
+                    L.i("$failedText was not found.")
                 }
 
                 override fun onTaskFinished() {
                     L.i("商品选择完成，准备支付")
                     //createAddress()
-                    L.i("check nodes")
-                    AdbScriptController.Builder()
-                        .setXY("150,250")
-                        .setXY("150,650")
-                        .setText("中文输入")
-                        .create()
-                        .execute()
-                    nodeService.postDelay(Runnable {
+                    payNow()
 
-                        /*  CMDUtil().apply {
-                              //executeCMD("getevent -p")
-                              execCmd("input tap 150 250")
-                              execCmd("input tap 150 650 ")
-                              execCmd("am broadcast -a ADB_INPUT_TEXT --es msg '中文输入'")
-                              // executeCMD("input tap 100 250")
-                          }*/
-                        // iteratorRootView(nodeService.rootInActiveWindow)
-                    }, 2)
                 }
             })
             .setNodeParams("发起拼单")  //todo 是拼单还是单独购买
@@ -193,76 +178,71 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             .execute()
     }
 
-    private fun iteratorRootView(nodeView: AccessibilityNodeInfo) {
-        // val rootView =
-        L.i("rootView childSize = ${nodeView.childCount}")
+    /**
+     * 立即支付
+     */
+    private fun payNow() {
 
-        for (i in 0 until nodeView.childCount) {
-            val childNode = nodeView.getChild(i)
-            L.i("childNode: ${childNode.className} textList: ${childNode.text}")
-
-            if (childNode.childCount > 0) {
-                iteratorRootView(childNode)
-            }
-/*
-            for (j in 0 until childNode.childCount) {
-                val secondChildNode = childNode.getChild(j)
-                L.i("第三级 childNode: ${secondChildNode.className} textList: ${secondChildNode.textList}")
-
-                for (k in 0 until secondChildNode.childCount) {
-                    val thirdChildNode = secondChildNode.getChild(k)
-                    L.i("第四级 childNode: ${thirdChildNode.className} textList: ${thirdChildNode.textList}")
-
-                    for (l in 0 until thirdChildNode.childCount)
-                    {
-                        L.i("")
-                    }
+        AdbScriptController.Builder()
+            .setXY(ADB_XY.PAY_NOW.add_address)
+            .setXY(ADB_XY.PAY_NOW.name)
+            .setText("张先生")
+            .setXY(ADB_XY.PAY_NOW.phone)
+            .setText("13286810987")
+            .setXY(ADB_XY.PAY_NOW.detailed)
+            .setText("唐东街道088号")
+            .setXY(ADB_XY.PAY_NOW.choose_local)     //todo 选省份和城市还有区域要下滑选指定的地址
+            .setXY(ADB_XY.PAY_NOW.province)
+            .setXY(ADB_XY.PAY_NOW.city)
+            .setXY(ADB_XY.PAY_NOW.region)
+            .setXY(ADB_XY.PAY_NOW.save_address)
+            .setSwipeXY(ADB_XY.PAY_NOW.origin_swipe_up, ADB_XY.PAY_NOW.target_swipe_up)
+            .setXY(ADB_XY.PAY_NOW.more_pay_channel)
+            .setSwipeXY(ADB_XY.PAY_NOW.origin_swipe_up, ADB_XY.PAY_NOW.target_swipe_up)
+            .setXY(ADB_XY.PAY_NOW.qq_pay)
+            .setXY(ADB_XY.PAY_NOW.pay_now_btn)
+            // .setXY(ADB_XY.PAY_NOW.pay_now_qq_btn, 5000)
+            //.setXY(ADB_XY.PAY_NOW.pay_by_other)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    //选择代付的好友
+                    payByOther()
                 }
-            }*/
-        }
+
+                override fun onTaskFailed(failedText: String) {
+                    //支付失败
+                    payByOther()
+                }
+
+            })
+            .create()
+            .execute()
     }
 
-    private fun createAddress() {
+    /**
+     * 在QQ好友中找好友代付
+     */
+    private fun payByOther() {
         NodeController.Builder()
             .setNodeService(nodeService)
             .setTaskListener(object : TaskListener {
-                override fun onTaskFailed(failedText: String) {
-
-                }
-
                 override fun onTaskFinished() {
-
+                    L.i("支付成功，下单完成，重新开始下一轮任务")
+                    mTaskFinishedListener?.onTaskFinished()
                 }
+
+                override fun onTaskFailed(failedText: String) {
+                    L.i("支付失败，屏幕分辨率没适配")
+                    mTaskFinishedListener?.onTaskFinished()
+                }
+
             })
-            .setNodeParams("手动添加收货地址")
-            .setNodeParams(
-                "com.xunmeng.pinduoduo:id/gw", 2,
-                isClicked = false,
-                isScrolled = false,
-                editorInputText = "秦先生"
-            )
-            .setNodeParams(
-                "com.xunmeng.pinduoduo:id/gx", 2,
-                isClicked = false,
-                isScrolled = false,
-                editorInputText = "13513613721"
-            )
-            .setNodeParams(
-                "com.xunmeng.pinduoduo:id/h3", 2,
-                isClicked = false,
-                isScrolled = false,
-                editorInputText = "长安街道088号"
-            )
-            .setNodeParams("选择地区")
-            .setNodeParams("四川省", 0, isClicked = true, isScrolled = true)
-            .setNodeParams("遂宁市", 0, isClicked = true, isScrolled = true)
-            .setNodeParams("安居区", 0, isClicked = true, isScrolled = true)
-            .setNodeParams("保存")
-            .setNodeParams("更多支付方式")
-            .setNodeParams("QQ钱包")
             .setNodeParams("立即支付")
+            .setNodeParams("找好友代付")
+            .setNodeParams("Quinin1993")    //支付好友的昵称
+            .setNodeParams("完成")
+            .setNodeParams("发送")
             .create()
             .execute()
-
     }
 }

@@ -16,12 +16,13 @@ class ClearDataService {
         L.i("clear data")
         ThreadUtils.executeBySingle(object : ThreadUtils.Task<Boolean>() {
             override fun doInBackground(): Boolean {
-                val cmdResult = CMDUtil().execCmd(
-                    "cd /data/data/com.tencent.mobileqq/;" +
-                            "rm -fr **;" +
-                            "cd /data/data/com.xunmeng.pinduoduo/;" +
-                            "rm -fr **;"
-                )
+                /* val cmdResult = CMDUtil().execCmd(
+                     "cd /data/data/com.tencent.mobileqq/;" +
+                             "rm -fr cache,code_cache,shared_prefs,databases;"
+                      "cd /data/data/com.xunmeng.pinduoduo/;" +
+                      "rm -fr **;"
+                 )*/
+                val cmdResult = "Success"
 
                 return cmdResult.contains("Success")
             }

@@ -17,38 +17,52 @@ class AdbScriptController private constructor() {
             AdbScriptController()
         }
 
-        const val DEFAULT_NEXT_DELAY_TIME = 1000L
+        const val DEFAULT_DELAY_TIME = 1000L
     }
 
     var cmdList: ArrayList<String> = ArrayList()     //执行的命令
-    var nextDelayTime: ArrayList<Long> = ArrayList()    //执行下一次操作延迟的时间 默认是2秒
+    var delayTime: ArrayList<Long> = ArrayList()    //执行下一次操作延迟的时间 默认是2秒
     var taskListener: TaskListener? = null
 
     class Builder {
         var cmdList: ArrayList<String> = ArrayList()     //执行的命令
-        var nextDelayTimeList: ArrayList<Long> = ArrayList()    //执行下一次操作延迟的时间 默认是2秒
+        var delayTimeList: ArrayList<Long> = ArrayList()    //执行下一次操作延迟的时间 默认是2秒
         var taskListener: TaskListener? = null
 
         fun setXY(xy: String): Builder {
-            setXY(xy, DEFAULT_NEXT_DELAY_TIME)
+            setXY(xy, DEFAULT_DELAY_TIME)
             return this@Builder
         }
 
-        fun setXY(xy: String, nextDelayTime: Long): Builder {
+        fun setXY(xy: String, delayTime: Long): Builder {
             val xyList = xy.split(",")
             this.cmdList.add("input tap ${xyList[0]} ${xyList[1]}")
-            this.nextDelayTimeList.add(nextDelayTime)
+            this.delayTimeList.add(delayTime)
             return this@Builder
         }
 
         fun setText(text: String): Builder {
-            setText(text, DEFAULT_NEXT_DELAY_TIME)
+            setText(text, DEFAULT_DELAY_TIME)
             return this@Builder
         }
 
-        fun setText(text: String, nextDelayTime: Long): Builder {
-            this.nextDelayTimeList.add(nextDelayTime)
+        fun setText(text: String, delayTime: Long): Builder {
+            this.delayTimeList.add(delayTime)
             this.cmdList.add("am broadcast -a ADB_INPUT_TEXT --es msg '$text'")
+            return this@Builder
+        }
+
+        fun setSwipeXY(originXY: String, targetXY: String): Builder {
+            setSwipeXY(originXY, targetXY, DEFAULT_DELAY_TIME)
+            return this@Builder
+        }
+
+        fun setSwipeXY(originXY: String, targetXY: String, delayTime: Long): Builder {
+            val origin_xy = originXY.split(",")
+            val target_xy = targetXY.split(",")
+            this.delayTimeList.add(delayTime)
+            this.cmdList.add("input swipe ${origin_xy[0]} ${origin_xy[1]} ${target_xy[0]} ${target_xy[1]}")
+
             return this@Builder
         }
 
@@ -60,7 +74,7 @@ class AdbScriptController private constructor() {
         fun create(): AdbScriptController {
             val adbScriptController = instance
             adbScriptController.cmdList = cmdList
-            adbScriptController.nextDelayTime = nextDelayTimeList
+            adbScriptController.delayTime = delayTimeList
             adbScriptController.taskListener = taskListener
 
             return adbScriptController
@@ -79,7 +93,7 @@ class AdbScriptController private constructor() {
                 try {
                     for (i in 0 until cmdList.size) {
                         L.i("执行命令：${cmdList[i]}")
-                        Thread.sleep(nextDelayTime[i])
+                        Thread.sleep(delayTime[i])
                         CMDUtil().execCmd(cmdList[i])
 
                         if (i == cmdList.size - 1)
