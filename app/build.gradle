@@ -56,6 +56,9 @@ dependencies {
     //table
     implementation 'com.github.RmondJone:LockTableView:1.1.2'
 
+    //net
+    implementation 'com.amitshekhar.android:android-networking:1.0.2'
+
     //无障碍
     implementation project(":accessibility_service")
 }

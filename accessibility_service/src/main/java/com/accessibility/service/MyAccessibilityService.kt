@@ -21,7 +21,7 @@ import com.safframework.log.L
  * Description:无障碍服务最上层
  * Created by Quinin on 2019-07-02.
  **/
-class MyAccessibilityService : BaseAccessibilityService() {
+open class MyAccessibilityService : BaseAccessibilityService() {
 
 
     companion object {

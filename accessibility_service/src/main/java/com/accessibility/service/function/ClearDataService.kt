@@ -1,7 +1,6 @@
 package com.accessibility.service.function
 
 import com.accessibility.service.listener.TaskListener
-import com.accessibility.service.util.CMDUtil
 import com.accessibility.service.util.ThreadUtils
 import com.safframework.log.L
 
