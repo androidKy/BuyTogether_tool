@@ -1,4 +1,4 @@
-package com.accessibility.service.util;
+package com.utils.common;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;

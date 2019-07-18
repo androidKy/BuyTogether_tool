@@ -8,7 +8,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.buy.together"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -61,4 +61,7 @@ dependencies {
 
     //无障碍
     implementation project(":accessibility_service")
+
+    //代理IP
+    implementation project(':localVPN')
 }

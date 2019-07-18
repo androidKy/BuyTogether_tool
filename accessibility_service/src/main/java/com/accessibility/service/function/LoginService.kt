@@ -2,14 +2,13 @@ package com.accessibility.service.function
 
 import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.MyAccessibilityService
-import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.base.BaseEventService
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.login.WXloginService
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.GetNodeUtils
-import com.accessibility.service.util.SingletonHolder
+import com.utils.common.SingletonHolder
 import com.accessibility.service.util.TaskDataUtil
 import com.safframework.log.L
 
@@ -19,7 +18,7 @@ import com.safframework.log.L
  **/
 class LoginService private constructor(nodeService: MyAccessibilityService) : BaseEventService(nodeService) {
 
-    companion object : SingletonHolder<LoginService, MyAccessibilityService>(::LoginService)
+    companion object : com.utils.common.SingletonHolder<LoginService, MyAccessibilityService>(::LoginService)
 
     private var mIsLogining = false
 

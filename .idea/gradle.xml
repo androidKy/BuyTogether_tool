@@ -15,6 +15,7 @@
             <option value="$PROJECT_DIR$/net_library" />
             <option value="$PROJECT_DIR$/otherlogin" />
             <option value="$PROJECT_DIR$/saf-log" />
+            <option value="$PROJECT_DIR$/utils_library" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

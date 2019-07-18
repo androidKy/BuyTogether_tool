@@ -1,20 +1,27 @@
 package com.buy.together.fragment.viewmodel
 
 import android.content.Context
+import com.accessibility.service.function.ClearDataService
+import com.accessibility.service.listener.TaskListener
+import com.androidnetworking.AndroidNetworking
+import com.androidnetworking.error.ANError
+import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.buy.together.base.BaseView
 import com.buy.together.base.BaseViewModel
-import com.buy.together.bean.*
+import com.buy.together.bean.TaskBean
 import com.buy.together.fragment.view.MainView
 import com.buy.together.utils.Constant
 import com.buy.together.utils.ParseDataUtil
 import com.buy.together.utils.TestData
 import com.google.gson.Gson
 import com.safframework.log.L
+import com.utils.common.DevicesUtil
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.goldze.mvvmhabit.utils.SPUtils
+import org.json.JSONObject
 
 /**
  * Description:
@@ -30,28 +37,9 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     fun getTask() {
         L.init(MainViewModel::class.java.simpleName)
 
-        /* val okHttpClient = OkHttpClient()
-
-         val request = Request.Builder()
-             .url(Constant.URL_GET_TASK)
-             .get()
-             .build()
-
-         okHttpClient.newCall(request).enqueue(object : Callback {
-             override fun onFailure(call: Call, e: IOException) {
-                 L.i("exception msg : ${e.message}")
-                 mainView.onFailed(e.message!!)
-             }
-
-             override fun onResponse(call: Call, response: Response) {
-                 L.i("get task result : ${response.body()?.string()}")
-             }
-         })*/
-
-
         val disposable = Observable.just(TestData.taskBean_str)
             .flatMap {
-               val taskBean = try {
+                val taskBean = try {
                     Gson().fromJson(it, TaskBean::class.java)
                 } catch (e: Exception) {
                     L.e(e.message)
@@ -100,6 +88,52 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     }
 
     /**
+     * 清理数据
+     */
+    fun clearData() {
+        ClearDataService().clearData(object : TaskListener {
+            override fun onTaskFinished() {
+                mainView.onClearDataResult("Success")
+            }
+
+            override fun onTaskFailed(failedText: String) {
+                L.i("清理数据失败: $failedText")
+                mainView.onClearDataResult("failed")
+            }
+        })
+    }
+
+    /**
+     * 申请端口
+     */
+    fun getPorts(taskBean: TaskBean) {
+        //匹配相应的城市
+        val city = ""
+
+        getCity()
+    }
+
+    fun getCity() {
+        AndroidNetworking.post(Constant.URL_PROXY_IP)
+            .setContentType("multipart/form-data")
+            .addBodyParameter(Constant.POST_PARAM_METHOD, "getCity")
+            .addBodyParameter(Constant.POST_PARAM_IMEI, DevicesUtil.getIMEI(context))
+            .addBodyParameter(Constant.POST_PARAM_PLATFORMID, 2.toString())
+            .build()
+            .getAsJSONObject(object : JSONObjectRequestListener {
+                override fun onResponse(response: JSONObject?) {
+                    L.i("getCity result: $response")
+                }
+
+                override fun onError(anError: ANError?) {
+                    L.e("getCity error: ${anError?.errorDetail}")
+                }
+
+            })
+    }
+
+
+    /**
      * 释放订阅
      */
     override fun clearSubscribes() {
@@ -113,9 +147,9 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     /**
      * 保存任务数据到SP
      */
-    private fun saveTaskData2SP(strData:String) {
+    private fun saveTaskData2SP(strData: String) {
         val spUtils = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
 
-        spUtils.put(Constant.KEY_TASK_DATA,strData)
+        spUtils.put(Constant.KEY_TASK_DATA, strData)
     }
 }

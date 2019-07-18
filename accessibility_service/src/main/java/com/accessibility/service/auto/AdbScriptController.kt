@@ -1,8 +1,8 @@
 package com.accessibility.service.auto
 
 import com.accessibility.service.listener.TaskListener
-import com.accessibility.service.util.CMDUtil
-import com.accessibility.service.util.ThreadUtils
+import com.utils.common.CMDUtil
+import com.utils.common.ThreadUtils
 import com.safframework.log.L
 
 
@@ -86,7 +86,7 @@ class AdbScriptController private constructor() {
         if (cmdList.size == 0)
             return
 
-        ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
+        com.utils.common.ThreadUtils.executeByCached(object : com.utils.common.ThreadUtils.Task<Boolean>() {
             override fun doInBackground(): Boolean {
                 var result: Boolean = false
 
@@ -94,7 +94,7 @@ class AdbScriptController private constructor() {
                     for (i in 0 until cmdList.size) {
                         L.i("执行命令：${cmdList[i]}")
                         Thread.sleep(delayTime[i])
-                        CMDUtil().execCmd(cmdList[i])
+                        com.utils.common.CMDUtil().execCmd(cmdList[i])
 
                         if (i == cmdList.size - 1)
                             result = true

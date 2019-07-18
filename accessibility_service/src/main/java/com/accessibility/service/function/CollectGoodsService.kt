@@ -2,7 +2,7 @@ package com.accessibility.service.function
 
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.base.BaseEventService
-import com.accessibility.service.util.SingletonHolder
+import com.utils.common.SingletonHolder
 
 /**
  * Description:
@@ -10,7 +10,7 @@ import com.accessibility.service.util.SingletonHolder
  **/
 class CollectGoodsService private constructor(nodeService: MyAccessibilityService) : BaseEventService(nodeService) {
 
-    companion object : SingletonHolder<CollectGoodsService, MyAccessibilityService>(::CollectGoodsService)
+    companion object : com.utils.common.SingletonHolder<CollectGoodsService, MyAccessibilityService>(::CollectGoodsService)
 
     override fun doOnEvent() {
 

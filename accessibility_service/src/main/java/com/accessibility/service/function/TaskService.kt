@@ -18,7 +18,7 @@ import com.safframework.log.L
  **/
 class TaskService private constructor(nodeService: MyAccessibilityService) : BaseEventService(nodeService) {
 
-    companion object : SingletonHolder<TaskService, MyAccessibilityService>(::TaskService)
+    companion object : com.utils.common.SingletonHolder<TaskService, MyAccessibilityService>(::TaskService)
 
     private var mIsScaningGoods: Boolean = false    //判断是否正在浏览,控制同一时刻只有一个收到一个节点事件
     private var mAlreadyScaned: Boolean = false   //是否已浏览，控制允许是否继续收到事件

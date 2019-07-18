@@ -1,19 +1,15 @@
 package com.buy.together.fragment
 
 import android.widget.FrameLayout
-import com.accessibility.service.function.ClearDataService
-import com.accessibility.service.listener.TaskListener
-import com.accessibility.service.util.DisplayUtils
 import com.buy.together.R
 import com.buy.together.base.BaseFragment
 import com.buy.together.bean.TaskBean
 import com.buy.together.fragment.view.MainView
 import com.buy.together.fragment.viewmodel.MainViewModel
-import com.buy.together.utils.Constant
-import com.rmondjone.locktableview.LockTableView
 import com.rmondjone.locktableview.DisplayUtil
+import com.rmondjone.locktableview.LockTableView
 import com.safframework.log.L
-import me.goldze.mvvmhabit.utils.SPUtils
+import com.utils.common.ToastUtils
 
 
 /**
@@ -23,6 +19,7 @@ import me.goldze.mvvmhabit.utils.SPUtils
 class MainFragment : BaseFragment(), MainView {
 
     private var mTableDatas = ArrayList<ArrayList<String>>()
+    private var mTaskBean: TaskBean? = null
     private var mContainer: FrameLayout? = null
     private var mViewModel: MainViewModel? = null
 
@@ -88,6 +85,7 @@ class MainFragment : BaseFragment(), MainView {
 
     override fun onResponTask(taskBean: TaskBean) {
         if (taskBean.code == 200) {
+            mTaskBean = taskBean
             mViewModel?.parseTask(taskBean)
         } else {
             L.i("获取数据失败：${taskBean.msg}")
@@ -99,24 +97,27 @@ class MainFragment : BaseFragment(), MainView {
 
         initTableView(mTableDatas)
 
-        val launchIntentForPackage = context?.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
+        mViewModel?.clearData()
+
+       /* val launchIntentForPackage = context?.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
         if (launchIntentForPackage != null) {
-            ClearDataService().clearData(object : TaskListener {
-                override fun onTaskFinished() {
-                    L.i("width = ${DisplayUtils.getRealWidth(activity!!)} height = ${DisplayUtils.getRealHeight(activity!!)}")
-                    saveScreenDensity()
-                    startActivity(launchIntentForPackage)
-                }
 
-                override fun onTaskFailed(failedText: String) {
-                }
-            })
-
-        }
+        } else {
+            ToastUtils.showToast(context!!, "未安装拼多多")
+        }*/
     }
 
     override fun onFailed(msg: String?) {
-        L.i(msg)
+        L.i("获取任务失败：$msg")
+    }
+
+
+    override fun onClearDataResult(result: String) {
+        if (result == "Success") {
+            mViewModel?.getPorts(mTaskBean!!)
+        } else {
+            ToastUtils.showToast(context!!, "清理数据失败")
+        }
     }
 
 
@@ -125,15 +126,5 @@ class MainFragment : BaseFragment(), MainView {
         mViewModel?.clearSubscribes()
     }
 
-    fun saveScreenDensity() {
-        val width = DisplayUtils.getRealWidth(activity!!)
-        val height = DisplayUtils.getRealHeight(activity!!)
-
-        SPUtils.getInstance().apply {
-            put(Constant.KEY_SCREEN_DENSITY, "$width,$height")
-        }
-
-
-    }
 
 }

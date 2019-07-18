@@ -2,18 +2,14 @@ package com.accessibility.service
 
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
-import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseAccessibilityService
-import com.accessibility.service.function.ClearDataService
 import com.accessibility.service.function.TaskService
-import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.listener.TaskFinishedListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
-import com.accessibility.service.util.NodeUtils
 import com.accessibility.service.util.TaskDataUtil
-import com.accessibility.service.util.ThreadUtils
+import com.utils.common.ThreadUtils
 import com.accessibility.service.util.WidgetConstant
 import com.safframework.log.L
 

@@ -1,2 +1,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.proxy.service"/>
+          package="com.proxy.service">
+    <application
+            android:networkSecurityConfig="@xml/network_security_config">
+        <receiver android:name=".receiver.VpnNotificationReceiver"
+                  android:exported="false">
+
+        </receiver>
+        <service android:name=".MyVpnService"
+                 android:exported="false"
+                 android:permission="android.permission.FOREGROUND_SERVICE"/>
+        <service android:name=".LocalVpnService"
+                 android:exported="false"
+                 android:permission="android.permission.BIND_VPN_SERVICE">
+            <intent-filter>
+                <action android:name="android.net.VpnService"/>
+            </intent-filter>
+        </service>
+
+    </application>
+</manifest>

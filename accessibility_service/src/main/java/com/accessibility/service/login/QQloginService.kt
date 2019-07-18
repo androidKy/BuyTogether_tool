@@ -9,7 +9,7 @@ import com.accessibility.service.util.WidgetConstant
 import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.NodeUtils
-import com.accessibility.service.util.SingletonHolder
+import com.utils.common.SingletonHolder
 import com.safframework.log.L
 
 /**
@@ -21,7 +21,7 @@ class QQloginService private constructor(nodeService: MyAccessibilityService) :
 
     private var mIsDoing = false //是否正在进行任务
 
-    companion object : SingletonHolder<QQloginService, MyAccessibilityService>(::QQloginService)
+    companion object : com.utils.common.SingletonHolder<QQloginService, MyAccessibilityService>(::QQloginService)
 
     /**
      * 点击登录跳转到登录界面

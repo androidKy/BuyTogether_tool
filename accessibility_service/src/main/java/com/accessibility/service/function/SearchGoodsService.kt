@@ -7,7 +7,7 @@ import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.NodeUtils
-import com.accessibility.service.util.SingletonHolder
+import com.utils.common.SingletonHolder
 import com.accessibility.service.util.TaskDataUtil
 import com.accessibility.service.util.WidgetConstant
 import com.safframework.log.L
@@ -18,7 +18,7 @@ import com.safframework.log.L
  **/
 class SearchGoodsService private constructor(nodeService: MyAccessibilityService) : BaseEventService(nodeService) {
 
-    companion object : SingletonHolder<SearchGoodsService, MyAccessibilityService>(::SearchGoodsService)
+    companion object : com.utils.common.SingletonHolder<SearchGoodsService, MyAccessibilityService>(::SearchGoodsService)
 
     private var mIsDoing = false
 

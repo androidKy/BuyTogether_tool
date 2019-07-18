@@ -7,7 +7,8 @@ import com.buy.together.bean.TaskBean
  * Description:
  * Created by Quinin on 2019-06-27.
  **/
-interface MainView:BaseView {
+interface MainView : BaseView {
     fun onResponTask(taskBean: TaskBean)
-    fun onParseDatas(taskData:ArrayList<ArrayList<String>>)
+    fun onParseDatas(taskData: ArrayList<ArrayList<String>>)
+    fun onClearDataResult(result: String)
 }

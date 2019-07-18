@@ -13,7 +13,7 @@ import com.accessibility.service.util.*
  **/
 class BuyGoodsService private constructor(nodeService: MyAccessibilityService) : BaseEventService(nodeService) {
 
-    companion object : SingletonHolder<BuyGoodsService, MyAccessibilityService>(::BuyGoodsService)
+    companion object : com.utils.common.SingletonHolder<BuyGoodsService, MyAccessibilityService>(::BuyGoodsService)
 
     override fun doOnEvent() {
         fillAddress()
