@@ -66,6 +66,11 @@ abstract class BaseAccessibilityService : AccessibilityService() {
 
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        L.i("BaseAccessibilityService onCreate()")
+    }
+
     /**
      * 设置当前处于哪一个页面
      */

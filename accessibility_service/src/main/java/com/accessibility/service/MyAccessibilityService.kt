@@ -9,7 +9,6 @@ import com.accessibility.service.listener.TaskFinishedListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.TaskDataUtil
-import com.utils.common.ThreadUtils
 import com.accessibility.service.util.WidgetConstant
 import com.safframework.log.L
 
@@ -17,7 +16,7 @@ import com.safframework.log.L
  * Description:无障碍服务最上层
  * Created by Quinin on 2019-07-02.
  **/
-open class MyAccessibilityService : BaseAccessibilityService() {
+class MyAccessibilityService : BaseAccessibilityService() {
 
 
     companion object {
@@ -27,6 +26,11 @@ open class MyAccessibilityService : BaseAccessibilityService() {
 
     override fun onInterrupt() {
 
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        L.i("MyAccessibilityService onCreate()")
     }
 
     /**
@@ -61,7 +65,7 @@ open class MyAccessibilityService : BaseAccessibilityService() {
      * 选择登录
      */
     private fun chooseLogin() {
-        if (mCurPageType == PageEnum.START_PAGE) {
+        if (mCurPageType == PageEnum.START_PAGE && !mIsInited) {
             initTaskData()
             L.i("拼多多登录界面")
             setCurPageType(PageEnum.CHOOSING_LOGIN_PAGE)
@@ -77,6 +81,8 @@ open class MyAccessibilityService : BaseAccessibilityService() {
                     }
                 })
                 .setNodeService(this@MyAccessibilityService)
+                .setNodeParams("好的")
+                .setNodeParams("允许")
                 .setNodeParams("请使用其它方式登录")
                 .setNodeParams("QQ登录")
                 .create()
@@ -104,6 +110,9 @@ open class MyAccessibilityService : BaseAccessibilityService() {
                         L.i("$failedText was not found.")
                     }
                 })
+                .setNodeParams("允许")
+                .setNodeParams("允许")
+                .setNodeParams("同意")
                 .setNodeParams("登录")
                 //.setNodeFilter("首页")
                 .setNodeParams(WidgetConstant.EDITTEXT, 3, false, TaskDataUtil.instance.getLogin_name()!!)

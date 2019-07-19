@@ -1,1 +1,1 @@
-include ':app', ':saf-log', ':login', ':otherlogin', ':accessibility_service', ':localVPN', ':net_library', ':utils_library'
+include ':app', ':saf-log', ':accessibility_service', ':localVPN', ':utils_library'

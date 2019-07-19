@@ -1,27 +1,42 @@
 package com.buy.together.fragment
 
+import android.app.Service
+import android.content.ComponentName
+import android.content.Intent
+import android.content.ServiceConnection
+import android.os.IBinder
 import android.widget.FrameLayout
 import com.buy.together.R
 import com.buy.together.base.BaseFragment
+import com.buy.together.bean.ProxyIPBean
 import com.buy.together.bean.TaskBean
 import com.buy.together.fragment.view.MainView
 import com.buy.together.fragment.viewmodel.MainViewModel
+import com.buy.together.utils.Constant
+import com.google.gson.Gson
+import com.proxy.service.LocalVpnService
+import com.proxy.service.MyVpnService
+import com.proxy.service.PingManager
 import com.rmondjone.locktableview.DisplayUtil
 import com.rmondjone.locktableview.LockTableView
 import com.safframework.log.L
+import com.utils.common.ThreadUtils
 import com.utils.common.ToastUtils
+import java.util.concurrent.TimeUnit
 
 
 /**
  * Description:
  * Created by Quinin on 2019-06-27.
  **/
-class MainFragment : BaseFragment(), MainView {
+class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedListener {
+
 
     private var mTableDatas = ArrayList<ArrayList<String>>()
     private var mTaskBean: TaskBean? = null
     private var mContainer: FrameLayout? = null
     private var mViewModel: MainViewModel? = null
+    private val mServiceConnect = ServiceConnectionImpl()
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_main
@@ -98,13 +113,6 @@ class MainFragment : BaseFragment(), MainView {
         initTableView(mTableDatas)
 
         mViewModel?.clearData()
-
-       /* val launchIntentForPackage = context?.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
-        if (launchIntentForPackage != null) {
-
-        } else {
-            ToastUtils.showToast(context!!, "未安装拼多多")
-        }*/
     }
 
     override fun onFailed(msg: String?) {
@@ -114,17 +122,82 @@ class MainFragment : BaseFragment(), MainView {
 
     override fun onClearDataResult(result: String) {
         if (result == "Success") {
-            mViewModel?.getPorts(mTaskBean!!)
+
+            mContainer?.postDelayed({
+                val launchIntentForPackage = context?.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
+                if (launchIntentForPackage != null) {
+                    startActivity(launchIntentForPackage)
+                } else {
+                    ToastUtils.showToast(context!!, "未安装拼多多")
+                }
+            },5000)
+
+            //mViewModel?.getPorts(mTaskBean!!)
+            // mViewModel?.closePort()
         } else {
             ToastUtils.showToast(context!!, "清理数据失败")
         }
+    }
+
+    override fun onRequestPortsResult(result: String) {
+        L.i("请求打开端口结果：$result")
+        LocalVpnService.addOnStatusChangedListener(this)
+        activity?.run {
+            val proxyIPBean = Gson().fromJson(result, ProxyIPBean::class.java)
+            val intentService = Intent(activity!!, MyVpnService::class.java)
+            intentService.apply {
+                val data = proxyIPBean?.data
+                putExtra(LocalVpnService.AUTHUSER_KEY, data?.authuser)
+                putExtra(LocalVpnService.AUTHPSW_KEY, data?.authpass)
+                putExtra(LocalVpnService.DOMAIN_KEY, data?.domain)
+                putExtra(LocalVpnService.PORT_KEY, data?.port?.get(0).toString())
+            }
+
+            startService(intentService)
+
+            bindService(intentService, mServiceConnect, Service.BIND_AUTO_CREATE)
+        }
+    }
+
+    override fun onStatusChanged(status: String, isRunning: Boolean?) {
+        L.i("LocalVpnService status changed: $status isRunning: $isRunning MainThread: ${ThreadUtils.isMainThread()}")
+        if (isRunning!!)   //代理连接成功
+        {
+
+        }
+    }
+
+    override fun onLogReceived(logString: String) {
+        L.i("LocalVpnService onLogReceived: $logString")
+    }
+
+
+    inner class ServiceConnectionImpl : ServiceConnection {
+        override fun onServiceDisconnected(name: ComponentName?) {
+            unBindService()
+        }
+
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            L.i("MyVpnService was connected")
+            val myBinder = service as MyVpnService.MyBinder
+            myBinder.connectVPN(activity!!)
+        }
+
     }
 
 
     override fun onDestroyView() {
         super.onDestroyView()
         mViewModel?.clearSubscribes()
+        unBindService()
     }
 
+
+    private fun unBindService() {
+        activity?.run {
+            unbindService(mServiceConnect)
+        }
+
+    }
 
 }

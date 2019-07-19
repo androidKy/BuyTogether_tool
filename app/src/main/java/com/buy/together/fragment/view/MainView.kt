@@ -11,4 +11,5 @@ interface MainView : BaseView {
     fun onResponTask(taskBean: TaskBean)
     fun onParseDatas(taskData: ArrayList<ArrayList<String>>)
     fun onClearDataResult(result: String)
+    fun onRequestPortsResult(result:String)
 }
