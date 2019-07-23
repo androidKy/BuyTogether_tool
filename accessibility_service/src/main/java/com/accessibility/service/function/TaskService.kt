@@ -159,7 +159,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
         L.i("购买商品，并且选择商品各个参数")
 
         val choose_info = TaskDataUtil.instance.getChoose_info()
-        if (choose_info == null) {
+        if (choose_info == null || choose_info.isEmpty()) {
             L.i("商品参数为空")
             return
         }
@@ -175,7 +175,6 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
                     L.i("商品选择完成，准备支付")
                     //createAddress()
                     payNow()
-
                 }
             })
             .setNodeParams("发起拼单")  //todo 是拼单还是单独购买

@@ -1,22 +1,21 @@
 package com.accessibility.service.data;
 
-import java.util.List;
-
 /**
  * Description:
  * Created by Quinin on 2019-07-08.
  **/
 public class TaskServiceData {
 
+
     /**
      * code : 200
-     * task : {"task_id":1000,"task_type":1234,"task_status":0,"login_channel":0,"ip":{"ip_id":234,"city":"GuangZhou","content":"192.168.2.104","mac_address":"0000:0000:0001"},"account":{"we_chat":{"wechat_id":23,"name":"12345678901","psw":"wechat_psw"},"qq":{"qq_id":24,"name":"qq_name","psw":"qq_psw"},"buy_together":{"buttogether_id":53,"name":"userName","psw":"buyTogether_psw"}},"goods":[{"goods_id":2014825,"goods_type":12,"name":"商品全名称","keyword":"夏季新款悠闲男装中短裤","delivery_address":"收货地址","talk_msg":"老板你好，这条裤子的尺码是怎么样的","tasked_count":0,"comment_need":true,"comment_content":"衣服很合适","score_need":true,"score_value":80,"stay_time":{"goods_time":30,"search_time":5}},{"goods_id":2014826,"goods_type":13,"name":"商品全名称","keyword":"夏季新款悠闲女装","delivery_address":"收货地址","talk_msg":"老板你好，这条裤子的尺码是怎么样的","tasked_count":0,"comment_need":true,"comment_content":"衣服很合适","score_need":true,"score_value":70,"stay_time":{"goods_time":30,"search_time":5}}]}
-     * msg : tip_msg
+     * msg : 成功
+     * task : {"task_id":1106,"task_status":1,"task_amount":20,"task_dispense":0,"task_complete":0,"task_fail":0,"time_limit":false,"talk_msg":"商品还有吗？","score_need":true,"comment_need":true,"comment_content":"东挑西选，头都晕了，还是这家吧，评价也不错","has_commented":false,"create_time":"2019-07-23T10:17:54.282","ip":{"city":"","content":"","mac_address":""},"account":{"id":23,"user":"2337630557","pwd":"xh19nyayrwb","type":0},"goods":{"id":5,"goods_id":1395698343,"cat_id":8464,"goods_name":"18种花型雪纺碎花长裙夏季高腰宽松a字裙ins半身裙女夏中长款裙子","mall_name":"姿想旗舰店","keyword":"18种花型雪纺碎花长裙夏季高腰宽松a字裙ins半身裙女夏中长款裙子","search_price":"28.24","choose_info":""},"device":{"id":3958,"bluetooth":"02:00:00:00:00:00","imei":"A00000719CDFA7","brand":"OPPO","android":"6.0.1","mac":"02:00:00:00:00:00","system":"A57_11_A.26_180329","sn":"aa65011","imsi":"460036041518319","model":"OPPO A57","useragent":"Dalvik/2.1.0 (Linux; U; Android 6.0.1; OPPO A57 Build/MMB29M)"},"delivery_address":{"name":"康念之","phone":"15513348714","province":"北京市","city":"北京市","district":"东城区","street":"北京市东城区东四北大街329号"},"stay_time":{"goods_time":3,"search_time":14}}
      */
 
     private int code;
-    private TaskBean task;
     private String msg;
+    private TaskBean task;
 
     public int getCode() {
         return code;
@@ -24,14 +23,6 @@ public class TaskServiceData {
 
     public void setCode(int code) {
         this.code = code;
-    }
-
-    public TaskBean getTask() {
-        return task;
-    }
-
-    public void setTask(TaskBean task) {
-        this.task = task;
     }
 
     public String getMsg() {
@@ -42,24 +33,58 @@ public class TaskServiceData {
         this.msg = msg;
     }
 
+    public TaskBean getTask() {
+        return task;
+    }
+
+    public void setTask(TaskBean task) {
+        this.task = task;
+    }
+
     public static class TaskBean {
         /**
-         * task_id : 1000
-         * task_type : 1234
-         * task_status : 0
-         * login_channel : 0
-         * ip : {"ip_id":234,"city":"GuangZhou","content":"192.168.2.104","mac_address":"0000:0000:0001"}
-         * account : {"we_chat":{"wechat_id":23,"name":"12345678901","psw":"wechat_psw"},"qq":{"qq_id":24,"name":"qq_name","psw":"qq_psw"},"buy_together":{"buttogether_id":53,"name":"userName","psw":"buyTogether_psw"}}
-         * goods : [{"goods_id":2014825,"goods_type":12,"name":"商品全名称","keyword":"夏季新款悠闲男装中短裤","delivery_address":"收货地址","talk_msg":"老板你好，这条裤子的尺码是怎么样的","tasked_count":0,"comment_need":true,"comment_content":"衣服很合适","score_need":true,"score_value":80,"stay_time":{"goods_time":30,"search_time":5}},{"goods_id":2014826,"goods_type":13,"name":"商品全名称","keyword":"夏季新款悠闲女装","delivery_address":"收货地址","talk_msg":"老板你好，这条裤子的尺码是怎么样的","tasked_count":0,"comment_need":true,"comment_content":"衣服很合适","score_need":true,"score_value":70,"stay_time":{"goods_time":30,"search_time":5}}]
+         * task_id : 1106
+         * task_status : 1
+         * task_amount : 20
+         * task_dispense : 0
+         * task_complete : 0
+         * task_fail : 0
+         * time_limit : false
+         * talk_msg : 商品还有吗？
+         * score_need : true
+         * comment_need : true
+         * comment_content : 东挑西选，头都晕了，还是这家吧，评价也不错
+         * has_commented : false
+         * create_time : 2019-07-23T10:17:54.282
+         * ip : {"city":"","content":"","mac_address":""}
+         * account : {"id":23,"user":"2337630557","pwd":"xh19nyayrwb","type":0}
+         * goods : {"id":5,"goods_id":1395698343,"cat_id":8464,"goods_name":"18种花型雪纺碎花长裙夏季高腰宽松a字裙ins半身裙女夏中长款裙子","mall_name":"姿想旗舰店","keyword":"18种花型雪纺碎花长裙夏季高腰宽松a字裙ins半身裙女夏中长款裙子","search_price":"28.24","choose_info":""}
+         * device : {"id":3958,"bluetooth":"02:00:00:00:00:00","imei":"A00000719CDFA7","brand":"OPPO","android":"6.0.1","mac":"02:00:00:00:00:00","system":"A57_11_A.26_180329","sn":"aa65011","imsi":"460036041518319","model":"OPPO A57","useragent":"Dalvik/2.1.0 (Linux; U; Android 6.0.1; OPPO A57 Build/MMB29M)"}
+         * delivery_address : {"name":"康念之","phone":"15513348714","province":"北京市","city":"北京市","district":"东城区","street":"北京市东城区东四北大街329号"}
+         * stay_time : {"goods_time":3,"search_time":14}
          */
 
         private int task_id;
-        private int task_type;
         private int task_status;
-        private int login_channel;
+        private int task_type;
+        private int task_amount;
+        private int task_dispense;
+        private int task_complete;
+        private int task_fail;
+        private boolean time_limit;
+        private String talk_msg;
+        private boolean score_need;
+        private boolean comment_need;
+        private String comment_content;
+        private boolean has_commented;
+        private String create_time;
         private IpBean ip;
         private AccountBean account;
-        private List<GoodsBean> goods;
+        private GoodsBean goods;
+        private DeviceBean device;
+        private DeliveryAddressBean delivery_address;
+        private StayTimeBean stay_time;
+
 
         public int getTask_id() {
             return task_id;
@@ -85,12 +110,92 @@ public class TaskServiceData {
             this.task_status = task_status;
         }
 
-        public int getLogin_channel() {
-            return login_channel;
+        public int getTask_amount() {
+            return task_amount;
         }
 
-        public void setLogin_channel(int login_channel) {
-            this.login_channel = login_channel;
+        public void setTask_amount(int task_amount) {
+            this.task_amount = task_amount;
+        }
+
+        public int getTask_dispense() {
+            return task_dispense;
+        }
+
+        public void setTask_dispense(int task_dispense) {
+            this.task_dispense = task_dispense;
+        }
+
+        public int getTask_complete() {
+            return task_complete;
+        }
+
+        public void setTask_complete(int task_complete) {
+            this.task_complete = task_complete;
+        }
+
+        public int getTask_fail() {
+            return task_fail;
+        }
+
+        public void setTask_fail(int task_fail) {
+            this.task_fail = task_fail;
+        }
+
+        public boolean isTime_limit() {
+            return time_limit;
+        }
+
+        public void setTime_limit(boolean time_limit) {
+            this.time_limit = time_limit;
+        }
+
+        public String getTalk_msg() {
+            return talk_msg;
+        }
+
+        public void setTalk_msg(String talk_msg) {
+            this.talk_msg = talk_msg;
+        }
+
+        public boolean isScore_need() {
+            return score_need;
+        }
+
+        public void setScore_need(boolean score_need) {
+            this.score_need = score_need;
+        }
+
+        public boolean isComment_need() {
+            return comment_need;
+        }
+
+        public void setComment_need(boolean comment_need) {
+            this.comment_need = comment_need;
+        }
+
+        public String getComment_content() {
+            return comment_content;
+        }
+
+        public void setComment_content(String comment_content) {
+            this.comment_content = comment_content;
+        }
+
+        public boolean isHas_commented() {
+            return has_commented;
+        }
+
+        public void setHas_commented(boolean has_commented) {
+            this.has_commented = has_commented;
+        }
+
+        public String getCreate_time() {
+            return create_time;
+        }
+
+        public void setCreate_time(String create_time) {
+            this.create_time = create_time;
         }
 
         public IpBean getIp() {
@@ -109,34 +214,48 @@ public class TaskServiceData {
             this.account = account;
         }
 
-        public List<GoodsBean> getGoods() {
+        public GoodsBean getGoods() {
             return goods;
         }
 
-        public void setGoods(List<GoodsBean> goods) {
+        public void setGoods(GoodsBean goods) {
             this.goods = goods;
+        }
+
+        public DeviceBean getDevice() {
+            return device;
+        }
+
+        public void setDevice(DeviceBean device) {
+            this.device = device;
+        }
+
+        public DeliveryAddressBean getDelivery_address() {
+            return delivery_address;
+        }
+
+        public void setDelivery_address(DeliveryAddressBean delivery_address) {
+            this.delivery_address = delivery_address;
+        }
+
+        public StayTimeBean getStay_time() {
+            return stay_time;
+        }
+
+        public void setStay_time(StayTimeBean stay_time) {
+            this.stay_time = stay_time;
         }
 
         public static class IpBean {
             /**
-             * ip_id : 234
-             * city : GuangZhou
-             * content : 192.168.2.104
-             * mac_address : 0000:0000:0001
+             * city :
+             * content :
+             * mac_address :
              */
 
-            private int ip_id;
             private String city;
             private String content;
             private String mac_address;
-
-            public int getIp_id() {
-                return ip_id;
-            }
-
-            public void setIp_id(int ip_id) {
-                this.ip_id = ip_id;
-            }
 
             public String getCity() {
                 return city;
@@ -165,185 +284,77 @@ public class TaskServiceData {
 
         public static class AccountBean {
             /**
-             * we_chat : {"wechat_id":23,"name":"12345678901","psw":"wechat_psw"}
-             * qq : {"qq_id":24,"name":"qq_name","psw":"qq_psw"}
-             * buy_together : {"buttogether_id":53,"name":"userName","psw":"buyTogether_psw"}
+             * id : 23
+             * user : 2337630557
+             * pwd : xh19nyayrwb
+             * type : 0
              */
 
-            private WeChatBean we_chat;
-            private QqBean qq;
-            private BuyTogetherBean buy_together;
+            private int id;
+            private String user;
+            private String pwd;
+            private int type;
 
-            public WeChatBean getWe_chat() {
-                return we_chat;
+            public int getId() {
+                return id;
             }
 
-            public void setWe_chat(WeChatBean we_chat) {
-                this.we_chat = we_chat;
+            public void setId(int id) {
+                this.id = id;
             }
 
-            public QqBean getQq() {
-                return qq;
+            public String getUser() {
+                return user;
             }
 
-            public void setQq(QqBean qq) {
-                this.qq = qq;
+            public void setUser(String user) {
+                this.user = user;
             }
 
-            public BuyTogetherBean getBuy_together() {
-                return buy_together;
+            public String getPwd() {
+                return pwd;
             }
 
-            public void setBuy_together(BuyTogetherBean buy_together) {
-                this.buy_together = buy_together;
+            public void setPwd(String pwd) {
+                this.pwd = pwd;
             }
 
-            public static class WeChatBean {
-                /**
-                 * wechat_id : 23
-                 * name : 12345678901
-                 * psw : wechat_psw
-                 */
-
-                private int wechat_id;
-                private String name;
-                private String psw;
-
-                public int getWechat_id() {
-                    return wechat_id;
-                }
-
-                public void setWechat_id(int wechat_id) {
-                    this.wechat_id = wechat_id;
-                }
-
-                public String getName() {
-                    return name;
-                }
-
-                public void setName(String name) {
-                    this.name = name;
-                }
-
-                public String getPsw() {
-                    return psw;
-                }
-
-                public void setPsw(String psw) {
-                    this.psw = psw;
-                }
+            public int getType() {
+                return type;
             }
 
-            public static class QqBean {
-                /**
-                 * qq_id : 24
-                 * name : qq_name
-                 * psw : qq_psw
-                 */
-
-                private int qq_id;
-                private String name;
-                private String psw;
-
-                public int getQq_id() {
-                    return qq_id;
-                }
-
-                public void setQq_id(int qq_id) {
-                    this.qq_id = qq_id;
-                }
-
-                public String getName() {
-                    return name;
-                }
-
-                public void setName(String name) {
-                    this.name = name;
-                }
-
-                public String getPsw() {
-                    return psw;
-                }
-
-                public void setPsw(String psw) {
-                    this.psw = psw;
-                }
-            }
-
-            public static class BuyTogetherBean {
-                /**
-                 * buttogether_id : 53
-                 * name : userName
-                 * psw : buyTogether_psw
-                 */
-
-                private int buttogether_id;
-                private String name;
-                private String psw;
-
-                public int getButtogether_id() {
-                    return buttogether_id;
-                }
-
-                public void setButtogether_id(int buttogether_id) {
-                    this.buttogether_id = buttogether_id;
-                }
-
-                public String getName() {
-                    return name;
-                }
-
-                public void setName(String name) {
-                    this.name = name;
-                }
-
-                public String getPsw() {
-                    return psw;
-                }
-
-                public void setPsw(String psw) {
-                    this.psw = psw;
-                }
+            public void setType(int type) {
+                this.type = type;
             }
         }
 
         public static class GoodsBean {
             /**
-             * goods_id : 2014825
-             * goods_type : 12
-             * name : 商品全名称
-             * keyword : 夏季新款悠闲男装中短裤
-             * delivery_address : 收货地址
-             * talk_msg : 老板你好，这条裤子的尺码是怎么样的
-             * tasked_count : 0
-             * comment_need : true
-             * comment_content : 衣服很合适
-             * score_need : true
-             * score_value : 80
-             * stay_time : {"goods_time":30,"search_time":5}
+             * id : 5
+             * goods_id : 1395698343
+             * cat_id : 8464
+             * goods_name : 18种花型雪纺碎花长裙夏季高腰宽松a字裙ins半身裙女夏中长款裙子
+             * mall_name : 姿想旗舰店
+             * keyword : 18种花型雪纺碎花长裙夏季高腰宽松a字裙ins半身裙女夏中长款裙子
+             * search_price : 28.24
+             * choose_info :
              */
 
+            private int id;
             private int goods_id;
-            private int goods_type;
-            private String name;
+            private int cat_id;
+            private String goods_name;
+            private String mall_name;
             private String keyword;
-            private String delivery_address;
-            private String talk_msg;
-            private int tasked_count;
-            private boolean comment_need;
-            private String comment_content;
-            private boolean score_need;
-            private int score_value;
+            private String search_price;
             private String choose_info;
-            private StayTimeBean stay_time;
 
-            public String getChoose_info(){
-                return choose_info;
+            public int getId() {
+                return id;
             }
 
-            public void setChoose_info(String choose_info)
-            {
-                this.choose_info = choose_info;
+            public void setId(int id) {
+                this.id = id;
             }
 
             public int getGoods_id() {
@@ -354,20 +365,28 @@ public class TaskServiceData {
                 this.goods_id = goods_id;
             }
 
-            public int getGoods_type() {
-                return goods_type;
+            public int getCat_id() {
+                return cat_id;
             }
 
-            public void setGoods_type(int goods_type) {
-                this.goods_type = goods_type;
+            public void setCat_id(int cat_id) {
+                this.cat_id = cat_id;
             }
 
-            public String getName() {
-                return name;
+            public String getGoods_name() {
+                return goods_name;
             }
 
-            public void setName(String name) {
-                this.name = name;
+            public void setGoods_name(String goods_name) {
+                this.goods_name = goods_name;
+            }
+
+            public String getMall_name() {
+                return mall_name;
+            }
+
+            public void setMall_name(String mall_name) {
+                this.mall_name = mall_name;
             }
 
             public String getKeyword() {
@@ -378,94 +397,228 @@ public class TaskServiceData {
                 this.keyword = keyword;
             }
 
-            public String getDelivery_address() {
-                return delivery_address;
+            public String getSearch_price() {
+                return search_price;
             }
 
-            public void setDelivery_address(String delivery_address) {
-                this.delivery_address = delivery_address;
+            public void setSearch_price(String search_price) {
+                this.search_price = search_price;
             }
 
-            public String getTalk_msg() {
-                return talk_msg;
+            public String getChoose_info() {
+                return choose_info;
             }
 
-            public void setTalk_msg(String talk_msg) {
-                this.talk_msg = talk_msg;
+            public void setChoose_info(String choose_info) {
+                this.choose_info = choose_info;
+            }
+        }
+
+        public static class DeviceBean {
+            /**
+             * id : 3958
+             * bluetooth : 02:00:00:00:00:00
+             * imei : A00000719CDFA7
+             * brand : OPPO
+             * android : 6.0.1
+             * mac : 02:00:00:00:00:00
+             * system : A57_11_A.26_180329
+             * sn : aa65011
+             * imsi : 460036041518319
+             * model : OPPO A57
+             * useragent : Dalvik/2.1.0 (Linux; U; Android 6.0.1; OPPO A57 Build/MMB29M)
+             */
+
+            private int id;
+            private String bluetooth;
+            private String imei;
+            private String brand;
+            private String android;
+            private String mac;
+            private String system;
+            private String sn;
+            private String imsi;
+            private String model;
+            private String useragent;
+
+            public int getId() {
+                return id;
             }
 
-            public int getTasked_count() {
-                return tasked_count;
+            public void setId(int id) {
+                this.id = id;
             }
 
-            public void setTasked_count(int tasked_count) {
-                this.tasked_count = tasked_count;
+            public String getBluetooth() {
+                return bluetooth;
             }
 
-            public boolean isComment_need() {
-                return comment_need;
+            public void setBluetooth(String bluetooth) {
+                this.bluetooth = bluetooth;
             }
 
-            public void setComment_need(boolean comment_need) {
-                this.comment_need = comment_need;
+            public String getImei() {
+                return imei;
             }
 
-            public String getComment_content() {
-                return comment_content;
+            public void setImei(String imei) {
+                this.imei = imei;
             }
 
-            public void setComment_content(String comment_content) {
-                this.comment_content = comment_content;
+            public String getBrand() {
+                return brand;
             }
 
-            public boolean isScore_need() {
-                return score_need;
+            public void setBrand(String brand) {
+                this.brand = brand;
             }
 
-            public void setScore_need(boolean score_need) {
-                this.score_need = score_need;
+            public String getAndroid() {
+                return android;
             }
 
-            public int getScore_value() {
-                return score_value;
+            public void setAndroid(String android) {
+                this.android = android;
             }
 
-            public void setScore_value(int score_value) {
-                this.score_value = score_value;
+            public String getMac() {
+                return mac;
             }
 
-            public StayTimeBean getStay_time() {
-                return stay_time;
+            public void setMac(String mac) {
+                this.mac = mac;
             }
 
-            public void setStay_time(StayTimeBean stay_time) {
-                this.stay_time = stay_time;
+            public String getSystem() {
+                return system;
             }
 
-            public static class StayTimeBean {
-                /**
-                 * goods_time : 30
-                 * search_time : 5
-                 */
+            public void setSystem(String system) {
+                this.system = system;
+            }
 
-                private int goods_time;
-                private int search_time;
+            public String getSn() {
+                return sn;
+            }
 
-                public int getGoods_time() {
-                    return goods_time;
-                }
+            public void setSn(String sn) {
+                this.sn = sn;
+            }
 
-                public void setGoods_time(int goods_time) {
-                    this.goods_time = goods_time;
-                }
+            public String getImsi() {
+                return imsi;
+            }
 
-                public int getSearch_time() {
-                    return search_time;
-                }
+            public void setImsi(String imsi) {
+                this.imsi = imsi;
+            }
 
-                public void setSearch_time(int search_time) {
-                    this.search_time = search_time;
-                }
+            public String getModel() {
+                return model;
+            }
+
+            public void setModel(String model) {
+                this.model = model;
+            }
+
+            public String getUseragent() {
+                return useragent;
+            }
+
+            public void setUseragent(String useragent) {
+                this.useragent = useragent;
+            }
+        }
+
+        public static class DeliveryAddressBean {
+            /**
+             * name : 康念之
+             * phone : 15513348714
+             * province : 北京市
+             * city : 北京市
+             * district : 东城区
+             * street : 北京市东城区东四北大街329号
+             */
+
+            private String name;
+            private String phone;
+            private String province;
+            private String city;
+            private String district;
+            private String street;
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public String getPhone() {
+                return phone;
+            }
+
+            public void setPhone(String phone) {
+                this.phone = phone;
+            }
+
+            public String getProvince() {
+                return province;
+            }
+
+            public void setProvince(String province) {
+                this.province = province;
+            }
+
+            public String getCity() {
+                return city;
+            }
+
+            public void setCity(String city) {
+                this.city = city;
+            }
+
+            public String getDistrict() {
+                return district;
+            }
+
+            public void setDistrict(String district) {
+                this.district = district;
+            }
+
+            public String getStreet() {
+                return street;
+            }
+
+            public void setStreet(String street) {
+                this.street = street;
+            }
+        }
+
+        public static class StayTimeBean {
+            /**
+             * goods_time : 3
+             * search_time : 14
+             */
+
+            private int goods_time;
+            private int search_time;
+
+            public int getGoods_time() {
+                return goods_time;
+            }
+
+            public void setGoods_time(int goods_time) {
+                this.goods_time = goods_time;
+            }
+
+            public int getSearch_time() {
+                return search_time;
+            }
+
+            public void setSearch_time(int search_time) {
+                this.search_time = search_time;
             }
         }
     }

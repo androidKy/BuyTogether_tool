@@ -3,6 +3,7 @@ package com.utils.common;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.text.TextUtils;
 
 import java.util.List;
 
@@ -26,6 +27,13 @@ public class PackageManagerUtils {
             }
         }
         return mInstance;
+    }
+
+    public void killApplication(String packageName) {
+        if (TextUtils.isEmpty(packageName)) {
+            return;
+        }
+        new CMDUtil().execCmd("am force-stop " + packageName);
     }
 
     public void restartApplication(Context context) {

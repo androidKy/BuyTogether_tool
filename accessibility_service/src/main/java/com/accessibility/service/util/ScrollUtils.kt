@@ -33,6 +33,7 @@ class ScrollUtils constructor(val nodeService: BaseAccessibilityService, val rec
     private var mNodeFoundListener: NodeFoundListener? = null
     private var mNodeText: String? = null
     private var mNodeId: String? = null
+    private var mIsNodeFound: Boolean = false
 
 
     private val mHandler = Handler(Looper.getMainLooper()) {
@@ -117,20 +118,29 @@ class ScrollUtils constructor(val nodeService: BaseAccessibilityService, val rec
 
             mHandler.sendEmptyMessageDelayed(MSG_BACKWARD_WHAT, 1000)
         } else {
+            if (!mIsNodeFound) {
+                mNodeFoundListener?.onNodeFound(null)
+            }
             mScrollListener?.onScrollFinished(recyclerViewNode)
             mHandler.removeMessages(MSG_BACKWARD_WHAT)
         }
     }
 
     private fun findNode() {
+        if (mIsNodeFound) {
+            mHandler.removeMessages(MSG_BACKWARD_WHAT)
+            return
+        }
         mNodeText?.apply {
             nodeService.findViewByFullText(this)?.apply {
                 mNodeFoundListener?.onNodeFound(this)
+                mIsNodeFound = true
             }
         }
 
         mNodeId?.apply {
             nodeService.findViewById(this)?.apply {
+                mIsNodeFound = true
                 mNodeFoundListener?.onNodeFound(this)
             }
         }

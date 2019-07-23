@@ -2,6 +2,7 @@ package com.accessibility.service.auto
 
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.base.BaseAccessibilityService
+import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.listener.TaskListener
 import com.safframework.log.L
 
@@ -37,6 +38,7 @@ class NodeController {
         var nodeEditTextList: ArrayList<String> = ArrayList()
         var nodeTimeOutList: ArrayList<Int> = ArrayList()
         var nodeFindNextList: ArrayList<Boolean> = ArrayList()
+        var nodeListener: ArrayList<NodeFoundListener> = ArrayList()
 
         var taskListener: TaskListener? = null
 
@@ -82,6 +84,7 @@ class NodeController {
             return this@Builder
         }
 
+
         fun setNodeParams(text: String, nodeFlag: Int, timeout: Int, findNextFlag: Boolean): Builder {
             setNodeParams(text, nodeFlag, true, false, "null", timeout, findNextFlag)
             return this@Builder
@@ -98,6 +101,11 @@ class NodeController {
 
         fun setNodeParams(text: String, nodeFlag: Int, isClicked: Boolean): Builder {
             setNodeParams(text, nodeFlag, isClicked, "null")
+            return this@Builder
+        }
+
+        fun setNodeParams(text: String, nodeFlag: Int, isClicked: Boolean, timeout: Int): Builder {
+            setNodeParams(text, nodeFlag, isClicked, false, "null", timeout, false)
             return this@Builder
         }
 
@@ -145,6 +153,7 @@ class NodeController {
          * editInputText:是否是EditText节点输入内容
          * foundNodeTimeOut：节点查找超时时间 单位秒
          * findNextFlag:当前节点查找失败后，是否继续查找下一个节点，默认是false，不继续查找，true为继续查找
+         * nodeListener:节点查找的结果监听
          *
          */
         fun setNodeParams(

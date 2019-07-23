@@ -21,6 +21,7 @@ import com.google.gson.Gson
 import com.safframework.log.L
 import com.utils.common.DevicesUtil
 import com.utils.common.ThreadUtils
+import com.utils.common.TimeUtils
 import com.utils.common.ToastUtils
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -28,6 +29,9 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.goldze.mvvmhabit.utils.SPUtils
 import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * Description:
@@ -43,10 +47,32 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     fun getTask() {
         L.init(MainViewModel::class.java.simpleName)
 
-        val disposable = Observable.just(TestData.taskBean_str)
-            .flatMap {
+        /* AndroidNetworking.get(Constant.URL_GET_TASK)
+             .build()
+             .getAsOkHttpResponse(object : OkHttpResponseListener {
+                 override fun onResponse(response: Response?) {
+                     response?.body()?.string()?.let {
+                         L.i("返回任务：$it")
+                         parseStringForTask(it)
+                     }
+                 }
+
+                 override fun onError(anError: ANError?) {
+                     anError?.apply {
+                         L.e(message, this)
+                         mainView.onFailed(message)
+                     }
+                 }
+
+             })*/
+        parseStringForTask(TestData.taskBean_str)
+    }
+
+    fun parseStringForTask(result: String) {
+        val disposable = Observable.just(result)
+            .flatMap { flatIt ->
                 val taskBean = try {
-                    Gson().fromJson(it, TaskBean::class.java)
+                    Gson().fromJson(flatIt, TaskBean::class.java)
                 } catch (e: Exception) {
                     L.e(e.message)
                     val exceptionTask = TaskBean()
@@ -54,12 +80,12 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                     exceptionTask.code = 400
                     exceptionTask
                 }
-                saveTaskData2SP(it)
+                saveTaskData2SP(flatIt)
                 Observable.just(taskBean)
             }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                mainView.onResponTask(it)
+            .subscribe { resultIt ->
+                mainView.onResponTask(resultIt)
             }
         mSubscribeList.add(disposable)
     }
@@ -70,7 +96,6 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     fun parseTask(taskBean: TaskBean) {
         val subscribe = Observable.just(taskBean)
             .flatMap {
-
                 val datas = try {
                     val hashMapData = ParseDataUtil.parseTaskBean2HashMap(it)
 
@@ -114,19 +139,29 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      */
     fun getPorts(taskBean: TaskBean) {
         //匹配相应的城市
-        val cityName = "宁波市"
-        val data = SPUtils.getInstance(Constant.SP_CITY_LIST).getString(Constant.KEY_CITY_DATA)
-        if (TextUtils.isEmpty(data)) {
-            getCities(cityName)
-        } else {
-            getCityCode(cityName, data)
-        }
+        val cityName = "佛山市"
+        val currentDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).run { format(Date()) }
+        L.i("currentDate: $currentDate")
+        val lastGetCityDate = SPUtils.getInstance(Constant.SP_CITY_LIST).getString(Constant.KEY_CITY_GET_DATE)
+        if (!TextUtils.isEmpty(lastGetCityDate)) {
+            if (TimeUtils.getDays(currentDate, lastGetCityDate) >= 1) { //对比当前时间与上次获取的时间
+                //重新获取
+                getCityListFromNet(cityName)
+            } else {
+                val data = SPUtils.getInstance(Constant.SP_CITY_LIST).getString(Constant.KEY_CITY_DATA)
+                if (TextUtils.isEmpty(data)) {
+                    getCityListFromNet(cityName)
+                } else {
+                    getCityCode(cityName, data)
+                }
+            }
+        } else getCityListFromNet(cityName)
     }
 
     /**
      * 获取城市列表
      */
-    private fun getCities(cityName: String) {
+    private fun getCityListFromNet(cityName: String) {
         AndroidNetworking.post(Constant.URL_PROXY_IP)
             .setContentType(Constant.CONTENT_TYPE)
             .addBodyParameter(Constant.POST_PARAM_METHOD, "getCity")
@@ -137,15 +172,18 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                 override fun onResponse(response: JSONObject?) {
                     response?.run {
                         val strResult = toString()
-                        L.i("threadID = ${ThreadUtils.isMainThread()} \ngetCities result: $strResult")
-                        //保存城市列表，下次不再获取
+                        L.i("threadID = ${ThreadUtils.isMainThread()} \ngetCityListFromNet result: $strResult")
+                        //保存城市列表，隔一天再重新获取
                         SPUtils.getInstance(Constant.SP_CITY_LIST).put(Constant.KEY_CITY_DATA, strResult)
+                        SPUtils.getInstance(Constant.SP_CITY_LIST).put(
+                            Constant.KEY_CITY_GET_DATE,
+                            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).run { format(Date()) })
                         getCityCode(cityName, strResult)
                     }
                 }
 
                 override fun onError(anError: ANError?) {
-                    L.e("getCities error: ${anError?.errorDetail} result: ${anError?.response?.body()?.string()}")
+                    L.e("getCityListFromNet error: ${anError?.errorDetail} result: ${anError?.response?.body()?.string()}")
                 }
             })
     }
@@ -236,7 +274,8 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                         if (proxyIpBean?.data?.code == 200) {
                             //保存已申请的端口
                             SPUtils.getInstance(Constant.SP_IP_PORTS).put(Constant.KEY_IP_PORTS, this)
-                            SPUtils.getInstance(Constant.SP_IP_PORTS).put(Constant.KEY_CUR_PORT, proxyIpBean.data.port[0].toString())
+                            SPUtils.getInstance(Constant.SP_IP_PORTS)
+                                .put(Constant.KEY_CUR_PORT, proxyIpBean.data.port[0].toString())
                             mainView.onRequestPortsResult(this)
                         } else {  //重新请求
                             L.i("请求数据出错：code = ${proxyIpBean?.data?.code}")

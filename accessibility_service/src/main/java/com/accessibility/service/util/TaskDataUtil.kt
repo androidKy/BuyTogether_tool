@@ -1,8 +1,5 @@
 package com.accessibility.service.util
 
-import android.os.Build
-import android.os.Bundle
-import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.data.TaskServiceData
 
 /**
@@ -25,20 +22,11 @@ class TaskDataUtil private constructor() {
 
 
     /**
-     * 获取登录渠道方式,默认是0
-     */
-    fun getLogin_channel(): Int? {
-        return mTaskServiceData?.run {
-            task?.login_channel ?: 0
-        }
-    }
-
-    /**
      * 获取账号名字
      */
     fun getLogin_name(): String? {
         return mTaskServiceData?.run {
-            task?.account?.qq?.name
+            task?.account?.user
         }
     }
 
@@ -47,7 +35,7 @@ class TaskDataUtil private constructor() {
      */
     fun getLogin_psw(): String? {
         return mTaskServiceData?.run {
-            task?.account?.qq?.psw
+            task?.account?.pwd
         }
     }
 
@@ -56,7 +44,34 @@ class TaskDataUtil private constructor() {
      */
     fun getGoods_name(): String? {
         return mTaskServiceData?.run {
-            task?.goods?.get(0)?.name
+            task?.goods?.goods_name
+        }
+    }
+
+    /**
+     * 获取商品的店铺名称
+     */
+    fun getMall_name(): String? {
+        return mTaskServiceData?.run {
+            task?.goods?.mall_name
+        }
+    }
+
+    /**
+     * 获取商品的关键词
+     */
+    fun getGoods_keyword(): String? {
+        return mTaskServiceData?.run {
+            task?.goods?.keyword
+        }
+    }
+
+    /**
+     * 获取搜索的价格
+     */
+    fun getSearchPrice(): String? {
+        return mTaskServiceData?.run {
+            task?.goods?.search_price
         }
     }
 
@@ -81,7 +96,7 @@ class TaskDataUtil private constructor() {
      */
     fun getTalk_msg(): String? {
         return mTaskServiceData?.run {
-            task?.goods?.get(0)?.talk_msg ?: "老板你好"
+            task?.talk_msg ?: "老板你好"
         }
     }
 
@@ -90,7 +105,7 @@ class TaskDataUtil private constructor() {
      */
     fun getChoose_info(): List<String>? {
         return mTaskServiceData?.run {
-            task?.goods?.get(0)?.choose_info ?: ""
+            task?.goods?.choose_info ?: ""
         }.run {
             this?.split(",")
         }

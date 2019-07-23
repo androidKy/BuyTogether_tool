@@ -137,7 +137,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
             //startPdd()
             val curPort = SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_CUR_PORT)
             if (!TextUtils.isEmpty(curPort)) {  //如果端口不为空
-                stopMyVpnService()
+                //stopMyVpnService()
                 L.i("关闭端口：$curPort")
                 mViewModel?.closePort(curPort)
             } else {
@@ -162,7 +162,8 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     override fun onResponClosePort(closeProxyBean: CloseProxyBean) {
         if (closeProxyBean.data.code == 200) {
             mTaskBean?.apply {
-                mViewModel?.getPorts(this)
+                //mViewModel?.getPorts(this)
+                startTask()
             }
         }
     }
@@ -205,7 +206,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         {
             LocalVpnService.IsRunning = true
 
-            //protectSocket()
+            protectSocket()
 
             startPdd()
         }
@@ -242,6 +243,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     override fun onDestroyView() {
         super.onDestroyView()
         mViewModel?.clearSubscribes()
+        stopMyVpnService()
         unBindService()
     }
 

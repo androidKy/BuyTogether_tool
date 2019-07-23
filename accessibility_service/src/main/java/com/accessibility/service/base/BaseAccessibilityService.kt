@@ -124,16 +124,16 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         val accessibilityNodeInfo = rootInActiveWindow ?: return null
 
         val nodeList = accessibilityNodeInfo.findAccessibilityNodeInfosByText(text)
-        L.i("nodeList size = ${nodeList.size} textList = $text ")
+       // L.i("nodeList size = ${nodeList.size} textList = $text ")
         if (nodeList.size > 0) {
             for (node in nodeList) {
-                L.i("nodeList textList = ${node.text} className = ${node.className}")
+              //  L.i("nodeList textList = ${node.text} className = ${node.className}")
                 if (node.text == text)
                     return node
             }
             return nodeList[0]
         }
-        L.i("$text not found")
+        //L.i("$text not found")
         return null
     }
 
@@ -144,16 +144,36 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         val accessibilityNodeInfo = rootInActiveWindow ?: return null
 
         val nodeList = accessibilityNodeInfo.findAccessibilityNodeInfosByText(text)
-        L.i("nodeList size = ${nodeList.size}")
+//        L.i("nodeList size = ${nodeList.size}")
         if (nodeList.size > 0) {
             for (node in nodeList) {
-                L.i("nodeList textList = ${node.text} className = ${node.className}")
+               // L.i("nodeList textList = ${node.text} className = ${node.className}")
                 if (node.text == text)
                     return node
             }
         }
-        L.i("$text not found")
+        //L.i("$text not found")
         return null
+    }
+
+    /**
+     * 查找与text完全相同的节点集合
+     */
+    fun findViewsByFullText(text: String): List<AccessibilityNodeInfo>? {
+        val accessibilityNodeInfo = rootInActiveWindow ?: return null
+
+        val nodeList = accessibilityNodeInfo.findAccessibilityNodeInfosByText(text)
+        val resultList = ArrayList<AccessibilityNodeInfo>()
+       // L.i("nodeList size = ${nodeList.size}")
+        if (nodeList.size > 0) {
+            for (node in nodeList) {
+              //  L.i("nodeList textList = ${node.text} className = ${node.className}")
+                if (node.text == text)
+                    resultList.add(node)
+            }
+        }
+       // L.i("$text nodeSize: ${resultList.size}")
+        return resultList
     }
 
 
@@ -166,7 +186,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
             return
         }
         val childCount = nodeInfo.childCount
-        L.i("className: ${nodeInfo.className} childCount: $childCount")
+       // L.i("className: ${nodeInfo.className} childCount: $childCount")
 
         for (i in 0 until childCount) {
             val childNode = nodeInfo.getChild(i) ?: continue
@@ -198,6 +218,9 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         performBackClick(0)
     }
 
+    /**
+     * 返回，延时时间：单位/秒
+     */
     fun performBackClick(delayTime: Int) {
         performBackClick(delayTime, null)
     }

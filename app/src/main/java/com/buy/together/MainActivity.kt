@@ -11,12 +11,12 @@ import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.listener.TaskListener
 import com.buy.together.fragment.MainFragment
-import com.buy.together.service.KeepLiveService
 import com.buy.together.utils.Constant
 import com.proxy.service.LocalVpnService.START_VPN_SERVICE_REQUEST_CODE
 import com.proxy.service.core.AppInfo
 import com.proxy.service.core.AppProxyManager
 import com.safframework.log.L
+import com.utils.common.PackageManagerUtils
 import com.utils.common.ToastUtils
 import me.goldze.mvvmhabit.utils.SPUtils
 
@@ -29,11 +29,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(Intent(this, KeepLiveService::class.java))
         } else {
             startService(Intent(this, KeepLiveService::class.java))
-        }
+        }*/
         initFragment()
 
         queryAppInfo()
@@ -64,8 +64,8 @@ class MainActivity : AppCompatActivity() {
 
                 AppProxyManager.Instance.mlistAppInfo.add(this)
 
-                if (packageName == this@MainActivity.packageName || packageName == "com.xunmeng.pinduoduo" ||
-                    packageName == "com.tencent.mobileqq" || packageName == "com.android.chrome"
+                if (packageName == "com.buy.together" || packageName == Constant.BUY_TOGETHER_PKG || packageName == Constant.QQ_TIM_PKG ||
+                    packageName == Constant.QQ_LIATE_PKG || packageName == "com.android.chrome"
                 ) {
                     AppProxyManager.Instance.addProxyApp(this)
                 }
@@ -105,6 +105,10 @@ class MainActivity : AppCompatActivity() {
 
     inner class TaskListenerImpl : TaskListener {
         override fun onTaskFinished() {
+            L.i("任务完成，重新开始任务")
+            PackageManagerUtils.getInstance().killApplication(Constant.BUY_TOGETHER_PKG)
+            PackageManagerUtils.getInstance().killApplication(Constant.QQ_TIM_PKG)
+
             mTaskRunning = false
             startTask()
         }
@@ -153,6 +157,8 @@ class MainActivity : AppCompatActivity() {
 
         SPUtils.getInstance().apply {
             put(Constant.KEY_SCREEN_DENSITY, "$width,$height")
+            put(Constant.KEY_SCREEN_WIDTH, width)
+            put(Constant.KEY_SCREEN_HEIGHT, height)
         }
 
     }

@@ -6,6 +6,7 @@ import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.function.TaskService
+import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskFinishedListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
@@ -139,28 +140,64 @@ class MyAccessibilityService : BaseAccessibilityService() {
                  .setNodeParams("登录", 0, 30)   //授权登录
                  .create()
                  .execute()*/
-            AdbScriptController.Builder()
+            NodeController.Builder()
+                .setNodeService(this)
                 .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {
-                        L.i("登录成功")
-                        setIsLogined(true)
-                        searchGoods()
+                        L.i("已跳转到QQ登录界面")
+                        AdbScriptController.Builder()
+                            .setTaskListener(object : TaskListener {
+                                override fun onTaskFinished() {
+                                    checkLoginResult()
+                                }
+
+                                override fun onTaskFailed(failedText: String) {
+                                    L.i("$failedText was not found.")
+                                    responTaskFailed(failedText)
+                                }
+                            })
+                            //.setXY("777,1600", 10 * 1000L)
+                            //.setXY("540,310")
+                            .setXY("540,320")   //账号输入框
+                            .setText(TaskDataUtil.instance.getLogin_name()!!)
+                            .setXY("540,450")   //密码输入框
+                            .setText(TaskDataUtil.instance.getLogin_psw()!!)
+                            .setXY("540,680")  //登录按钮
+                            .create()
+                            .execute()
                     }
 
                     override fun onTaskFailed(failedText: String) {
-                        L.i("$failedText was not found.")
-                        responTaskFailed(failedText)
                     }
+
                 })
-                //.setXY("777,1600", 10 * 1000L)
-                .setXY("540,320")   //账号输入框
-                .setText(TaskDataUtil.instance.getLogin_name()!!)
-                .setXY("540,450")   //密码输入框
-                .setText(TaskDataUtil.instance.getLogin_psw()!!)
-                .setXY("540,680")  //登录按钮
+                .setNodeParams("TIM登录")
                 .create()
                 .execute()
         }
+    }
+
+    /**
+     * 检查登录结果
+     */
+    private fun checkLoginResult() {
+        NodeController.Builder()
+            .setNodeService(this)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    L.i("登录成功")
+                    setIsLogined(true)
+                    searchGoods()
+                }
+
+                override fun onTaskFailed(failedText: String) {
+                    setCurPageType(PageEnum.CHOOSING_LOGIN_PAGE)
+                    loginByQQ() //todo 登录失败次数限制
+                }
+            })
+            .setNodeParams("授权并登录", 0, 5)
+            .create()
+            .execute()
     }
 
     /**
@@ -171,12 +208,26 @@ class MyAccessibilityService : BaseAccessibilityService() {
             L.i("mIsLogined : $mIsLogined")
             setCurPageType(PageEnum.GOODS_INFO_PAGE)
 
+            val goodName = TaskDataUtil.instance.getGoods_name()
+            val keyWord = TaskDataUtil.instance.getGoods_keyword()
+            val searchPrice = TaskDataUtil.instance.getSearchPrice()
+            val mallName = TaskDataUtil.instance.getMall_name()
+
+            if (goodName.isNullOrEmpty() || mallName.isNullOrEmpty() ||
+                keyWord.isNullOrEmpty() || searchPrice.isNullOrEmpty()
+            ) {
+                L.i("商品信息为空，自动查找商品失败")
+                responTaskFailed("商品信息为空，自动查找商品失败")
+                return
+            }
+
+
             NodeController.Builder()
                 .setNodeService(this)
                 .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {
-                        L.i("搜索商品成功")
-                        doTask()
+                        L.i("开始确认商品")
+                        confirmGoods(goodName, searchPrice, mallName)
                     }
 
                     override fun onTaskFailed(failedText: String) {
@@ -184,16 +235,91 @@ class MyAccessibilityService : BaseAccessibilityService() {
                         responTaskFailed(failedText)
                     }
                 })
-                .setNodeParams("授权并登录", true)
                 .setNodeParams("搜索", true)
-                .setNodeParams("com.xunmeng.pinduoduo:id/a8f", 2, 5, true)
-                .setNodeParams("com.xunmeng.pinduoduo:id/fq", 2, 5)
-                .setNodeParams(WidgetConstant.EDITTEXT, 3, false, TaskDataUtil.instance.getGoods_name()!!)
+                .setNodeParams("com.xunmeng.pinduoduo:id/a8f", 2, 3, true)
+                .setNodeParams("com.xunmeng.pinduoduo:id/fq", 2, 3)
+                .setNodeParams(WidgetConstant.EDITTEXT, 3, false, keyWord)
                 .setNodeParams("搜索")
-                .setNodeParams("7.9", 0, isClicked = true, isScrolled = true)
                 .create()
                 .execute()
         }
+    }
+
+    /**
+     * 确认商品是需要刷的商品
+     */
+    private fun confirmGoods(goodName: String, searchPrice: String, mallName: String) {
+        /* mHandler.postDelayed({
+             val nodeList = findViewsByFullText(goodName)
+             nodeList?.run {
+                 if (size > 0) {
+
+                 }
+             }
+         }, 1000)*/
+
+        /* val screenWidth = getSharedPreferences("spUtils", Context.MODE_PRIVATE).getInt("key_screen_width", 0)
+         val screenHeight = getSharedPreferences("spUtils", Context.MODE_PRIVATE).getInt("key_screen_height", 0)
+         AdbScriptController.Builder()
+             .setSwipeXY("${screenWidth / 2},${screenHeight * 0.7}", "${screenWidth / 2},${screenHeight * 0.6}")
+             .create()
+             .execute()*/
+
+        NodeController.Builder()
+            .setNodeService(this)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    L.i("价格一致,继续对比店铺的名字是否一样")
+                    confirmMallName(goodName, searchPrice, mallName)
+                }
+
+                override fun onTaskFailed(failedText: String) {
+                    L.i("$failedText not found.返回搜索结果界面继续往下找")
+                    responTaskFailed(failedText)
+                    //lookforwardGood(goodName, searchPrice, mallName)
+                }
+            })
+            .setNodeParams(goodName, nodeFlag = 0, isClicked = false, isScrolled = true)
+            .setNodeParams(
+                searchPrice, 0, true,
+                isScrolled = true,
+                editInputText = "null",
+                foundNodeTimeOut = 2,
+                findNextFlag = false
+            )
+            .create()
+            .execute()
+    }
+
+    /**
+     * 确认店铺名称
+     */
+    private fun confirmMallName(goodName: String, searchPrice: String, mallName: String) {
+        NodeController.Builder()
+            .setNodeService(this)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    L.i("店铺名称相同，找到需要刷的商品")
+                    performBackClick()
+                    // doTask()
+                    mTaskListener?.onTaskFinished()
+                }
+
+                override fun onTaskFailed(failedText: String) {
+                    L.i("店铺名称不一样：$failedText was not found.")
+                    performBackClick(0)
+                    performBackClick(2, object : AfterClickedListener {
+                        override fun onClicked() {
+                            confirmGoods(goodName, searchPrice, mallName)
+                        }
+                    })
+                }
+
+            })
+            .setNodeParams("客服")
+            .setNodeParams(mallName, 0, false, 10)
+            .create()
+            .execute()
     }
 
     /**
@@ -211,7 +337,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
                             initParams()
                             mTaskListener?.onTaskFinished()
                         } else {
-                            mTaskListener?.onTaskFailed("")
+                            responTaskFailed("任务失败")
                         }
                     }
                 })

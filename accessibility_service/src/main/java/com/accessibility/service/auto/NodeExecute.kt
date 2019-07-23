@@ -71,14 +71,14 @@ class NodeExecute(
 
         val nodeResult = findNode(textOrId, nodeFlag)
         if (nodeResult == null && mStartTime <= timeout) {
-            mStartTime++
+            mStartTime += 1
             val message = mHandler.obtainMessage()
             message.arg1 = index
             message.what = MSG_NOT_FOUND
-            mHandler.sendMessageDelayed(message, 1000)
-        } else if (nodeResult == null) {    //找不到时是否需要下滑查找
+            mHandler.sendMessageDelayed(message, 2000)
+        } else if (nodeResult == null && mStartTime > timeout) {    //找不到时是否需要下滑查找
             dealNodeFailed(index, textOrId, editInputText, isClicked, isScrolled)
-        } else {
+        } else if (nodeResult != null && mStartTime < timeout) {
             dealNodeSucceed(index, textOrId, editInputText, isClicked, nodeResult)
         }
     }
@@ -115,7 +115,7 @@ class NodeExecute(
                     override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                         nodeInfo?.apply {
                             ScrollUtils(nodeService, this)
-                                .setForwardTotalTime(5)
+                                .setForwardTotalTime(20)
                                 .setNodeText(textOrId)
                                 .setScrollListener(object : ScrollUtils.ScrollListener {
                                     override fun onScrollFinished(nodeInfo: AccessibilityNodeInfo) {
@@ -168,7 +168,7 @@ class NodeExecute(
             }
 
             if (isClicked)  //点击
-                nodeService.performViewClick(this, 1, object : AfterClickedListener {
+                nodeService.performViewClick(this, 2, object : AfterClickedListener {
                     override fun onClicked() {
                         L.i("$textOrId was clicked")
                         if (index == nodeTextList.size - 1) {
