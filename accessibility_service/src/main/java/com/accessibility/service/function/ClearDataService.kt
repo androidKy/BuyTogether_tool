@@ -17,7 +17,7 @@ class ClearDataService {
         ThreadUtils.executeBySingle(object : ThreadUtils.Task<Boolean>() {
             override fun doInBackground(): Boolean {
                 val cmdResult = CMDUtil().execCmd(
-                    "pm clear com.tencent.mobileqq;" +
+                    //"pm clear com.tencent.mobileqq;" +
                             "pm clear com.xunmeng.pinduoduo;"
                     /*   "cd /sdcard/;" +
                        "rm -fr Android;" +

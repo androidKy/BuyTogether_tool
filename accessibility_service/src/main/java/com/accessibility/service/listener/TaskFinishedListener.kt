@@ -5,5 +5,5 @@ package com.accessibility.service.listener
  * Created by Quinin on 2019-07-11.
  **/
 interface TaskFinishedListener {
-    fun onTaskFinished()
+    fun onTaskFinished(result: Boolean)
 }

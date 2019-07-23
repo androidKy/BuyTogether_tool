@@ -43,7 +43,7 @@ dependencies {
     //解析Html
     implementation 'org.jsoup:jsoup:1.11.3'
 
-    implementation 'com.github.vilyever:AndroidSocketClient:2.0.1'
+    api 'com.github.vilyever:AndroidSocketClient:2.0.1'
 
     api 'org.bouncycastle:bcprov-jdk15on:1.61'
 }

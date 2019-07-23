@@ -4,12 +4,11 @@ import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.base.BaseEventService
 import com.accessibility.service.listener.AfterClickedListener
-import com.accessibility.service.util.TaskDataUtil
-import com.accessibility.service.util.WidgetConstant
 import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.NodeUtils
-import com.utils.common.SingletonHolder
+import com.accessibility.service.util.TaskDataUtil
+import com.accessibility.service.util.WidgetConstant
 import com.safframework.log.L
 
 /**
@@ -119,7 +118,7 @@ class QQloginService private constructor(nodeService: MyAccessibilityService) :
                             setIsLogined(true)
                             mIsDoing = false
 
-                            mTaskFinishedListener?.onTaskFinished()
+                            mTaskFinishedListener?.onTaskFinished(false)
                         } else {
                             performViewClick(nodeInfo, 1, object : AfterClickedListener {
                                 override fun onClicked() {
@@ -127,7 +126,7 @@ class QQloginService private constructor(nodeService: MyAccessibilityService) :
                                     setIsLogined(true)
                                     mIsDoing = false
 
-                                    mTaskFinishedListener?.onTaskFinished()
+                                    mTaskFinishedListener?.onTaskFinished(true)
                                 }
                             })
                         }

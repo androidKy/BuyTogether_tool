@@ -11,7 +11,7 @@ class TestData {
                 "  \"code\": 200,\n" +
                 "  \"task\": {\n" +
                 "    \"task_id\": 1000,\n" +
-                "    \"task_type\": 1234,\n" +
+                "    \"task_type\": 4,\n" +
                 "    \"task_status\":0,\n" +
                 "    \"login_channel\":0,\n" +
                 "    \"ip\": {\n" +
@@ -28,8 +28,8 @@ class TestData {
                 "      },\n" +
                 "      \"qq\": {\n" +
                 "        \"qq_id\": 24,\n" +
-                "        \"name\": \"1467370044\",\n" +
-                "        \"psw\": \"kkle123\"\n" +
+                "        \"name\": \"1478264528\",\n" +
+                "        \"psw\": \"xd81yfa7rpj\"\n" +
                 "      },\n" +
                 "      \"buy_together\": {\n" +
                 "        \"buttogether_id\": 53,\n" +

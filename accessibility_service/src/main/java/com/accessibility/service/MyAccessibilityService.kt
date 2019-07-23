@@ -2,6 +2,7 @@ package com.accessibility.service
 
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
+import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.function.TaskService
@@ -22,6 +23,11 @@ class MyAccessibilityService : BaseAccessibilityService() {
     companion object {
         const val PKG_PINDUODUO = "com.xunmeng.pinduoduo"
         const val PKG_QQ = "com.tencent.mobileqq"
+        var mTaskListener: TaskListener? = null
+
+        fun setTaskListener(taskListener: TaskListener) {
+            mTaskListener = taskListener
+        }
     }
 
     override fun onInterrupt() {
@@ -31,6 +37,11 @@ class MyAccessibilityService : BaseAccessibilityService() {
     override fun onCreate() {
         super.onCreate()
         L.i("MyAccessibilityService onCreate()")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        L.i("MyAccessibilityService onDestroy()")
     }
 
     /**
@@ -72,17 +83,20 @@ class MyAccessibilityService : BaseAccessibilityService() {
             NodeController.Builder()
                 .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {
-                        L.i("已跳转到QQ登录界面")
+                        L.i("判断是跳转到主页还是登录界面")
                         loginByQQ()
                     }
 
                     override fun onTaskFailed(failedText: String) {
                         L.i("$failedText was not found.")
+                        responTaskFailed(failedText)
                     }
                 })
                 .setNodeService(this@MyAccessibilityService)
-                .setNodeParams("好的")
-                .setNodeParams("允许")
+                .setNodeParams("好的", true)
+                .setNodeParams("允许", true)
+                .setNodeParams("个人中心")
+                .setNodeParams("点击登录")
                 .setNodeParams("请使用其它方式登录")
                 .setNodeParams("QQ登录")
                 .create()
@@ -97,8 +111,35 @@ class MyAccessibilityService : BaseAccessibilityService() {
         if (mCurPageType == PageEnum.CHOOSING_LOGIN_PAGE) {
             setCurPageType(PageEnum.INDEX_PAGE)
 
-            NodeController.Builder()
-                .setNodeService(this)
+            val login_name = TaskDataUtil.instance.getLogin_name()
+            L.i("login_name: $login_name")
+
+            /* NodeController.Builder()
+                 .setNodeService(this)
+                 .setTaskListener(object : TaskListener {
+                     override fun onTaskFinished() {
+                         L.i("登录成功")
+                         setIsLogined(true)
+                         searchGoods()
+                     }
+
+                     override fun onTaskFailed(failedText: String) {
+                         L.i("$failedText was not found.")
+                         responTaskFailed(failedText)
+                     }
+                 })
+                 //.setNodeParams("允许")
+                 //.setNodeParams("允许", 0, 5)
+                 //.setNodeParams("同意", 0, 5)
+                 .setNodeParams("登录", 0, 5)
+                 //.setNodeFilter("首页")
+                 .setNodeParams("QQ号/手机号/邮箱", 0, false, TaskDataUtil.instance.getLogin_name()!!)
+                 .setNodeParams("com.tencent.mobileqq:id/password", 2, false, TaskDataUtil.instance.getLogin_psw()!!)
+                 .setNodeParams("com.tencent.mobileqq:id/login", 2)
+                 .setNodeParams("登录", 0, 30)   //授权登录
+                 .create()
+                 .execute()*/
+            AdbScriptController.Builder()
                 .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {
                         L.i("登录成功")
@@ -108,27 +149,17 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
                     override fun onTaskFailed(failedText: String) {
                         L.i("$failedText was not found.")
+                        responTaskFailed(failedText)
                     }
                 })
-                .setNodeParams("允许")
-                .setNodeParams("允许")
-                .setNodeParams("同意")
-                .setNodeParams("登录")
-                //.setNodeFilter("首页")
-                .setNodeParams(WidgetConstant.EDITTEXT, 3, false, TaskDataUtil.instance.getLogin_name()!!)
-                .setNodeParams("com.tencent.mobileqq:id/password", 2, false, TaskDataUtil.instance.getLogin_psw()!!)
-                .setNodeParams("com.tencent.mobileqq:id/login", 2)
-                .setNodeParams("登录")
+                //.setXY("777,1600", 10 * 1000L)
+                .setXY("540,320")   //账号输入框
+                .setText(TaskDataUtil.instance.getLogin_name()!!)
+                .setXY("540,450")   //密码输入框
+                .setText(TaskDataUtil.instance.getLogin_psw()!!)
+                .setXY("540,680")  //登录按钮
                 .create()
                 .execute()
-
-            /*   QQloginService.getInstance(this)
-                   .setTaskFinishedListener(object : TaskFinishedListener {
-                       override fun onTaskFinished() {
-                           searchGoods()
-                       }
-                   })
-                   .doOnEvent()*/
         }
     }
 
@@ -150,10 +181,12 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
                     override fun onTaskFailed(failedText: String) {
                         L.i("$failedText was not found.")
+                        responTaskFailed(failedText)
                     }
                 })
-                .setNodeParams("搜索", 0, 5)
-                .setNodeParams("com.xunmeng.pinduoduo:id/a8f", 2, 5)
+                .setNodeParams("授权并登录", true)
+                .setNodeParams("搜索", true)
+                .setNodeParams("com.xunmeng.pinduoduo:id/a8f", 2, 5, true)
                 .setNodeParams("com.xunmeng.pinduoduo:id/fq", 2, 5)
                 .setNodeParams(WidgetConstant.EDITTEXT, 3, false, TaskDataUtil.instance.getGoods_name()!!)
                 .setNodeParams("搜索")
@@ -172,13 +205,22 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
             TaskService.getInstance(this)
                 .setTaskFinishedListener(object : TaskFinishedListener {
-                    override fun onTaskFinished() {
-                        L.i("任务完成，重新开始下一轮任务")
-                        initParams()
+                    override fun onTaskFinished(result: Boolean) {
+                        L.i("任务完成，重新开始下一轮任务: $result")
+                        if (result) {
+                            initParams()
+                            mTaskListener?.onTaskFinished()
+                        } else {
+                            mTaskListener?.onTaskFailed("")
+                        }
                     }
                 })
                 .doOnEvent()
         }
+    }
+
+    private fun responTaskFailed(msg: String) {
+        mTaskListener?.onTaskFailed(msg)
     }
 
     /**
@@ -187,4 +229,5 @@ class MyAccessibilityService : BaseAccessibilityService() {
     private fun initParams() {
         setCurPageType(PageEnum.START_PAGE)
     }
+
 }

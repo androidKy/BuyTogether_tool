@@ -15,12 +15,12 @@ import com.utils.common.ToastUtils
  **/
 class MyVpnService : BaseService() {
     private var mInitProxyData = false
-
+    private var mLocanVpnIntent: Intent? = null
 
     override fun onCreate() {
         super.onCreate()
 
-        createNotification(VPN_NOTIFICATION_ID, CHANNEL_NAME)
+        //createNotification(VPN_NOTIFICATION_ID, CHANNEL_NAME)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -71,6 +71,8 @@ class MyVpnService : BaseService() {
                 return
             }
 
+            disconnect()
+
             LocalVpnService.setAcitivity(activity)
 
             val intent = LocalVpnService.prepare(activity)
@@ -97,12 +99,21 @@ class MyVpnService : BaseService() {
          * 断掉代理IP
          */
         fun disconnect() {
-
+            mLocanVpnIntent?.apply {
+                stopService(this)
+            }
         }
     }
 
     private fun startConnect(activity: Activity) {
-        val intent = Intent(activity, LocalVpnService::class.java)
-        startService(intent)
+        mLocanVpnIntent = Intent(activity, LocalVpnService::class.java)
+        startService(mLocanVpnIntent)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mLocanVpnIntent?.apply {
+            stopService(this)
+        }
     }
 }

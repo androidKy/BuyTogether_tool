@@ -13,6 +13,7 @@ class Constant {
         const val SP_TASK_FILE_NAME = "pinduoduo_task_sp"
         const val SP_CITY_LIST = "city_data_sp"
         const val SP_IP_PORTS = "ip_ports_sp"
+        const val SP_DEVICE_PARAMS = "device_params_sp"
 
         const val KEY_TASK_DATA = "key_task_data"
         const val KEY_CITY_DATA = "key_cities"
@@ -29,4 +30,6 @@ class Constant {
         const val POST_PARAM_AREA = "area"
         const val POST_PARAM_PORT = "port"
     }
+
+
 }

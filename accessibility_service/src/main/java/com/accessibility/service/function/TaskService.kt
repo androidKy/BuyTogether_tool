@@ -9,7 +9,10 @@ import com.accessibility.service.base.BaseEventService
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.listener.TaskListener
-import com.accessibility.service.util.*
+import com.accessibility.service.util.NodeUtils
+import com.accessibility.service.util.ScrollUtils
+import com.accessibility.service.util.TaskDataUtil
+import com.accessibility.service.util.WidgetConstant
 import com.safframework.log.L
 
 /**
@@ -25,17 +28,21 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
 
 
     override fun doOnEvent() {
-        val taskType = TaskDataUtil.instance.getTask_type()
-        L.i("taskType = $taskType")
-        when (taskType) {
-            2, 23, 24, 234 -> talkWithSaler()
-            3, 32, 34 -> collectGoods()
-            4 -> buyGoods()
-            else -> {
-                nodeService.postDelay(Runnable {
-                    scanGoods()
-                }, 2)
+        try {
+            val taskType = TaskDataUtil.instance.getTask_type()
+            L.i("taskType = $taskType")
+            when (taskType) {
+                2, 23, 24, 234 -> talkWithSaler()
+                3, 32, 34 -> collectGoods()
+                4 -> buyGoods()
+                else -> {
+                    nodeService.postDelay(Runnable {
+                        scanGoods()
+                    }, 2)
+                }
             }
+        } catch (e: Exception) {
+            L.e(e.message, e)
         }
     }
 
@@ -184,7 +191,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
     private fun payNow() {
 
         AdbScriptController.Builder()
-            .setXY(ADB_XY.PAY_NOW.add_address)
+            .setXY(ADB_XY.PAY_NOW.add_address, 3000L)
             .setXY(ADB_XY.PAY_NOW.name)
             .setText("张先生")
             .setXY(ADB_XY.PAY_NOW.phone)
@@ -199,7 +206,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             .setSwipeXY(ADB_XY.PAY_NOW.origin_swipe_up, ADB_XY.PAY_NOW.target_swipe_up)
             .setXY(ADB_XY.PAY_NOW.more_pay_channel)
             .setSwipeXY(ADB_XY.PAY_NOW.origin_swipe_up, ADB_XY.PAY_NOW.target_swipe_up)
-            .setXY(ADB_XY.PAY_NOW.qq_pay)
+            .setXY(ADB_XY.PAY_NOW.ali_pay)
             .setXY(ADB_XY.PAY_NOW.pay_now_btn)
             // .setXY(ADB_XY.PAY_NOW.pay_now_qq_btn, 5000)
             //.setXY(ADB_XY.PAY_NOW.pay_by_other)
@@ -228,12 +235,12 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("支付成功，下单完成，重新开始下一轮任务")
-                    mTaskFinishedListener?.onTaskFinished()
+                    mTaskFinishedListener?.onTaskFinished(true)
                 }
 
                 override fun onTaskFailed(failedText: String) {
                     L.i("支付失败，屏幕分辨率没适配")
-                    mTaskFinishedListener?.onTaskFinished()
+                    mTaskFinishedListener?.onTaskFinished(false)
                 }
 
             })

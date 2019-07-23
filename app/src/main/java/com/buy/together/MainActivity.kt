@@ -9,6 +9,7 @@ import android.provider.Settings
 import android.support.v7.app.AppCompatActivity
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.base.BaseAccessibilityService
+import com.accessibility.service.listener.TaskListener
 import com.buy.together.fragment.MainFragment
 import com.buy.together.service.KeepLiveService
 import com.buy.together.utils.Constant
@@ -16,9 +17,13 @@ import com.proxy.service.LocalVpnService.START_VPN_SERVICE_REQUEST_CODE
 import com.proxy.service.core.AppInfo
 import com.proxy.service.core.AppProxyManager
 import com.safframework.log.L
+import com.utils.common.ToastUtils
 import me.goldze.mvvmhabit.utils.SPUtils
 
 class MainActivity : AppCompatActivity() {
+
+    private var mMainFragment: MainFragment? = null
+    private var mTaskRunning: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +34,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             startService(Intent(this, KeepLiveService::class.java))
         }
+        initFragment()
 
         queryAppInfo()
     }
@@ -65,23 +71,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
-       // AppProxyManager.mInstance.saveProxyAppList()
-
-/*
-        val mainIntent = Intent(Intent.ACTION_MAIN, null)
-        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER)
-        val resolveInfos = pm.queryIntentActivities(mainIntent, 0)
-        Collections.sort(resolveInfos, ResolveInfo.DisplayNameComparator(pm))
-        if (AppProxyManager.mInstance.mlistAppInfo != null) {
-            AppProxyManager.mInstance.mlistAppInfo.clear()
-            for (reInfo in resolveInfos) {
-                val pkgName = reInfo.activityInfo.packageName // 获得应用程序的包名
-                val appLabel = reInfo.loadLabel(pm) as String // 获得应用程序的Label
-                val icon = reInfo.loadIcon(pm) // 获得应用程序图标
-
-            }
-        }*/
     }
 
     override fun onStart() {
@@ -101,14 +90,36 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
             return
         }
-        initFragment()
+        startTask()
+    }
+
+    private fun startTask() {
+        mMainFragment?.apply {
+            if (!mTaskRunning) {
+                mTaskRunning = true
+                startTask()
+                MyAccessibilityService.setTaskListener(TaskListenerImpl())
+            }
+        }
+    }
+
+    inner class TaskListenerImpl : TaskListener {
+        override fun onTaskFinished() {
+            mTaskRunning = false
+            startTask()
+        }
+
+        override fun onTaskFailed(failedText: String) {
+            mTaskRunning = false
+            ToastUtils.showToast(this@MainActivity, "任务失败：$failedText 节点找不到")
+        }
     }
 
     private fun initFragment() {
         val beginTransaction = supportFragmentManager.beginTransaction()
-        val mainFragment = MainFragment()
+        mMainFragment = MainFragment()
 
-        beginTransaction.add(R.id.main_container, mainFragment)
+        beginTransaction.add(R.id.main_container, mMainFragment!!)
 
         beginTransaction.commitNow()
     }

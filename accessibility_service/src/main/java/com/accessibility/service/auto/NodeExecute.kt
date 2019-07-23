@@ -20,7 +20,8 @@ class NodeExecute(
     val nodeService: BaseAccessibilityService, val nodeTextList: ArrayList<String>,
     val nodeClickedList: ArrayList<Boolean>, val nodeFlagList: ArrayList<Int>,
     val nodeEditTextList: ArrayList<String>, val nodeTimeOutList: ArrayList<Int>,
-    val taskListener: TaskListener, val filterText: String?, val nodeScrolledList: ArrayList<Boolean>
+    val taskListener: TaskListener, val filterText: String?, val nodeScrolledList: ArrayList<Boolean>,
+    val nodeFindList: ArrayList<Boolean>
 ) {
 
     private var mStartTime: Int = 0
@@ -89,11 +90,13 @@ class NodeExecute(
                 0 -> nodeInfo = findViewByFullText(textOrId)
                 1 -> nodeInfo = findViewByText(textOrId)
                 2 -> nodeInfo = findViewById(textOrId)
-                3 -> findViewByClassName(this.rootInActiveWindow, textOrId, object : NodeFoundListener {
-                    override fun onNodeFound(nodeResult: AccessibilityNodeInfo?) {
-                        nodeInfo = nodeResult
-                    }
-                })
+                3 -> this.rootInActiveWindow?.apply {
+                    findViewByClassName(this, textOrId, object : NodeFoundListener {
+                        override fun onNodeFound(nodeResult: AccessibilityNodeInfo?) {
+                            nodeInfo = nodeResult
+                        }
+                    })
+                }
             }
         }
 
@@ -136,9 +139,11 @@ class NodeExecute(
         }
 
         if (index < nodeTextList.size - 1) {   //当查找一个节点通过多种方法时
-            if (TextUtils.isEmpty(filterText))
-                findNode(index + 1)
-            else {  //如果filterText存在，过滤后面的节点
+            if (TextUtils.isEmpty(filterText)) {
+                if (nodeFindList[index])    //
+                    findNode(index + 1)
+                else taskListener.onTaskFailed(textOrId)
+            } else {  //如果filterText存在，过滤后面的节点
                 findNode(filterText!!, 0)?.apply {
                     taskListener.onTaskFinished()
                 }

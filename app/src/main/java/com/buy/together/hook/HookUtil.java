@@ -1,6 +1,7 @@
 package com.buy.together.hook;
 
 import android.text.TextUtils;
+import com.buy.together.hook.sp.SharedPref;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodHook.MethodHookParam;
 import de.robv.android.xposed.XposedBridge;
@@ -20,7 +21,7 @@ public class HookUtil {
         if (methodHookParam != null) {
             Object[] args = methodHookParam.args;
             if (args != null) {
-                log(tag,"params size = " + args.length);
+                log(tag, "params size = " + args.length);
                 for (int i = 0; i < args.length; i++) {
                     Object obj = args[i];
                     if (obj == null) continue;
@@ -51,6 +52,10 @@ public class HookUtil {
         XposedBridge.log(tag + ": " + msg);
     }
 
+    public static String getValueFromSP(String key) {
+        return SharedPref.getXValue(key);
+    }
+
     public void hookMethod(XC_LoadPackage.LoadPackageParam loadPackageParam, String className, String methodName,
                            Object... parameterTypesAndCallback) {
         Class<?> classObj = XposedHelpers.findClassIfExists(className, loadPackageParam.classLoader);
@@ -67,8 +72,8 @@ public class HookUtil {
         }
     }
 
-    public  void hookField(XC_LoadPackage.LoadPackageParam loadPackageParam, String className, String filedName,
-                                 String value) {
+    public void hookField(XC_LoadPackage.LoadPackageParam loadPackageParam, String className, String filedName,
+                          String value) {
         Class<?> classObj = XposedHelpers.findClassIfExists(className, loadPackageParam.classLoader);
         if (classObj != null) {
             try {
@@ -84,8 +89,8 @@ public class HookUtil {
         }
     }
 
-    public  void hookField(XC_LoadPackage.LoadPackageParam loadPackageParam, String className, String filedName,
-                                 long value) {
+    public void hookField(XC_LoadPackage.LoadPackageParam loadPackageParam, String className, String filedName,
+                          long value) {
         Class<?> classObj = XposedHelpers.findClassIfExists(className, loadPackageParam.classLoader);
         if (classObj != null) {
             try {
@@ -100,8 +105,8 @@ public class HookUtil {
         }
     }
 
-    public  void hookConstructor(XC_LoadPackage.LoadPackageParam loadPackageParam, XC_MethodHook xcMethodHook, Class<?> classZz,
-                                       Class<?>... parameterTypes) {
+    public void hookConstructor(XC_LoadPackage.LoadPackageParam loadPackageParam, XC_MethodHook xcMethodHook, Class<?> classZz,
+                                Class<?>... parameterTypes) {
         try {
             XposedBridge.log("hookConstructor packageName: " + loadPackageParam.packageName + " className : " + classZz.getSimpleName());
             Constructor<?> constructor = XposedHelpers.findConstructorExact(classZz, parameterTypes);

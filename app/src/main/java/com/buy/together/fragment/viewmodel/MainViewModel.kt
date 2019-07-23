@@ -10,6 +10,7 @@ import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.buy.together.base.BaseView
 import com.buy.together.base.BaseViewModel
 import com.buy.together.bean.CityListBean
+import com.buy.together.bean.CloseProxyBean
 import com.buy.together.bean.ProxyIPBean
 import com.buy.together.bean.TaskBean
 import com.buy.together.fragment.view.MainView
@@ -235,8 +236,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                         if (proxyIpBean?.data?.code == 200) {
                             //保存已申请的端口
                             SPUtils.getInstance(Constant.SP_IP_PORTS).put(Constant.KEY_IP_PORTS, this)
-                            SPUtils.getInstance(Constant.SP_IP_PORTS)
-                                .put(Constant.KEY_CUR_PORT, proxyIpBean.data.port[0].toString())
+                            SPUtils.getInstance(Constant.SP_IP_PORTS).put(Constant.KEY_CUR_PORT, proxyIpBean.data.port[0].toString())
                             mainView.onRequestPortsResult(this)
                         } else {  //重新请求
                             L.i("请求数据出错：code = ${proxyIpBean?.data?.code}")
@@ -253,9 +253,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     /**
      * 关闭端口
      */
-    fun closePort() {
-        val curPort = SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_CUR_PORT)
-
+    fun closePort(curPort: String) {
         AndroidNetworking.post(Constant.URL_PROXY_IP)
             .setContentType(Constant.CONTENT_TYPE)
             .addBodyParameter(Constant.POST_PARAM_METHOD, "closePort")
@@ -265,7 +263,12 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
             .build()
             .getAsJSONObject(object : JSONObjectRequestListener {
                 override fun onResponse(response: JSONObject?) {
-                    L.i("关闭端口成功：${response?.toString()}")
+                    response?.toString()?.run {
+                        L.i("关闭端口成功：$this")
+                        SPUtils.getInstance(Constant.SP_IP_PORTS).clear()
+                        val closeProxyBean = Gson().fromJson(this, CloseProxyBean::class.java)
+                        mainView.onResponClosePort(closeProxyBean)
+                    }
                 }
 
                 override fun onError(anError: ANError?) {

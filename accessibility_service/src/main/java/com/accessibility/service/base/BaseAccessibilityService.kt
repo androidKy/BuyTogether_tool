@@ -7,11 +7,11 @@ import android.os.Looper
 import android.provider.Settings
 import android.text.TextUtils
 import android.view.accessibility.AccessibilityNodeInfo
-import com.accessibility.service.util.TaskDataUtil
 import com.accessibility.service.data.TaskServiceData
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.page.PageEnum
+import com.accessibility.service.util.TaskDataUtil
 import com.google.gson.Gson
 import com.safframework.log.L
 
@@ -93,8 +93,9 @@ abstract class BaseAccessibilityService : AccessibilityService() {
     fun initTaskData() {
         try {
             if (mIsInited) return
-            getSharedPreferences("pinduoduo_task_sp", Context.MODE_PRIVATE).getString("task_data", "")
+            getSharedPreferences("pinduoduo_task_sp", Context.MODE_PRIVATE).getString("key_task_data", "")
                 .let {
+                    L.i("无障碍服务初始化数据: $it")
                     if (!TextUtils.isEmpty(it)) {
                         mIsInited = true
                         val taskServiceData = Gson().fromJson(it, TaskServiceData::class.java)

@@ -5,9 +5,11 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
+import android.text.TextUtils
 import android.widget.FrameLayout
 import com.buy.together.R
 import com.buy.together.base.BaseFragment
+import com.buy.together.bean.CloseProxyBean
 import com.buy.together.bean.ProxyIPBean
 import com.buy.together.bean.TaskBean
 import com.buy.together.fragment.view.MainView
@@ -16,13 +18,13 @@ import com.buy.together.utils.Constant
 import com.google.gson.Gson
 import com.proxy.service.LocalVpnService
 import com.proxy.service.MyVpnService
-import com.proxy.service.PingManager
 import com.rmondjone.locktableview.DisplayUtil
 import com.rmondjone.locktableview.LockTableView
 import com.safframework.log.L
 import com.utils.common.ThreadUtils
 import com.utils.common.ToastUtils
-import java.util.concurrent.TimeUnit
+import com.vilyever.socketclient.SocketClient
+import me.goldze.mvvmhabit.utils.SPUtils
 
 
 /**
@@ -36,7 +38,8 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     private var mTaskBean: TaskBean? = null
     private var mContainer: FrameLayout? = null
     private var mViewModel: MainViewModel? = null
-    private val mServiceConnect = ServiceConnectionImpl()
+    private var mMyVpnServiceIntent: Intent? = null
+    private var mServiceConnect: ServiceConnectionImpl? = null
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_main
@@ -51,7 +54,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         initHeader()
 
         mViewModel = MainViewModel(context!!, this)
-        mViewModel?.getTask()
+
 
         //initTableView(mTableDatas)
     }
@@ -98,6 +101,13 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         lockTableView.show()
     }
 
+    /**
+     * 开始任务
+     */
+    fun startTask() {
+        mViewModel?.getTask()
+    }
+
     override fun onResponTask(taskBean: TaskBean) {
         if (taskBean.code == 200) {
             mTaskBean = taskBean
@@ -119,28 +129,45 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         L.i("获取任务失败：$msg")
     }
 
-
+    /**
+     * 拼多多和QQ的缓存数据清理完毕
+     */
     override fun onClearDataResult(result: String) {
         if (result == "Success") {
-
-            mContainer?.postDelayed({
-                val launchIntentForPackage = context?.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
-                if (launchIntentForPackage != null) {
-                    startActivity(launchIntentForPackage)
-                } else {
-                    ToastUtils.showToast(context!!, "未安装拼多多")
-                }
-            },5000)
-
-            //mViewModel?.getPorts(mTaskBean!!)
-            // mViewModel?.closePort()
+            //startPdd()
+            val curPort = SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_CUR_PORT)
+            if (!TextUtils.isEmpty(curPort)) {  //如果端口不为空
+                stopMyVpnService()
+                L.i("关闭端口：$curPort")
+                mViewModel?.closePort(curPort)
+            } else {
+                mViewModel?.getPorts(mTaskBean!!)
+            }
         } else {
             ToastUtils.showToast(context!!, "清理数据失败")
         }
     }
 
+    /**
+     * 申请打开端口，开始连接VPN
+     */
     override fun onRequestPortsResult(result: String) {
         L.i("请求打开端口结果：$result")
+        startMyVpnService(result)
+    }
+
+    /**
+     * 申请关闭端口结果，重新连接VPN
+     */
+    override fun onResponClosePort(closeProxyBean: CloseProxyBean) {
+        if (closeProxyBean.data.code == 200) {
+            mTaskBean?.apply {
+                mViewModel?.getPorts(this)
+            }
+        }
+    }
+
+    private fun startMyVpnService(result: String) {
         LocalVpnService.addOnStatusChangedListener(this)
         activity?.run {
             val proxyIPBean = Gson().fromJson(result, ProxyIPBean::class.java)
@@ -155,7 +182,20 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
 
             startService(intentService)
 
-            bindService(intentService, mServiceConnect, Service.BIND_AUTO_CREATE)
+            mServiceConnect = ServiceConnectionImpl()
+            bindService(intentService, mServiceConnect!!, Service.BIND_AUTO_CREATE)
+        }
+    }
+
+    /**
+     * 停止VPN服务
+     */
+    private fun stopMyVpnService() {
+        mMyVpnServiceIntent?.let {
+            activity?.apply {
+                stopService(it)
+                unBindService()
+            }
         }
     }
 
@@ -163,8 +203,22 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         L.i("LocalVpnService status changed: $status isRunning: $isRunning MainThread: ${ThreadUtils.isMainThread()}")
         if (isRunning!!)   //代理连接成功
         {
+            LocalVpnService.IsRunning = true
 
+            //protectSocket()
+
+            startPdd()
         }
+    }
+
+    /**
+     * VPN连接成功后，把Socket保护起来
+     */
+    private fun protectSocket() {
+        mContainer?.postDelayed({
+            val result = LocalVpnService.mInstance.protect(SocketClient().runningSocket)
+            L.i("protect socket result: $result")
+        }, 2000)
     }
 
     override fun onLogReceived(logString: String) {
@@ -182,7 +236,6 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
             val myBinder = service as MyVpnService.MyBinder
             myBinder.connectVPN(activity!!)
         }
-
     }
 
 
@@ -195,9 +248,26 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
 
     private fun unBindService() {
         activity?.run {
-            unbindService(mServiceConnect)
+            mServiceConnect?.let {
+                unbindService(it)
+            }
         }
+    }
 
+    /**
+     * 启动拼多多开始任务
+     */
+    private fun startPdd() {
+        mContainer?.postDelayed({
+
+            val launchIntentForPackage =
+                context?.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
+            if (launchIntentForPackage != null) {
+                startActivity(launchIntentForPackage)
+            } else {
+                ToastUtils.showToast(context!!, "未安装拼多多")
+            }
+        }, 3000)
     }
 
 }
