@@ -12,7 +12,7 @@ class TestData {
                 "    \"msg\":\"成功\",\n" +
                 "    \"task\":{\n" +
                 "        \"task_id\":1111,\n" +
-                "        \"task_type\":4,\n" +
+                "        \"task_type\":1234,\n" +
                 "        \"task_status\":1,\n" +
                 "        \"task_amount\":20,\n" +
                 "        \"task_dispense\":5,\n" +
@@ -32,19 +32,19 @@ class TestData {
                 "        },\n" +
                 "        \"account\":{\n" +
                 "            \"id\":22,\n" +
-                "            \"user\":\"2952548594\",\n" +
-                "            \"pwd\":\"xe86jxpkh6w\",\n" +
+                "            \"user\":\"252399595\",\n" +
+                "            \"pwd\":\"vct0ktv0b9\",\n" +
                 "            \"type\":0\n" +
                 "        },\n" +
                 "        \"goods\":{\n" +
                 "            \"id\":5,\n" +
                 "            \"goods_id\":1395698343,\n" +
                 "            \"cat_id\":8464,\n" +
-                "            \"goods_name\":\"18种花型雪纺碎花长裙夏季高腰宽松a字裙ins半身裙女夏中长款裙子\",\n" +
-                "            \"mall_name\":\"姿想旗舰店\",\n" +
-                "            \"keyword\":\"18种花型雪纺碎花长裙夏季高腰宽松a字裙ins半身裙女夏中长款裙子\",\n" +
-                "            \"search_price\":\"28.24\",\n" +
-                "            \"choose_info\":\"蓝色玫瑰,L（110斤-125斤）\"\n" +
+                "            \"goods_name\":\"酸甜杨梅干500g九制梅子果蜜饯办公室户外休闲随身独立小包装零食\",\n" +
+                "            \"mall_name\":\"益C果城恒康美专卖店\",\n" +
+                "            \"keyword\":\"酸甜杨梅干\",\n" +
+                "            \"search_price\":\"7.9\",\n" +
+                "            \"choose_info\":\"超值250g\"\n" +
                 "        },\n" +
                 "        \"device\":{\n" +
                 "            \"id\":4220,\n" +

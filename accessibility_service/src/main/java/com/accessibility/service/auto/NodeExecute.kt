@@ -65,8 +65,8 @@ class NodeExecute(
 
         L.i("node index = $index")
         L.i(
-            "开始查找节点：textOrId: $textOrId ; isFoundById: $nodeFlag ; isClicked: $isClicked ; " +
-                    "editInputText: $editInputText ; timeout: $timeout ; isScrolled: $isScrolled"
+            "开始查找节点：textOrId: $textOrId; isFoundById: $nodeFlag; isClicked: $isClicked; " +
+                    "editInputText: $editInputText; timeout: $timeout; isScrolled: $isScrolled"
         )
 
         val nodeResult = findNode(textOrId, nodeFlag)
@@ -75,7 +75,7 @@ class NodeExecute(
             val message = mHandler.obtainMessage()
             message.arg1 = index
             message.what = MSG_NOT_FOUND
-            mHandler.sendMessageDelayed(message, 2000)
+            mHandler.sendMessageDelayed(message, 1500)
         } else if (nodeResult == null && mStartTime > timeout) {    //找不到时是否需要下滑查找
             dealNodeFailed(index, textOrId, editInputText, isClicked, isScrolled)
         } else if (nodeResult != null && mStartTime < timeout) {

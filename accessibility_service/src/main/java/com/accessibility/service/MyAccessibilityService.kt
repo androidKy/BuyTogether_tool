@@ -1,5 +1,6 @@
 package com.accessibility.service
 
+import android.content.Context
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import com.accessibility.service.auto.AdbScriptController
@@ -7,7 +8,6 @@ import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.function.TaskService
 import com.accessibility.service.listener.AfterClickedListener
-import com.accessibility.service.listener.TaskFinishedListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.TaskDataUtil
@@ -20,6 +20,9 @@ import com.safframework.log.L
  **/
 class MyAccessibilityService : BaseAccessibilityService() {
 
+    private var mScreenWidth: Int = 1080
+    private var mScreenHeight: Int = 1920
+
 
     companion object {
         const val PKG_PINDUODUO = "com.xunmeng.pinduoduo"
@@ -29,6 +32,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
         fun setTaskListener(taskListener: TaskListener) {
             mTaskListener = taskListener
         }
+
     }
 
     override fun onInterrupt() {
@@ -38,6 +42,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
     override fun onCreate() {
         super.onCreate()
         L.i("MyAccessibilityService onCreate()")
+        mScreenWidth = getSharedPreferences("spUtils", Context.MODE_PRIVATE).getInt("key_screen_width", 0)
+        mScreenHeight = getSharedPreferences("spUtils", Context.MODE_PRIVATE).getInt("key_screen_height", 0)
     }
 
     override fun onDestroy() {
@@ -185,19 +191,39 @@ class MyAccessibilityService : BaseAccessibilityService() {
             .setNodeService(this)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    L.i("登录成功")
-                    setIsLogined(true)
-                    searchGoods()
-                }
-
-                override fun onTaskFailed(failedText: String) {
                     setCurPageType(PageEnum.CHOOSING_LOGIN_PAGE)
                     loginByQQ() //todo 登录失败次数限制
                 }
+
+                override fun onTaskFailed(failedText: String) {
+                    NodeController.Builder()
+                        .setNodeService(this@MyAccessibilityService)
+                        .setTaskListener(object : TaskListener {
+                            override fun onTaskFinished() {
+                                L.i("登录成功")
+                                setIsLogined(true)
+
+                                mHandler.postDelayed({
+                                    searchGoods()
+                                }, 3000)
+                            }
+
+                            override fun onTaskFailed(failedText: String) {
+                                setCurPageType(PageEnum.CHOOSING_LOGIN_PAGE)
+                                loginByQQ() //todo 登录失败次数限制
+                            }
+                        })
+                        .setNodeParams("授权并登录", 0, 2)
+                        .create()
+                        .execute()
+                }
+
             })
-            .setNodeParams("授权并登录", 0, 5)
+            .setNodeParams("登录失败", 0, 2)
             .create()
             .execute()
+
+
     }
 
     /**
@@ -235,7 +261,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
                         responTaskFailed(failedText)
                     }
                 })
-                .setNodeParams("搜索", true)
+                .setNodeParams("搜索", false)
                 .setNodeParams("com.xunmeng.pinduoduo:id/a8f", 2, 3, true)
                 .setNodeParams("com.xunmeng.pinduoduo:id/fq", 2, 3)
                 .setNodeParams(WidgetConstant.EDITTEXT, 3, false, keyWord)
@@ -274,12 +300,11 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 }
 
                 override fun onTaskFailed(failedText: String) {
-                    L.i("$failedText not found.返回搜索结果界面继续往下找")
+                    L.i("$failedText not found.关键词查找失败")
                     responTaskFailed(failedText)
                     //lookforwardGood(goodName, searchPrice, mallName)
                 }
             })
-            .setNodeParams(goodName, nodeFlag = 0, isClicked = false, isScrolled = true)
             .setNodeParams(
                 searchPrice, 0, true,
                 isScrolled = true,
@@ -292,6 +317,30 @@ class MyAccessibilityService : BaseAccessibilityService() {
     }
 
     /**
+     * 确认商品名称是否一样
+     */
+    /* private fun confirmGoodName(goodName: String, searchPrice: String, mallName: String) {
+         NodeController.Builder()
+             .setNodeService(this)
+             .setTaskListener(object : TaskListener {
+                 override fun onTaskFinished() {
+                     confirmMallName(goodName, searchPrice, mallName)
+                 }
+
+                 override fun onTaskFailed(failedText: String) {
+                     //商品名称不一样,返回向下滑动继续查找
+                     L.i("$failedText was not found.商品名称不一样，返回继续查找")
+                     performBackClick()
+
+                     continueLookGood(goodName, searchPrice, mallName)
+                 }
+             })
+             .setNodeParams(goodName, 0, false, 2)
+             .create()
+             .execute()
+     }*/
+
+    /**
      * 确认店铺名称
      */
     private fun confirmMallName(goodName: String, searchPrice: String, mallName: String) {
@@ -301,8 +350,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 override fun onTaskFinished() {
                     L.i("店铺名称相同，找到需要刷的商品")
                     performBackClick()
-                    // doTask()
-                    mTaskListener?.onTaskFinished()
+                    doTask()
+                    //mTaskListener?.onTaskFinished()
                 }
 
                 override fun onTaskFailed(failedText: String) {
@@ -310,7 +359,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
                     performBackClick(0)
                     performBackClick(2, object : AfterClickedListener {
                         override fun onClicked() {
-                            confirmGoods(goodName, searchPrice, mallName)
+                            //返回继续查找
+                            continueLookGood(goodName, searchPrice, mallName)
                         }
                     })
                 }
@@ -318,6 +368,24 @@ class MyAccessibilityService : BaseAccessibilityService() {
             })
             .setNodeParams("客服")
             .setNodeParams(mallName, 0, false, 10)
+            .create()
+            .execute()
+    }
+
+    private fun continueLookGood(goodName: String, searchPrice: String, mallName: String) {
+        AdbScriptController.Builder()
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    confirmGoods(goodName, searchPrice, mallName)
+                }
+
+                override fun onTaskFailed(failedText: String) {
+                }
+            })
+            .setSwipeXY(
+                "${mScreenWidth / 2},${mScreenHeight * 0.8}",
+                "${mScreenWidth / 2},${mScreenHeight * 0.2}"
+            )
             .create()
             .execute()
     }
@@ -330,15 +398,16 @@ class MyAccessibilityService : BaseAccessibilityService() {
             setCurPageType(PageEnum.PAYING_PAGE)
 
             TaskService.getInstance(this)
-                .setTaskFinishedListener(object : TaskFinishedListener {
-                    override fun onTaskFinished(result: Boolean) {
-                        L.i("任务完成，重新开始下一轮任务: $result")
-                        if (result) {
-                            initParams()
-                            mTaskListener?.onTaskFinished()
-                        } else {
-                            responTaskFailed("任务失败")
-                        }
+                .setScreenDensity(mScreenWidth, mScreenHeight)
+                .setTaskFinishedListener(object : TaskListener {
+                    override fun onTaskFinished() {
+                        L.i("任务完成，重新开始下一轮任务")
+                        initParams()
+                        mTaskListener?.onTaskFinished()
+                    }
+
+                    override fun onTaskFailed(failedText: String) {
+                        mTaskListener?.onTaskFailed(failedText)
                     }
                 })
                 .doOnEvent()
@@ -346,6 +415,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
     }
 
     private fun responTaskFailed(msg: String) {
+        setCurPageType(PageEnum.START_PAGE)
         mTaskListener?.onTaskFailed(msg)
     }
 

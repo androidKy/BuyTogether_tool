@@ -26,6 +26,14 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
     private var mIsScaningGoods: Boolean = false    //判断是否正在浏览,控制同一时刻只有一个收到一个节点事件
     private var mAlreadyScaned: Boolean = false   //是否已浏览，控制允许是否继续收到事件
 
+    private var mScreenWidth: Int = 0
+    private var mScreenHeight: Int = 0
+
+    fun setScreenDensity(width: Int, height: Int): TaskService {
+        mScreenWidth = width
+        mScreenHeight = height
+        return this
+    }
 
     override fun doOnEvent() {
         try {
@@ -159,8 +167,9 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
         L.i("购买商品，并且选择商品各个参数")
 
         val choose_info = TaskDataUtil.instance.getChoose_info()
-        if (choose_info == null || choose_info.isEmpty()) {
+        if (choose_info.isNullOrEmpty()) {
             L.i("商品参数为空")
+            responFailed("商品信息为空")
             return
         }
 
@@ -188,15 +197,28 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
      * 立即支付
      */
     private fun payNow() {
+        val taskDataUtil = TaskDataUtil.instance
+        val buyerName = taskDataUtil.getBuyer_name()
+        val buyerPhone = taskDataUtil.getBuyer_phone()
+        val streetName = taskDataUtil.getStreet()
+        val provinceName = taskDataUtil.getProvince()
+        val cityName = taskDataUtil.getCity()
+        val districtName = taskDataUtil.getDistrict()
+
+        if (buyerName.isNullOrEmpty()) {
+            responFailed("收货信息为空")
+            return
+        }
+
 
         AdbScriptController.Builder()
             .setXY(ADB_XY.PAY_NOW.add_address, 3000L)
             .setXY(ADB_XY.PAY_NOW.name)
-            .setText("张先生")
+            .setText(buyerName)
             .setXY(ADB_XY.PAY_NOW.phone)
-            .setText("13286810987")
+            .setText(buyerPhone!!)
             .setXY(ADB_XY.PAY_NOW.detailed)
-            .setText("唐东街道088号")
+            .setText(streetName!!)
             .setXY(ADB_XY.PAY_NOW.choose_local)     //todo 选省份和城市还有区域要下滑选指定的地址
             .setXY(ADB_XY.PAY_NOW.province)
             .setXY(ADB_XY.PAY_NOW.city)
@@ -212,12 +234,14 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     //选择代付的好友
-                    payByOther()
+                    payByAlipay()
+                    //payByOther()
                 }
 
                 override fun onTaskFailed(failedText: String) {
                     //支付失败
-                    payByOther()
+                    L.i("$failedText was not found.")
+                    //payByOther()
                 }
 
             })
@@ -234,12 +258,12 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("支付成功，下单完成，重新开始下一轮任务")
-                    mTaskFinishedListener?.onTaskFinished(true)
+                    mTaskFinishedListener?.onTaskFinished()
                 }
 
                 override fun onTaskFailed(failedText: String) {
-                    L.i("支付失败，屏幕分辨率没适配")
-                    mTaskFinishedListener?.onTaskFinished(false)
+                    L.i("$failedText was not found.支付失败")
+
                 }
 
             })
@@ -250,5 +274,37 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             .setNodeParams("发送")
             .create()
             .execute()
+    }
+
+    /**
+     * 支付宝支付
+     */
+    private fun payByAlipay() {
+        NodeController.Builder()
+            .setNodeService(nodeService)
+            .setNodeParams("立即支付")
+            //.setNodeParams("付款方式")
+            .setNodeParams("立即付款")
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    responSuccess()
+                }
+
+                override fun onTaskFailed(failedText: String) {
+                    responFailed("$failedText was not found.")
+                }
+
+            })
+            .create()
+            .execute()
+    }
+
+
+    private fun responFailed(failedMsg: String) {
+        mTaskFinishedListener?.onTaskFailed(failedMsg)
+    }
+
+    private fun responSuccess() {
+        mTaskFinishedListener?.onTaskFinished()
     }
 }

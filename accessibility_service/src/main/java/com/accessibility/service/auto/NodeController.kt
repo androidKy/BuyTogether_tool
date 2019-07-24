@@ -28,7 +28,7 @@ class NodeController {
     var filterText: String? = null
 
     class Builder {
-        val DEFAULT_FOUND_TIME_OUT: Int = 18
+        val DEFAULT_FOUND_TIME_OUT: Int = 15
         val DEFAULT_FIND_NEXT_FLAG: Boolean = false
         var nodeService: BaseAccessibilityService? = null
         var nodeTextList: ArrayList<String> = ArrayList()

@@ -110,4 +110,58 @@ class TaskDataUtil private constructor() {
             this?.split(",")
         }
     }
+
+    /**
+     * 返回买家的名字
+     */
+    fun getBuyer_name(): String? {
+        return mTaskServiceData?.run {
+            task?.delivery_address?.name
+        }
+    }
+
+    /**
+     * 返回买家的手机号
+     */
+    fun getBuyer_phone(): String? {
+        return mTaskServiceData?.run {
+            task?.delivery_address?.phone
+        }
+    }
+
+    /**
+     * 返回收货地址的省份
+     */
+    fun getProvince(): String? {
+        return mTaskServiceData?.run {
+            task?.delivery_address?.province
+        }
+    }
+
+    /**
+     * 返回城市
+     */
+    fun getCity(): String? {
+        return mTaskServiceData?.run {
+            task?.delivery_address?.city
+        }
+    }
+
+    /**
+     * 返回区域
+     */
+    fun getDistrict(): String? {
+        return mTaskServiceData?.run {
+            task?.delivery_address?.district
+        }
+    }
+
+    /**
+     * 返回街道等详细地址
+     */
+    fun getStreet(): String? {
+        return mTaskServiceData?.run {
+            task?.delivery_address?.street
+        }
+    }
 }

@@ -3,6 +3,7 @@ package com.buy.together
 import android.text.TextUtils
 import com.buy.together.hook.CloakHook
 import com.buy.together.hook.DeviceParamsHook
+import com.buy.together.hook.LoginHook
 import com.buy.together.utils.Constant
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -22,7 +23,7 @@ class MainHook : IXposedHookLoadPackage {
                 CloakHook().hook(this)
                 DeviceParamsHook().hook(this)
                 //HttpHook().hook(lpparam)
-                // LoginHook().hook(lpparam)
+                LoginHook().hook(lpparam)
                 // WebViewHook().hook(lpparam)
             }
         } else return

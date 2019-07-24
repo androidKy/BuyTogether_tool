@@ -136,7 +136,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         if (result == "Success") {
             //startPdd()
             val curPort = SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_CUR_PORT)
-            if (!TextUtils.isEmpty(curPort)) {  //如果端口不为空
+            if (!TextUtils.isEmpty(curPort) && LocalVpnService.IsRunning) {  //如果端口不为空
                 //stopMyVpnService()
                 L.i("关闭端口：$curPort")
                 mViewModel?.closePort(curPort)
