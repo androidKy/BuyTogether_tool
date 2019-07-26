@@ -263,11 +263,11 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 }
 
                 override fun onTaskFailed(failedText: String) {
-                    L.i("店铺名称不一样：$failedText was not found.")
                     performBackClick(0)
                     performBackClick(2, object : AfterClickedListener {
                         override fun onClicked() {
                             //返回继续查找
+                            L.i("店铺名称不一样：$failedText was not found.返回继续查找")
                             continueLookGood(goodName, searchPrice, mallName)
                         }
                     })

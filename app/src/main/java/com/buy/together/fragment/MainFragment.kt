@@ -1,10 +1,5 @@
 package com.buy.together.fragment
 
-import android.app.Service
-import android.content.ComponentName
-import android.content.Intent
-import android.content.ServiceConnection
-import android.os.IBinder
 import android.text.TextUtils
 import android.widget.FrameLayout
 import com.buy.together.R
@@ -16,8 +11,8 @@ import com.buy.together.fragment.view.MainView
 import com.buy.together.fragment.viewmodel.MainViewModel
 import com.buy.together.utils.Constant
 import com.google.gson.Gson
+import com.proxy.service.LocalVpnManager
 import com.proxy.service.LocalVpnService
-import com.proxy.service.MyVpnService
 import com.rmondjone.locktableview.DisplayUtil
 import com.rmondjone.locktableview.LockTableView
 import com.safframework.log.L
@@ -38,8 +33,8 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     private var mTaskBean: TaskBean? = null
     private var mContainer: FrameLayout? = null
     private var mViewModel: MainViewModel? = null
-    private var mMyVpnServiceIntent: Intent? = null
-    private var mServiceConnect: ServiceConnectionImpl? = null
+    //private var mMyVpnServiceIntent: Intent? = null
+    // private var mServiceConnect: ServiceConnectionImpl? = null
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_main
@@ -152,7 +147,6 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
      * 申请打开端口，开始连接VPN
      */
     override fun onRequestPortsResult(result: String) {
-        L.i("请求打开端口结果：$result")
         startMyVpnService(result)
     }
 
@@ -173,36 +167,18 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     }
 
     fun startMyVpnService(result: String) {
+        L.i("请求打开端口结果：$result")
         LocalVpnService.addOnStatusChangedListener(this)
         activity?.run {
             val proxyIPBean = Gson().fromJson(result, ProxyIPBean::class.java)
-            val intentService = Intent(activity!!, MyVpnService::class.java)
-            intentService.apply {
-                val data = proxyIPBean?.data
-                putExtra(LocalVpnService.AUTHUSER_KEY, data?.authuser)
-                putExtra(LocalVpnService.AUTHPSW_KEY, data?.authpass)
-                putExtra(LocalVpnService.DOMAIN_KEY, data?.domain)
-                putExtra(LocalVpnService.PORT_KEY, data?.port?.get(0).toString())
-            }
+            proxyIPBean?.data?.apply {
+                LocalVpnManager.initData(this@run, authuser, authpass, domain, port?.get(0)?.toString())
 
-            startService(intentService)
-
-            mServiceConnect = ServiceConnectionImpl()
-            bindService(intentService, mServiceConnect!!, Service.BIND_AUTO_CREATE)
-        }
-    }
-
-    /**
-     * 停止VPN服务
-     */
-    private fun stopMyVpnService() {
-        mMyVpnServiceIntent?.let {
-            activity?.apply {
-                stopService(it)
-                unBindService()
+                LocalVpnManager.startVpnService(this@run)
             }
         }
     }
+
 
     override fun onStatusChanged(status: String, isRunning: Boolean?) {
         L.i("LocalVpnService status changed: $status isRunning: $isRunning MainThread: ${ThreadUtils.isMainThread()}")
@@ -231,34 +207,22 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     }
 
 
-    inner class ServiceConnectionImpl : ServiceConnection {
-        override fun onServiceDisconnected(name: ComponentName?) {
-            unBindService()
-        }
-
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            L.i("MyVpnService was connected")
-            val myBinder = service as MyVpnService.MyBinder
-            myBinder.connectVPN(activity!!)
-        }
-    }
-
-
     override fun onDestroyView() {
         super.onDestroyView()
         mViewModel?.clearSubscribes()
-        stopMyVpnService()
-        unBindService()
-    }
-
-
-    private fun unBindService() {
-        activity?.run {
-            mServiceConnect?.let {
-                unbindService(it)
-            }
+        activity?.apply {
+            LocalVpnManager.stopVpnService(this)
         }
     }
+
+
+    /* private fun unBindService() {
+         activity?.run {
+             mServiceConnect?.let {
+                 unbindService(it)
+             }
+         }
+     }*/
 
     /**
      * 启动拼多多开始任务

@@ -7,6 +7,7 @@ import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.WidgetConstant
 import com.safframework.log.L
+import com.utils.common.screen.ScreenShotActivity
 import com.utils.common.verifycode.VerifyCodeUtils
 import java.io.File
 
@@ -38,6 +39,8 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
             addCategory(Intent.CATEGORY_DEFAULT)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             myAccessibilityService.startActivity(this)
+
+            ScreenShotActivity.setScreenShotListener(ScreenShotListenerImpl())
         }
 
         NodeController.Builder()
@@ -45,8 +48,7 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
             .setNodeParams("立即开始", 0, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    L.i("屏幕截图完成,开始提取验证码")
-                    pictureShot()
+                    L.i("点击开始截图")
                 }
 
                 override fun onTaskFailed(failedText: String) {
@@ -55,6 +57,14 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
             })
             .create()
             .execute()
+    }
+
+    inner class ScreenShotListenerImpl : ScreenShotActivity.ScreenShotListener {
+        override fun onScreenShotFinish() {
+            L.i("屏幕截图完成,开始提取验证码")
+            pictureShot()
+        }
+
     }
 
     /**

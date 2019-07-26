@@ -2,7 +2,6 @@ package com.proxy.service.core;
 
 import android.annotation.SuppressLint;
 import com.proxy.service.LocalVpnService;
-import com.safframework.log.L;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -58,7 +57,7 @@ public abstract class Tunnel {
             m_DestAddress = destAddress;
             m_InnerChannel.register(m_Selector, SelectionKey.OP_CONNECT, this);//注册链接事件
             boolean connect = m_InnerChannel.connect(m_ServerEP);//链接目标
-            L.i("connect:" + connect);
+            //L.i("connect:" + connect);
         } else {
             throw new Exception("VPN protect socket failed.");
         }
@@ -107,14 +106,14 @@ public abstract class Tunnel {
     public void onConnectable() {
         try {
             if (m_InnerChannel.finishConnect()) {//链接成功
-                L.i("Success: connect to " + m_ServerEP + "Success.");
+                //L.i("Success: connect to " + m_ServerEP + "Success.");
                 onConnected(GL_BUFFER);//通知子类TCP已链接，子类可以根据协议实现握手等。
             } else {//链接失败
-                L.i("Error: connect to " + m_ServerEP + " failed.");
+                //L.i("Error: connect to " + m_ServerEP + " failed.");
                 this.dispose();
             }
         } catch (Exception e) {
-            L.i("Error: connect to " + m_ServerEP + " failed: " + e.getMessage());
+            ////L.i("Error: connect to " + m_ServerEP + " failed: " + e.getMessage());
             this.dispose();
         }
     }

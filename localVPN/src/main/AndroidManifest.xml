@@ -7,9 +7,9 @@
                   android:exported="false">
 
         </receiver>
-        <service android:name=".MyVpnService"
+      <!--  <service android:name=".MyVpnService"
                  android:exported="false"
-                 android:permission="android.permission.FOREGROUND_SERVICE"/>
+                 android:permission="android.permission.FOREGROUND_SERVICE"/>-->
         <service android:name=".LocalVpnService"
                  android:exported="false"
                  android:permission="android.permission.BIND_VPN_SERVICE">

@@ -115,6 +115,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onTaskFailed(failedText: String) {
+            L.i("任务失败：重新开始任务.errorMsg:$failedText")
             mTaskRunning = false
             ToastUtils.showToast(this@MainActivity, "任务失败：$failedText")
         }

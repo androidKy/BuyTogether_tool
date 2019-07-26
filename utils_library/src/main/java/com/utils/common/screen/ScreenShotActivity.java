@@ -24,7 +24,6 @@ public class ScreenShotActivity extends Activity {
 
     public static final int REQUEST_MEDIA_PROJECTION = 0x2893;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -77,6 +76,8 @@ public class ScreenShotActivity extends Activity {
                     public void onFinish() {
                         L.i("截屏完成,结束该透明Activity");
                         finish(); // don't forget finish activity
+                        if (mScreenShotListener != null)
+                            mScreenShotListener.onScreenShotFinish();
                     }
                 }, picUrl);
             } else if (resultCode == RESULT_CANCELED) {
@@ -87,5 +88,13 @@ public class ScreenShotActivity extends Activity {
         }
     }
 
+    private static ScreenShotListener mScreenShotListener;
 
+    public static void setScreenShotListener(ScreenShotListener screenShotListener) {
+        mScreenShotListener = screenShotListener;
+    }
+
+    public interface ScreenShotListener {
+        public void onScreenShotFinish();
+    }
 }

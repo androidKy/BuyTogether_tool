@@ -140,8 +140,8 @@ class ScrollUtils constructor(val nodeService: BaseAccessibilityService, val rec
 
         mNodeId?.apply {
             nodeService.findViewById(this)?.apply {
-                mIsNodeFound = true
                 mNodeFoundListener?.onNodeFound(this)
+                mIsNodeFound = true
             }
         }
     }

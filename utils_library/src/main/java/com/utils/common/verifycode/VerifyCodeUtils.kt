@@ -26,9 +26,16 @@ class VerifyCodeUtils {
         fun doOcr(file: File, resultListener: ResultListener) {
             if (!file.exists()) {
                 L.i("识别图片不存在，请重新选择")
+                resultListener.onResult("")
                 return
             }
-            val img_data = FileUtils.getBytesByBitmap(FileUtils.getBitmapByFile(file)!!)
+            val bitmap = FileUtils.getBitmapByFile(file)
+            if (bitmap == null) {
+                L.i("验证码的截图bitmap为空")
+                resultListener.onResult("")
+                return
+            }
+            val img_data = FileUtils.getBytesByBitmap(bitmap)
 
             ThreadUtils.executeByCached(object : ThreadUtils.Task<Util.HttpResp>() {
                 override fun doInBackground(): Util.HttpResp {

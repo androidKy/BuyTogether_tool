@@ -2,7 +2,6 @@ package com.proxy.service.core;
 
 import android.annotation.SuppressLint;
 import android.util.Base64;
-import com.safframework.log.L;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -30,7 +29,7 @@ public class HttpConnectTunnel extends Tunnel {
                         userInfo,
                         ProxyConfig.Instance.getUserAgent(),
                         ProxyConfig.AppInstallID);
-        L.i("request:" + request);
+        //L.i("request:" + request);
 
         buffer.clear();
         buffer.put(request.getBytes());

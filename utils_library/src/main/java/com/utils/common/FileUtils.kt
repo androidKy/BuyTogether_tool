@@ -49,6 +49,7 @@ class FileUtils {
                 bitmap = BitmapFactory.decodeStream(fileInputStream)
             } catch (e: Exception) {
                 e.printStackTrace()
+                L.e(e.message,e)
             }
 
             return bitmap
