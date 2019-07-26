@@ -27,5 +27,8 @@ class BaseApplication : BaseApplication() {
             .apply()
 
         Utils.init(this)
+
     }
+
+
 }

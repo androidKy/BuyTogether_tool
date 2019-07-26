@@ -47,7 +47,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     fun getTask() {
         L.init(MainViewModel::class.java.simpleName)
 
-        /* AndroidNetworking.get(Constant.URL_GET_TASK)
+        /* AndroidNetworking.get(Constants.URL_GET_TASK)
              .build()
              .getAsOkHttpResponse(object : OkHttpResponseListener {
                  override fun onResponse(response: Response?) {
@@ -279,12 +279,14 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                             mainView.onRequestPortsResult(this)
                         } else {  //重新请求
                             L.i("请求数据出错：code = ${proxyIpBean?.data?.code}")
+                            mainView.onResponPortsFailed("请求数据出错：code = ${proxyIpBean?.data?.code}")
                         }
                     }
                 }
 
                 override fun onError(anError: ANError?) {
                     L.i("申请端口失败：${anError?.errorDetail}")
+                    mainView.onResponPortsFailed("申请端口失败：${anError?.errorDetail}")
                 }
             })
     }

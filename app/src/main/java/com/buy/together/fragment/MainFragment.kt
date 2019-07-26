@@ -134,7 +134,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
      */
     override fun onClearDataResult(result: String) {
         if (result == "Success") {
-            //startPdd()
+            // startPdd()
             val curPort = SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_CUR_PORT)
             if (!TextUtils.isEmpty(curPort) && LocalVpnService.IsRunning) {  //如果端口不为空
                 //stopMyVpnService()
@@ -156,6 +156,10 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         startMyVpnService(result)
     }
 
+    override fun onResponPortsFailed(errorMsg: String) {
+        ToastUtils.showToast(context!!, errorMsg)
+    }
+
     /**
      * 申请关闭端口结果，重新连接VPN
      */
@@ -168,7 +172,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         }
     }
 
-    private fun startMyVpnService(result: String) {
+    fun startMyVpnService(result: String) {
         LocalVpnService.addOnStatusChangedListener(this)
         activity?.run {
             val proxyIPBean = Gson().fromJson(result, ProxyIPBean::class.java)
@@ -267,7 +271,9 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
             if (launchIntentForPackage != null) {
                 startActivity(launchIntentForPackage)
             } else {
-                ToastUtils.showToast(context!!, "未安装拼多多")
+                context?.run {
+                    ToastUtils.showToast(this, "未安装拼多多")
+                }
             }
         }, 3000)
     }

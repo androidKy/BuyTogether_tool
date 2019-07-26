@@ -13,7 +13,6 @@ public class RawTunnel extends Tunnel {
 
     public RawTunnel(SocketChannel innerChannel, Selector selector) {
         super(innerChannel, selector);
-        // TODO Auto-generated constructor stub
     }
 
     @Override
@@ -23,13 +22,11 @@ public class RawTunnel extends Tunnel {
 
     @Override
     protected void beforeSend(ByteBuffer buffer) throws Exception {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     protected void afterReceived(ByteBuffer buffer) throws Exception {
-        // TODO Auto-generated method stub
 
     }
 
@@ -40,7 +37,6 @@ public class RawTunnel extends Tunnel {
 
     @Override
     protected void onDispose() {
-        // TODO Auto-generated method stub
 
     }
 

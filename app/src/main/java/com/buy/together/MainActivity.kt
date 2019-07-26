@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
         queryAppInfo()
     }
 
+
     private fun queryAppInfo() {
         if (AppProxyManager.isLollipopOrAbove) {
             AppProxyManager(this)
@@ -64,7 +65,7 @@ class MainActivity : AppCompatActivity() {
 
                 AppProxyManager.Instance.mlistAppInfo.add(this)
 
-                if (packageName == "com.buy.together" || packageName == Constant.BUY_TOGETHER_PKG || packageName == Constant.QQ_TIM_PKG ||
+                if (packageName == com.utils.common.Constants.PKG_NAME || packageName == Constant.BUY_TOGETHER_PKG || packageName == Constant.QQ_TIM_PKG ||
                     packageName == Constant.QQ_LIATE_PKG || packageName == "com.android.chrome"
                 ) {
                     AppProxyManager.Instance.addProxyApp(this)
@@ -115,7 +116,7 @@ class MainActivity : AppCompatActivity() {
 
         override fun onTaskFailed(failedText: String) {
             mTaskRunning = false
-            ToastUtils.showToast(this@MainActivity, "任务失败：$failedText 节点找不到")
+            ToastUtils.showToast(this@MainActivity, "任务失败：$failedText")
         }
     }
 
@@ -133,7 +134,9 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == START_VPN_SERVICE_REQUEST_CODE) {
             L.i("VPN启动回调的Activity")
             if (resultCode == RESULT_OK) {
-                // startVpnService()
+                val ipPorts = SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_IP_PORTS)
+                L.i("第一次打开VPN，需要确认允许VPN连接。ipPorts: $ipPorts")
+                mMainFragment?.startMyVpnService(ipPorts)
             } else {
                 //log("onActivityResult", "resultCode != RESULT_OK")
                 //onLogReceived("canceled.")

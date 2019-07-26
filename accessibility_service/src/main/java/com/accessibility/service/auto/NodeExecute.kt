@@ -75,7 +75,7 @@ class NodeExecute(
             val message = mHandler.obtainMessage()
             message.arg1 = index
             message.what = MSG_NOT_FOUND
-            mHandler.sendMessageDelayed(message, 1500)
+            mHandler.sendMessageDelayed(message, 1000)
         } else if (nodeResult == null && mStartTime > timeout) {    //找不到时是否需要下滑查找
             dealNodeFailed(index, textOrId, editInputText, isClicked, isScrolled)
         } else if (nodeResult != null && mStartTime < timeout) {

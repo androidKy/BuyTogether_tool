@@ -159,12 +159,12 @@ object L {
 
     @JvmStatic
     fun e(msg: String?, tr: Throwable) {
-        if (LogLevel.ERROR.value <= logLevel.value) {
-
-            if (msg != null && msg.isNotEmpty()) {
-                Log.e(TAG, msg, tr)
-            }
+        if (msg != null && msg.isNotEmpty()) {
+            Log.e(TAG, msg, tr)
         }
+        /*  if (LogLevel.ERROR.value <= logLevel.value) {
+
+          }*/
     }
 
     @JvmStatic

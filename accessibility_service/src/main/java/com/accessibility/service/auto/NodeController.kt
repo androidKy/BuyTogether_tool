@@ -109,6 +109,17 @@ class NodeController {
             return this@Builder
         }
 
+        fun setNodeParams(
+            text: String,
+            nodeFlag: Int,
+            isClicked: Boolean,
+            timeout: Int,
+            findNextFlag: Boolean
+        ): Builder {
+            setNodeParams(text, nodeFlag, isClicked, false, "null", timeout, findNextFlag)
+            return this@Builder
+        }
+
         fun setNodeParams(text: String, nodeFlag: Int, isClicked: Boolean, isScrolled: Boolean): Builder {
             setNodeParams(text, nodeFlag, isClicked, isScrolled, "null")
             return this@Builder

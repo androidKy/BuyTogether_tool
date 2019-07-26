@@ -50,6 +50,17 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <activity
+                android:name="com.utils.common.screen.ScreenShotActivity"
+                android:exported="true"
+                android:theme="@android:style/Theme.Dialog">
+            <intent-filter>
+                <action android:name="android.screen.shot"></action>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>

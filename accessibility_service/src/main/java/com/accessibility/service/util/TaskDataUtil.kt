@@ -20,6 +20,14 @@ class TaskDataUtil private constructor() {
         mTaskServiceData = taskServiceData
     }
 
+    /**
+     * 返回登录渠道
+     */
+    fun getLogin_channel(): Int? {
+        return mTaskServiceData?.run {
+            task?.account?.type
+        }
+    }
 
     /**
      * 获取账号名字

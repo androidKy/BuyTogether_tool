@@ -260,7 +260,6 @@ public class DnsProxy implements Runnable {
                     System.err.println("VPN protect udp socket failed.");
                 }
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
