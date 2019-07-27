@@ -162,18 +162,17 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
             .setNodeParams("1001", 1, false, 3, true)
-            .setNodeParams("该账号涉嫌违规", 1, false, 3)
+            //.setNodeParams("该账号涉嫌违规", 1, false, 3)
             .setNodeParams("确定", 0, 3)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     //重新请求QQ账号
-                    mTaskListener?.run {
-                        login(this)
-                    }
+                    L.i("QQ账号已经被封")
+
                 }
 
                 override fun onTaskFailed(failedText: String) {
-                    responTaskFailed("账号登录，其它错误")
+                    responTaskFailed("账号涉嫌违规被冻结: $failedText was not found.")
                 }
             })
             .create()

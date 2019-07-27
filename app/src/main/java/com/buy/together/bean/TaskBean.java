@@ -244,6 +244,32 @@ public class TaskBean {
             this.stay_time = stay_time;
         }
 
+        @Override
+        public String toString() {
+            return "TaskData{" +
+                    "task_id=" + task_id +
+                    ", task_status=" + task_status +
+                    ", task_amount=" + task_amount +
+                    ", task_type=" + task_type +
+                    ", task_dispense=" + task_dispense +
+                    ", task_complete=" + task_complete +
+                    ", task_fail=" + task_fail +
+                    ", time_limit=" + time_limit +
+                    ", talk_msg='" + talk_msg + '\'' +
+                    ", score_need=" + score_need +
+                    ", comment_need=" + comment_need +
+                    ", comment_content='" + comment_content + '\'' +
+                    ", has_commented=" + has_commented +
+                    ", create_time='" + create_time + '\'' +
+                    ", ip=" + ip +
+                    ", account=" + account +
+                    ", goods=" + goods +
+                    ", device=" + device +
+                    ", delivery_address=" + delivery_address +
+                    ", stay_time=" + stay_time +
+                    '}';
+        }
+
         public static class IpBean {
             /**
              * city :
@@ -277,6 +303,15 @@ public class TaskBean {
 
             public void setMac_address(String mac_address) {
                 this.mac_address = mac_address;
+            }
+
+            @Override
+            public String toString() {
+                return "IpBean{" +
+                        "city='" + city + '\'' +
+                        ", content='" + content + '\'' +
+                        ", mac_address='" + mac_address + '\'' +
+                        '}';
             }
         }
 
@@ -324,6 +359,16 @@ public class TaskBean {
             public void setType(int type) {
                 this.type = type;
             }
+
+            @Override
+            public String toString() {
+                return "AccountBean{" +
+                        "id=" + id +
+                        ", user='" + user + '\'' +
+                        ", pwd='" + pwd + '\'' +
+                        ", type=" + type +
+                        '}';
+            }
         }
 
         public static class GoodsBean {
@@ -346,6 +391,20 @@ public class TaskBean {
             private String keyword;
             private String search_price;
             private String choose_info;
+
+            @Override
+            public String toString() {
+                return "GoodsBean{" +
+                        "id=" + id +
+                        ", goods_id=" + goods_id +
+                        ", cat_id=" + cat_id +
+                        ", goods_name='" + goods_name + '\'' +
+                        ", mall_name='" + mall_name + '\'' +
+                        ", keyword='" + keyword + '\'' +
+                        ", search_price='" + search_price + '\'' +
+                        ", choose_info='" + choose_info + '\'' +
+                        '}';
+            }
 
             public int getId() {
                 return id;
@@ -438,6 +497,23 @@ public class TaskBean {
             private String imsi;
             private String model;
             private String useragent;
+
+            @Override
+            public String toString() {
+                return "DeviceBean{" +
+                        "id=" + id +
+                        ", bluetooth='" + bluetooth + '\'' +
+                        ", imei='" + imei + '\'' +
+                        ", brand='" + brand + '\'' +
+                        ", android='" + android + '\'' +
+                        ", mac='" + mac + '\'' +
+                        ", system='" + system + '\'' +
+                        ", sn='" + sn + '\'' +
+                        ", imsi='" + imsi + '\'' +
+                        ", model='" + model + '\'' +
+                        ", useragent='" + useragent + '\'' +
+                        '}';
+            }
 
             public int getId() {
                 return id;
@@ -545,6 +621,18 @@ public class TaskBean {
             private String district;
             private String street;
 
+            @Override
+            public String toString() {
+                return "DeliveryAddressBean{" +
+                        "name='" + name + '\'' +
+                        ", phone='" + phone + '\'' +
+                        ", province='" + province + '\'' +
+                        ", city='" + city + '\'' +
+                        ", district='" + district + '\'' +
+                        ", street='" + street + '\'' +
+                        '}';
+            }
+
             public String getName() {
                 return name;
             }
@@ -602,6 +690,14 @@ public class TaskBean {
 
             private int goods_time;
             private int search_time;
+
+            @Override
+            public String toString() {
+                return "StayTimeBean{" +
+                        "goods_time=" + goods_time +
+                        ", search_time=" + search_time +
+                        '}';
+            }
 
             public int getGoods_time() {
                 return goods_time;

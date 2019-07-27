@@ -76,10 +76,11 @@ class MyAccessibilityService : BaseAccessibilityService() {
         if (eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ||
             eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED
         ) {
+
             try {
                 chooseLogin()
             } catch (e: Exception) {
-                L.e(e.message, e)
+                L.e(e.message)
             }
         }
     }
@@ -257,8 +258,11 @@ class MyAccessibilityService : BaseAccessibilityService() {
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("店铺名称相同，找到需要刷的商品")
-                    performBackClick()
-                    doTask()
+                    performBackClick(1,object:AfterClickedListener{
+                        override fun onClicked() {
+                            doTask()
+                        }
+                    })
                     //mTaskListener?.onTaskFinished()
                 }
 

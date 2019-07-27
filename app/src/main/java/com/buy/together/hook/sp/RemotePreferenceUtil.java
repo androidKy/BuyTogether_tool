@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import com.buy.together.utils.Constant;
 import com.crossbowffs.remotepreferences.RemotePreferences;
+import com.utils.common.Constants;
 
 import java.lang.ref.WeakReference;
 
@@ -21,7 +22,7 @@ public class RemotePreferenceUtil {
             return lastUsedInstance;
         }
         //CachedRemotePreferences newInstance = new CachedRemotePreferences(context, BuildConfig.APPLICATION_ID, Common.PREFS_FILE);
-        SharedPreferences prefs = new RemotePreferences(context, "com.buy.together", Constant.SP_DEVICE_PARAMS);
+        SharedPreferences prefs = new RemotePreferences(context, Constants.PKG_NAME, Constant.SP_DEVICE_PARAMS);
         instance = new WeakReference<>(prefs);
         return prefs;
     }

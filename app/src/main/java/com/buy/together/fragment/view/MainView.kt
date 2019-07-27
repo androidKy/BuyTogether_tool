@@ -14,5 +14,6 @@ interface MainView : BaseView {
     fun onClearDataResult(result: String)
     fun onRequestPortsResult(result: String)
     fun onResponPortsFailed(errorMsg:String)
-    fun onResponClosePort(closeProxyBean: CloseProxyBean)
+    fun onResponClosePort(closeProxyBean: CloseProxyBean?)
+    fun onResponVpnResult(result:Boolean)
 }

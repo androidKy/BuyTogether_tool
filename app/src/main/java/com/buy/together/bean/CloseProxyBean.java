@@ -42,6 +42,15 @@ public class CloseProxyBean {
         this.data = data;
     }
 
+    @Override
+    public String toString() {
+        return "CloseProxyBean{" +
+                "code=" + code +
+                ", msg='" + msg + '\'' +
+                ", data=" + data +
+                '}';
+    }
+
     public static class ResultBean {
         /**
          * usable : 1013
@@ -105,6 +114,18 @@ public class CloseProxyBean {
 
         public void setPort(List<String> port) {
             this.port = port;
+        }
+
+        @Override
+        public String toString() {
+            return "ResultBean{" +
+                    "usable=" + usable +
+                    ", code=" + code +
+                    ", inuse=" + inuse +
+                    ", domain='" + domain + '\'' +
+                    ", left_ip=" + left_ip +
+                    ", port=" + port +
+                    '}';
         }
     }
 }

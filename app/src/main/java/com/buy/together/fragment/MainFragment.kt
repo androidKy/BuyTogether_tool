@@ -33,6 +33,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     private var mTaskBean: TaskBean? = null
     private var mContainer: FrameLayout? = null
     private var mViewModel: MainViewModel? = null
+    private var mVpnFailedConnectCount: Int = 0 //VPN连接失败次数
     //private var mMyVpnServiceIntent: Intent? = null
     // private var mServiceConnect: ServiceConnectionImpl? = null
 
@@ -100,6 +101,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
      * 开始任务
      */
     fun startTask() {
+        mVpnFailedConnectCount = 0
         mViewModel?.getTask()
     }
 
@@ -130,21 +132,45 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     override fun onClearDataResult(result: String) {
         if (result == "Success") {
             // startPdd()
-            val curPort = SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_CUR_PORT)
-            if (!TextUtils.isEmpty(curPort) && LocalVpnService.IsRunning) {  //如果端口不为空
-                //stopMyVpnService()
-                L.i("关闭端口：$curPort")
-                mViewModel?.closePort(curPort)
-            } else {
-                mViewModel?.getPorts(mTaskBean!!)
-            }
+            getPort()
+            /*  val curPort = SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_CUR_PORT)
+              if (!TextUtils.isEmpty(curPort) && LocalVpnService.IsRunning) {  //如果端口不为空
+                  //stopMyVpnService()
+                  L.i("关闭端口：$curPort")
+                  mViewModel?.closePort(curPort)
+              } else {
+
+              }*/
         } else {
             ToastUtils.showToast(context!!, "清理数据失败")
         }
     }
 
     /**
-     * 申请打开端口，开始连接VPN
+     * 申请端口（注意：必须先关闭端口，再申请端口）
+     */
+    private fun getPort() {
+        closePort()
+    }
+
+    /**
+     * 关闭端口
+     */
+    private fun closePort() {
+        val curPort = SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_CUR_PORT)
+        if (!TextUtils.isEmpty(curPort)) {  //如果端口不为空
+            //stopMyVpnService()
+            L.i("开始关闭端口：$curPort")
+            mViewModel?.closePort(curPort)
+        } else {
+            mTaskBean?.run {
+                mViewModel?.getPorts(this)
+            }
+        }
+    }
+
+    /**
+     * 端口打开成功，开始连接VPN
      */
     override fun onRequestPortsResult(result: String) {
         startMyVpnService(result)
@@ -157,15 +183,16 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     /**
      * 申请关闭端口结果，重新连接VPN
      */
-    override fun onResponClosePort(closeProxyBean: CloseProxyBean) {
-        if (closeProxyBean.data.code == 200) {
-            mTaskBean?.apply {
-                //mViewModel?.getPorts(this)
-                startTask()
-            }
+    override fun onResponClosePort(closeProxyBean: CloseProxyBean?) {
+        L.i("关闭端口结果：$closeProxyBean")
+        mTaskBean?.run {
+            mViewModel?.getPorts(this)
         }
     }
 
+    /**
+     * 开启VPN
+     */
     fun startMyVpnService(result: String) {
         L.i("请求打开端口结果：$result")
         LocalVpnService.addOnStatusChangedListener(this)
@@ -179,16 +206,37 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         }
     }
 
-
+    /**
+     * VPN状态变化
+     */
     override fun onStatusChanged(status: String, isRunning: Boolean?) {
         L.i("LocalVpnService status changed: $status isRunning: $isRunning MainThread: ${ThreadUtils.isMainThread()}")
         if (isRunning!!)   //代理连接成功
         {
-            LocalVpnService.IsRunning = true
-
             protectSocket()
 
+            LocalVpnService.IsRunning = true
             startPdd()
+            // mViewModel?.checkVpnConnected()
+        }
+    }
+
+    override fun onResponVpnResult(result: Boolean) {
+        if (result) {
+            LocalVpnService.IsRunning = true
+            startPdd()
+        } else {
+            L.i("VPN连接失败，尝试重新连接次数：$mVpnFailedConnectCount")
+            mVpnFailedConnectCount++
+            if (mVpnFailedConnectCount < 5) {
+                val ipPorts = SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_IP_PORTS)
+                startMyVpnService(ipPorts)
+            } else {
+                context?.run {
+                    ToastUtils.showToast(this, "VPN连接失败,重新请求端口")
+                    startTask()
+                }
+            }
         }
     }
 
@@ -199,7 +247,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         mContainer?.postDelayed({
             val result = LocalVpnService.mInstance.protect(SocketClient().runningSocket)
             L.i("protect socket result: $result")
-        }, 2000)
+        }, 3000)
     }
 
     override fun onLogReceived(logString: String) {

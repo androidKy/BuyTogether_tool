@@ -12,7 +12,7 @@ class TestData {
                 "    \"msg\":\"成功\",\n" +
                 "    \"task\":{\n" +
                 "        \"task_id\":1111,\n" +
-                "        \"task_type\":1234,\n" +
+                "        \"task_type\":14,\n" +
                 "        \"task_status\":1,\n" +
                 "        \"task_amount\":20,\n" +
                 "        \"task_dispense\":5,\n" +
@@ -32,19 +32,19 @@ class TestData {
                 "        },\n" +
                 "        \"account\":{\n" +
                 "            \"id\":22,\n" +
-                "            \"user\":\"2751836156\",\n" +
-                "            \"pwd\":\"qqqq8888\",\n" +
+                "            \"user\":\"430406404\",\n" +
+                "            \"pwd\":\"nn521521\",\n" +
                 "            \"type\":0\n" +
                 "        },\n" +
                 "        \"goods\":{\n" +
                 "            \"id\":5,\n" +
                 "            \"goods_id\":1395698343,\n" +
                 "            \"cat_id\":8464,\n" +
-                "            \"goods_name\":\"酸甜杨梅干500g九制梅子果蜜饯办公室户外休闲随身独立小包装零食\",\n" +
+                "            \"goods_name\":\"即食柠檬片咸甜柠檬干泡茶水健胃消腻蜜饯果脯休闲零食维C柠檬果\",\n" +
                 "            \"mall_name\":\"益C果城恒康美专卖店\",\n" +
-                "            \"keyword\":\"酸甜杨梅干\",\n" +
-                "            \"search_price\":\"7.9\",\n" +
-                "            \"choose_info\":\"超值250g\"\n" +
+                "            \"keyword\":\"即食柠檬片酸甜柠檬干维c柠檬果\",\n" +
+                "            \"search_price\":\"13.8\",\n" +
+                "            \"choose_info\":\"\"\n" +
                 "        },\n" +
                 "        \"device\":{\n" +
                 "            \"id\":4220,\n" +
@@ -62,10 +62,10 @@ class TestData {
                 "        \"delivery_address\":{\n" +
                 "            \"name\":\"邵涵育\",\n" +
                 "            \"phone\":\"13319345124\",\n" +
-                "            \"province\":\"北京市\",\n" +
-                "            \"city\":\"北京市\",\n" +
-                "            \"district\":\"东城区\",\n" +
-                "            \"street\":\"东城区国中商业大厦1层\"\n" +
+                "            \"province\":\"广东省\",\n" +
+                "            \"city\":\"佛山市\",\n" +
+                "            \"district\":\"天河区\",\n" +
+                "            \"street\":\"商业大厦1层\"\n" +
                 "        },\n" +
                 "        \"stay_time\":{\n" +
                 "            \"goods_time\":4,\n" +

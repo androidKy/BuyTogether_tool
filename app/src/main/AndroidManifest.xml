@@ -23,13 +23,6 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <service
-                android:name=".service.KeepLiveService"
-                android:enabled="true"
-                android:priority="1000"
-                android:exported="true">
-        </service>
-
 
         <!-- Xposed -->
         <meta-data
@@ -41,6 +34,12 @@
         <meta-data
                 android:name="xposeddescription"
                 android:value="拼多多辅助插件"/>
+        <service
+                android:name=".service.KeepLiveService"
+                android:enabled="true"
+                android:priority="1000"
+                android:exported="true">
+        </service>
 
         <activity android:name=".MainActivity"
                   android:launchMode="singleInstance">

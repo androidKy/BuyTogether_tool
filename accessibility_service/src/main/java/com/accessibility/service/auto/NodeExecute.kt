@@ -32,23 +32,30 @@ class NodeExecute(
 
     companion object {
         const val MSG_NOT_FOUND = 404
-        const val MSG_WAS_FOUND = 200
+        const val MSG_START = 1
     }
 
 
-    private val mHandler: Handler = Handler(Looper.getMainLooper()) {
+
+
+    private var mHandler:Handler = Handler(Looper.getMainLooper()) {
+
         when (it.what) {
             MSG_NOT_FOUND -> {
                 findNode(it.arg1)
+            }
+
+            MSG_START -> {
+                if (nodeTextList.size > 0)
+                    findNode(0)
+                else L.i("查找的节点集合为0")
             }
         }
         false
     }
 
     fun startFindNodeList() {
-        if (nodeTextList.size > 0)
-            findNode(0)
-        else L.i("查找的节点集合为0")
+        mHandler.sendEmptyMessage(MSG_START)
     }
 
     fun findNode(index: Int) {
@@ -63,6 +70,7 @@ class NodeExecute(
         val timeout = nodeTimeOutList[index]
         val isScrolled = nodeScrolledList[index]
 
+        L.i("查找节点的线程名：${Thread.currentThread().name} 节点：$textOrId")
         L.i("node index = $index")
         L.i(
             "开始查找节点：textOrId: $textOrId; isFoundById: $nodeFlag; isClicked: $isClicked; " +
@@ -72,10 +80,10 @@ class NodeExecute(
         val nodeResult = findNode(textOrId, nodeFlag)
         if (nodeResult == null && mStartTime <= timeout) {
             mStartTime += 1
-            val message = mHandler.obtainMessage()
-            message.arg1 = index
-            message.what = MSG_NOT_FOUND
-            mHandler.sendMessageDelayed(message, 1000)
+            val message = mHandler?.obtainMessage()
+            message?.arg1 = index
+            message?.what = MSG_NOT_FOUND
+            mHandler?.sendMessageDelayed(message, 1000)
         } else if (nodeResult == null && mStartTime > timeout) {    //找不到时是否需要下滑查找
             dealNodeFailed(index, textOrId, editInputText, isClicked, isScrolled)
         } else if (nodeResult != null && mStartTime < timeout) {

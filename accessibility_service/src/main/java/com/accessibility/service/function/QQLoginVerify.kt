@@ -2,10 +2,10 @@ package com.accessibility.service.function
 
 import android.content.Intent
 import com.accessibility.service.MyAccessibilityService
+import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
-import com.accessibility.service.util.WidgetConstant
 import com.safframework.log.L
 import com.utils.common.screen.ScreenShotActivity
 import com.utils.common.verifycode.VerifyCodeUtils
@@ -101,15 +101,29 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
      * 更新验证码
      */
     private fun updateVerifyCode() {
-        NodeController.Builder()
-            .setNodeService(myAccessibilityService)
-            .setNodeParams("看不清？换一张", 1, 5)
+        AdbScriptController.Builder()
+            .setXY("540,450")   //更换验证码
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("验证码图片已更新，重新开始校验")
                     myAccessibilityService.postDelay(Runnable {
                         startVerify(mTaskListener!!)
-                    }, 2000)
+                    }, 5)
+                }
+
+                override fun onTaskFailed(failedText: String) {
+
+                }
+            })
+            .create()
+            .execute()
+/*
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("看不清？换一张", 1, 5)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    2000)
                 }
 
                 override fun onTaskFailed(failedText: String) {
@@ -118,28 +132,42 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
                 }
             })
             .create()
-            .execute()
+            .execute()*/
     }
 
     /**
      * 输入验证码·
      */
     private fun inputVerifyCode(verifyCode: String) {
-        NodeController.Builder()
-            .setNodeService(myAccessibilityService)
-            .setNodeParams(WidgetConstant.EDITTEXT, 3, false, false, verifyCode)
-            .setNodeParams("完成", 0, 3)
+        AdbScriptController.Builder()
+            .setXY("540,590")
+            .setText(verifyCode)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    mTaskListener?.onTaskFinished()
+                    NodeController.Builder()
+                        .setNodeService(myAccessibilityService)
+                        // .setNodeParams(WidgetConstant.EDITTEXT, 3, false, false, verifyCode)
+                        .setNodeParams("完成", 0, 3)
+                        .setTaskListener(object : TaskListener {
+                            override fun onTaskFinished() {
+                                mTaskListener?.onTaskFinished()
+                            }
+
+                            override fun onTaskFailed(failedText: String) {
+                                L.i("$failedText was not found.")
+                            }
+                        })
+                        .create()
+                        .execute()
                 }
 
                 override fun onTaskFailed(failedText: String) {
-                    L.i("$failedText was not found.")
+
                 }
             })
             .create()
             .execute()
+
     }
 
 

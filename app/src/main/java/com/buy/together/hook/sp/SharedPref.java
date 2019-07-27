@@ -2,6 +2,7 @@ package com.buy.together.hook.sp;
 
 import com.buy.together.utils.Constant;
 import com.safframework.log.L;
+import com.utils.common.Constants;
 import de.robv.android.xposed.XSharedPreferences;
 
 public class SharedPref {
@@ -12,7 +13,7 @@ public class SharedPref {
             myXsharedPref.reload();
             return myXsharedPref;
         }
-        myXsharedPref = new XSharedPreferences("com.buy.together", Constant.SP_DEVICE_PARAMS);
+        myXsharedPref = new XSharedPreferences(Constants.PKG_NAME, Constant.SP_DEVICE_PARAMS);
         myXsharedPref.makeWorldReadable();
         return myXsharedPref;
     }

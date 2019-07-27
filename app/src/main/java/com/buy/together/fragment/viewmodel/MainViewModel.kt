@@ -14,6 +14,7 @@ import com.buy.together.bean.CloseProxyBean
 import com.buy.together.bean.ProxyIPBean
 import com.buy.together.bean.TaskBean
 import com.buy.together.fragment.view.MainView
+import com.buy.together.hook.sp.DeviceParams
 import com.buy.together.utils.Constant
 import com.buy.together.utils.ParseDataUtil
 import com.buy.together.utils.TestData
@@ -63,12 +64,11 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                          mainView.onFailed(message)
                      }
                  }
-
              })*/
         parseStringForTask(TestData.taskBean_str)
     }
 
-    fun parseStringForTask(result: String) {
+    private fun parseStringForTask(result: String) {
         val disposable = Observable.just(result)
             .flatMap { flatIt ->
                 val taskBean = try {
@@ -81,6 +81,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                     exceptionTask
                 }
                 saveTaskData2SP(flatIt)
+                saveDeviceParams(taskBean)
                 Observable.just(taskBean)
             }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -138,16 +139,20 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      * 申请端口
      */
     fun getPorts(taskBean: TaskBean) {
+        L.i("开始申请端口: $taskBean")
         //匹配相应的城市
-        val cityName = "佛山市"
+        val cityName = taskBean.task.delivery_address.city
+        L.i("target cityName: $cityName")
         val currentDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).run { format(Date()) }
         L.i("currentDate: $currentDate")
         val lastGetCityDate = SPUtils.getInstance(Constant.SP_CITY_LIST).getString(Constant.KEY_CITY_GET_DATE)
         if (!TextUtils.isEmpty(lastGetCityDate)) {
             if (TimeUtils.getDays(currentDate, lastGetCityDate) >= 1) { //对比当前时间与上次获取的时间
                 //重新获取
+                L.i("间隔一天，重新获取城市ID")
                 getCityListFromNet(cityName)
             } else {
+                L.i("从缓存获取城市ID")
                 val data = SPUtils.getInstance(Constant.SP_CITY_LIST).getString(Constant.KEY_CITY_DATA)
                 if (TextUtils.isEmpty(data)) {
                     getCityListFromNet(cityName)
@@ -228,6 +233,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                     }
                 } else {
                     L.i("city id == null")
+                    //todo 该城市没有IP，重新获取地址
                     ToastUtils.showToast(context, "city id == null")
                 }
             }
@@ -314,11 +320,75 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
 
                 override fun onError(anError: ANError?) {
                     L.i("关闭端口失败：${anError?.response?.body()?.string()} errorMsg: ${anError?.errorDetail}")
+                    mainView.onResponClosePort(null)
                 }
 
             })
     }
 
+    /**
+     * 检查VPN是否连接成功
+     */
+    fun checkVpnConnected() {
+        ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
+            override fun doInBackground(): Boolean {
+                var getIpUrl = "http://2019.ip138.com"
+                try {
+                    getIpUrl = Gson().fromJson(
+                        SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_IP_PORTS),
+                        ProxyIPBean::class.java
+                    ).data.getIpUrl
+                } catch (e: Exception) {
+                    L.e(e.message, e)
+                }
+                return true
+            }
+
+            override fun onSuccess(result: Boolean?) {
+                L.i("vpn connect result: $result")
+                mainView.onResponVpnResult(result!!)
+            }
+
+            override fun onCancel() {
+                mainView.onResponVpnResult(false)
+            }
+
+            override fun onFail(t: Throwable?) {
+                mainView.onResponVpnResult(false)
+            }
+
+        })
+    }
+
+
+    /**
+     * 保存任务数据到SP
+     */
+    private fun saveTaskData2SP(strData: String) {
+        val spUtils = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+
+        spUtils.put(Constant.KEY_TASK_DATA, strData)
+    }
+
+    /**
+     * 保存设备参数
+     */
+    private fun saveDeviceParams(taskBean: TaskBean) {
+        val spUtils = SPUtils.getInstance(Constant.SP_DEVICE_PARAMS)
+        taskBean.task?.device?.run {
+            spUtils.apply {
+                put(DeviceParams.IMEI_KEY, imei)
+                put(DeviceParams.IMSI_KEY, imsi)
+                put(DeviceParams.MAC_KEY, mac)
+                put(DeviceParams.USER_AGENT_KEY, useragent)
+                put(DeviceParams.BRAND_KEY, brand)
+                put(DeviceParams.MODEL_KEY, model)
+                put(DeviceParams.SDK_KEY, android)
+                put(DeviceParams.SYSTEM_KEY, system)
+            }
+        }
+
+    }
 
     /**
      * 释放订阅
@@ -329,14 +399,5 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                 sub.dispose()
             }
         }
-    }
-
-    /**
-     * 保存任务数据到SP
-     */
-    private fun saveTaskData2SP(strData: String) {
-        val spUtils = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
-
-        spUtils.put(Constant.KEY_TASK_DATA, strData)
     }
 }

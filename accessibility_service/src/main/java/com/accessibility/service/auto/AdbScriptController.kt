@@ -1,8 +1,6 @@
 package com.accessibility.service.auto
 
 import com.accessibility.service.listener.TaskListener
-import com.utils.common.CMDUtil
-import com.utils.common.ThreadUtils
 import com.safframework.log.L
 
 
@@ -99,6 +97,7 @@ class AdbScriptController private constructor() {
                         if (i == cmdList.size - 1)
                             result = true
                     }
+                    //Thread.sleep(500)
                 } catch (e: Exception) {
                     L.e(e.message, e)
                 }

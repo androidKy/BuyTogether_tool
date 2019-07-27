@@ -15,6 +15,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -178,29 +179,46 @@ public class PingManager implements ILoggerListener {
     /**
      * 判断当前链接的网络是否可用
      */
-    @Deprecated
-    public boolean isConnecting(Context context) {
+    public boolean isConnecting(Context context, String getIpUrl) {
         boolean isConnecting = false;
         HttpURLConnection urlConnection = null;
+        InputStreamReader inputStreamReader = null;
         try {
-            URL url = new URL("http://2019.ip138.com/ic.asp");
+            URL url = new URL(getIpUrl);
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
-            urlConnection.setReadTimeout(5000);//读取超时
-            urlConnection.setConnectTimeout(5000);//链接超时
+            urlConnection.setReadTimeout(15000);//读取超时
+            urlConnection.setConnectTimeout(15000);//链接超时
             urlConnection.setDoInput(true);
             urlConnection.setUseCaches(false);
 
             int code = urlConnection.getResponseCode();
-            log("isConnecting", "code:" + code);
+            L.i("isConnecting code:" + code);
             if (code == HttpURLConnection.HTTP_OK && isNetworkAvailable(context)) {
                 isConnecting = true;
+                inputStreamReader = new InputStreamReader(urlConnection.getInputStream());
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                StringBuilder sb = new StringBuilder();
+                String line = "";
+
+                while ((line = bufferedReader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                L.i("VPN连接结果：" + sb.toString());
             }
         } catch (Exception e) {
+            L.i("Vpn连接失败：" + e.getMessage());
             error(e, "connect");
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
+            }
+            if (inputStreamReader != null) {
+                try {
+                    inputStreamReader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return isConnecting;
