@@ -1,6 +1,6 @@
 package com.accessibility.service.util
 
-import com.accessibility.service.data.TaskServiceData
+import com.accessibility.service.data.TaskBean
 
 /**
  * Description:
@@ -8,7 +8,7 @@ import com.accessibility.service.data.TaskServiceData
  **/
 class TaskDataUtil private constructor() {
 
-    private var mTaskServiceData: TaskServiceData? = null
+    private var mTaskServiceData: TaskBean? = null
 
     companion object {
         val instance: TaskDataUtil by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
@@ -16,8 +16,12 @@ class TaskDataUtil private constructor() {
         }
     }
 
-    fun initData(taskServiceData: TaskServiceData) {
+    fun initData(taskServiceData: TaskBean) {
         mTaskServiceData = taskServiceData
+    }
+
+    fun getTaskServiceData(): TaskBean? {
+        return mTaskServiceData
     }
 
     /**

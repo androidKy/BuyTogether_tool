@@ -7,13 +7,14 @@ import android.os.Looper
 import android.provider.Settings
 import android.text.TextUtils
 import android.view.accessibility.AccessibilityNodeInfo
-import com.accessibility.service.data.TaskServiceData
+import com.accessibility.service.data.TaskBean
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.TaskDataUtil
 import com.google.gson.Gson
 import com.safframework.log.L
+import com.utils.common.SPUtils
 
 /**
  * Description:
@@ -93,12 +94,12 @@ abstract class BaseAccessibilityService : AccessibilityService() {
     fun initTaskData() {
         try {
             if (mIsInited) return
-            getSharedPreferences("pinduoduo_task_sp", Context.MODE_PRIVATE).getString("key_task_data", "")
+            SPUtils.getInstance(this, "pinduoduo_task_sp").getString("key_task_data")
                 .let {
                     L.i("无障碍服务初始化数据: $it")
                     if (!TextUtils.isEmpty(it)) {
                         mIsInited = true
-                        val taskServiceData = Gson().fromJson(it, TaskServiceData::class.java)
+                        val taskServiceData = Gson().fromJson(it, TaskBean::class.java)
                         TaskDataUtil.instance.initData(taskServiceData)
                     }
                 }
@@ -124,10 +125,10 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         val accessibilityNodeInfo = rootInActiveWindow ?: return null
 
         val nodeList = accessibilityNodeInfo.findAccessibilityNodeInfosByText(text)
-       // L.i("nodeList size = ${nodeList.size} textList = $text ")
+        // L.i("nodeList size = ${nodeList.size} textList = $text ")
         if (nodeList.size > 0) {
             for (node in nodeList) {
-              //  L.i("nodeList textList = ${node.text} className = ${node.className}")
+                //  L.i("nodeList textList = ${node.text} className = ${node.className}")
                 if (node.text == text)
                     return node
             }
@@ -147,7 +148,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
 //        L.i("nodeList size = ${nodeList.size}")
         if (nodeList.size > 0) {
             for (node in nodeList) {
-               // L.i("nodeList textList = ${node.text} className = ${node.className}")
+                // L.i("nodeList textList = ${node.text} className = ${node.className}")
                 if (node.text == text)
                     return node
             }
@@ -164,15 +165,15 @@ abstract class BaseAccessibilityService : AccessibilityService() {
 
         val nodeList = accessibilityNodeInfo.findAccessibilityNodeInfosByText(text)
         val resultList = ArrayList<AccessibilityNodeInfo>()
-       // L.i("nodeList size = ${nodeList.size}")
+        // L.i("nodeList size = ${nodeList.size}")
         if (nodeList.size > 0) {
             for (node in nodeList) {
-              //  L.i("nodeList textList = ${node.text} className = ${node.className}")
+                //  L.i("nodeList textList = ${node.text} className = ${node.className}")
                 if (node.text == text)
                     resultList.add(node)
             }
         }
-       // L.i("$text nodeSize: ${resultList.size}")
+        // L.i("$text nodeSize: ${resultList.size}")
         return resultList
     }
 
@@ -186,7 +187,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
             return
         }
         val childCount = nodeInfo.childCount
-       // L.i("className: ${nodeInfo.className} childCount: $childCount")
+        // L.i("className: ${nodeInfo.className} childCount: $childCount")
 
         for (i in 0 until childCount) {
             val childNode = nodeInfo.getChild(i) ?: continue

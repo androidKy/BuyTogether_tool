@@ -92,8 +92,8 @@ class DeviceParamsHook : HookListener {
             param?.run {
                 val value = HookUtil.getValueFromSP(key)
                 L.i("key: $key value: $value")
-                value?.let {
-                    result = it
+                if (!TextUtils.isEmpty(value)) {
+                    result = value
                 }
             }
         }
@@ -107,7 +107,6 @@ class DeviceParamsHook : HookListener {
                     when (this) {
                         "ro.product.brand" -> setResult(DeviceParams.BRAND_KEY, this@run)
                         "ro.product.mode" -> setResult(DeviceParams.MODEL_KEY, this@run)
-
                     }
                 }
             }

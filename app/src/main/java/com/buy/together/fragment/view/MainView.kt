@@ -2,7 +2,7 @@ package com.buy.together.fragment.view
 
 import com.buy.together.base.BaseView
 import com.buy.together.bean.CloseProxyBean
-import com.buy.together.bean.TaskBean
+import com.accessibility.service.data.TaskBean
 
 /**
  * Description:

@@ -1,12 +1,13 @@
 package com.buy.together
 
+import com.tencent.bugly.crashreport.CrashReport
 import me.goldze.mvvmhabit.base.BaseApplication
 import me.goldze.mvvmhabit.crash.CaocConfig
 import me.goldze.mvvmhabit.utils.KLog
 import me.goldze.mvvmhabit.utils.Utils
 
 
-class BaseApplication : BaseApplication() {
+class MyBaseApplication : BaseApplication() {
     override fun onCreate() {
         super.onCreate()
 
@@ -28,6 +29,7 @@ class BaseApplication : BaseApplication() {
 
         Utils.init(this)
 
+        CrashReport.initCrashReport(this, "bddd8c650b", false)
     }
 
 

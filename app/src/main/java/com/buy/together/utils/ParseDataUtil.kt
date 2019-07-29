@@ -1,6 +1,6 @@
 package com.buy.together.utils
 
-import com.buy.together.bean.TaskBean
+import com.accessibility.service.data.TaskBean
 
 /**
  * Description:
@@ -16,8 +16,6 @@ class ParseDataUtil {
         val task_failed = "task_failed"
         val talk_msg = "talk_msg"
 
-        val comment_need = "comment_need"
-        val score_need = "score_need"
         val comment_content = "comment_content"
         val ip_address = "ip_address"
         val account_name = "account_name"
@@ -43,9 +41,7 @@ class ParseDataUtil {
             hashMap[task_completed] = taskData.task_complete.toString()
             hashMap[task_failed] = taskData.task_fail.toString()
             hashMap[talk_msg] = taskData.talk_msg
-            hashMap[comment_need] = taskData.isComment_need.toString()
             hashMap[comment_content] = taskData.comment_content.toString()
-            hashMap[score_need] = taskData.isScore_need.toString()
 
             hashMap[ip_address] = taskData.ip.content
             hashMap[account_name] = taskData.account.user

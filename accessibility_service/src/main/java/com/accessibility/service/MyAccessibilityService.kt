@@ -167,7 +167,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
                 override fun onTaskFailed(failedText: String) {
                     L.i("$failedText was not found.")
-                    responTaskFailed(failedText)
+                    responTaskFailed("$failedText was not found.搜索失败")
                 }
             })
             .setNodeParams("搜索", false)
@@ -258,7 +258,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("店铺名称相同，找到需要刷的商品")
-                    performBackClick(1,object:AfterClickedListener{
+                    performBackClick(1, object : AfterClickedListener {
                         override fun onClicked() {
                             doTask()
                         }
@@ -296,7 +296,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
             })
             .setSwipeXY(
                 "${mScreenWidth / 2},${mScreenHeight * 0.8}",
-                "${mScreenWidth / 2},${mScreenHeight * 0.2}"
+                "${mScreenWidth / 2},${mScreenHeight * 0.3}"
             )
             .create()
             .execute()

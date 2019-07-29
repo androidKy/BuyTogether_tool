@@ -6,7 +6,7 @@ import com.buy.together.R
 import com.buy.together.base.BaseFragment
 import com.buy.together.bean.CloseProxyBean
 import com.buy.together.bean.ProxyIPBean
-import com.buy.together.bean.TaskBean
+import com.accessibility.service.data.TaskBean
 import com.buy.together.fragment.view.MainView
 import com.buy.together.fragment.viewmodel.MainViewModel
 import com.buy.together.utils.Constant
@@ -111,6 +111,9 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
             mViewModel?.parseTask(taskBean)
         } else {
             L.i("获取数据失败：${taskBean.msg}")
+            context?.run {
+                ToastUtils.showToast(this, "获取数据失败：${taskBean.msg}")
+            }
         }
     }
 
@@ -124,6 +127,9 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
 
     override fun onFailed(msg: String?) {
         L.i("获取任务失败：$msg")
+        context?.run {
+            ToastUtils.showToast(this, "获取任务失败")
+        }
     }
 
     /**

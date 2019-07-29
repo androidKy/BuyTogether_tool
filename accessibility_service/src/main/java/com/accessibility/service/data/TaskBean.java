@@ -1,4 +1,4 @@
-package com.buy.together.bean;
+package com.accessibility.service.data;
 
 /**
  * Description:
@@ -6,10 +6,11 @@ package com.buy.together.bean;
  **/
 public class TaskBean {
 
+
     /**
      * code : 200
      * msg : 成功
-     * task : {"task_id":1106,"task_status":1,"task_amount":20,"task_dispense":0,"task_complete":0,"task_fail":0,"time_limit":false,"talk_msg":"商品还有吗？","score_need":true,"comment_need":true,"comment_content":"东挑西选，头都晕了，还是这家吧，评价也不错","has_commented":false,"create_time":"2019-07-23T10:17:54.282","ip":{"city":"","content":"","mac_address":""},"account":{"id":23,"user":"2337630557","pwd":"xh19nyayrwb","type":0},"goods":{"id":5,"goods_id":1395698343,"cat_id":8464,"goods_name":"18种花型雪纺碎花长裙夏季高腰宽松a字裙ins半身裙女夏中长款裙子","mall_name":"姿想旗舰店","keyword":"18种花型雪纺碎花长裙夏季高腰宽松a字裙ins半身裙女夏中长款裙子","search_price":"28.24","choose_info":""},"device":{"id":3958,"bluetooth":"02:00:00:00:00:00","imei":"A00000719CDFA7","brand":"OPPO","android":"6.0.1","mac":"02:00:00:00:00:00","system":"A57_11_A.26_180329","sn":"aa65011","imsi":"460036041518319","model":"OPPO A57","useragent":"Dalvik/2.1.0 (Linux; U; Android 6.0.1; OPPO A57 Build/MMB29M)"},"delivery_address":{"name":"康念之","phone":"15513348714","province":"北京市","city":"北京市","district":"东城区","street":"北京市东城区东四北大街329号"},"stay_time":{"goods_time":3,"search_time":14}}
+     * task : {"task_id":133,"task_type":1,"task_status":1,"task_amount":20,"task_dispense":1,"task_complete":0,"task_fail":0,"talk_msg":"","comment_content":"","buy_behavior":0,"create_time":1.564390811833056E9,"ip":{"city":"","content":"","mac_address":""},"account":{"id":269,"user":"2356727178","pwd":"qqqq8888","type":0},"goods":{"id":8,"goods_id":8183196997,"cat_id":6441,"goods_name":" 酸甜杨梅干九制梅子果蜜饯办公室户外休闲随身独立小包装零食","mall_name":"益C果城恒康美专卖店","keyword":"酸甜杨梅干九制梅子果蜜饯","search_price":"7.9","choose_info":"团购价:15.9,正常价:16.9%%%300g"},"device":{"id":1846,"bluetooth":"B8:37:65:19:2A:90","imei":"864297033467033","brand":"OPPO","android":"5.1","mac":"b8:37:65:19:2a:91","system":"A59s_11_A.12_180302","sn":"GQNFCUS499999999","imsi":"460005912308999","model":"OPPO A59s","useragent":"Dalvik/2.1.0 (Linux; U; Android 5.1; OPPO A59s Build/LMY47I)"},"delivery_address":{"name":"宿韵梅","phone":"17156908545","province":"北京市","city":"北京市","district":"东城区","street":"北京市东城区仓南胡同58"},"stay_time":{"goods_time":10,"search_time":18},"pay_account":{"id":"","type":"","username":"","pwd":""}}
      */
 
     private int code;
@@ -42,53 +43,50 @@ public class TaskBean {
 
     public static class TaskData {
         /**
-         * task_id : 1106
+         * task_id : 133
+         * task_type : 1
          * task_status : 1
          * task_amount : 20
-         * task_dispense : 0
+         * task_dispense : 1
          * task_complete : 0
          * task_fail : 0
-         * time_limit : false
-         * talk_msg : 商品还有吗？
-         * score_need : true
-         * comment_need : true
-         * comment_content : 东挑西选，头都晕了，还是这家吧，评价也不错
-         * has_commented : false
-         * create_time : 2019-07-23T10:17:54.282
+         * talk_msg :
+         * comment_content :
+         * buy_behavior : 0
+         * create_time : 1.564390811833056E9
          * ip : {"city":"","content":"","mac_address":""}
-         * account : {"id":23,"user":"2337630557","pwd":"xh19nyayrwb","type":0}
-         * goods : {"id":5,"goods_id":1395698343,"cat_id":8464,"goods_name":"18种花型雪纺碎花长裙夏季高腰宽松a字裙ins半身裙女夏中长款裙子","mall_name":"姿想旗舰店","keyword":"18种花型雪纺碎花长裙夏季高腰宽松a字裙ins半身裙女夏中长款裙子","search_price":"28.24","choose_info":""}
-         * device : {"id":3958,"bluetooth":"02:00:00:00:00:00","imei":"A00000719CDFA7","brand":"OPPO","android":"6.0.1","mac":"02:00:00:00:00:00","system":"A57_11_A.26_180329","sn":"aa65011","imsi":"460036041518319","model":"OPPO A57","useragent":"Dalvik/2.1.0 (Linux; U; Android 6.0.1; OPPO A57 Build/MMB29M)"}
-         * delivery_address : {"name":"康念之","phone":"15513348714","province":"北京市","city":"北京市","district":"东城区","street":"北京市东城区东四北大街329号"}
-         * stay_time : {"goods_time":3,"search_time":14}
+         * account : {"id":269,"user":"2356727178","pwd":"qqqq8888","type":0}
+         * goods : {"id":8,"goods_id":8183196997,"cat_id":6441,"goods_name":" 酸甜杨梅干九制梅子果蜜饯办公室户外休闲随身独立小包装零食","mall_name":"益C果城恒康美专卖店","keyword":"酸甜杨梅干九制梅子果蜜饯","search_price":"7.9","choose_info":"团购价:15.9,正常价:16.9%%%300g"}
+         * device : {"id":1846,"bluetooth":"B8:37:65:19:2A:90","imei":"864297033467033","brand":"OPPO","android":"5.1","mac":"b8:37:65:19:2a:91","system":"A59s_11_A.12_180302","sn":"GQNFCUS499999999","imsi":"460005912308999","model":"OPPO A59s","useragent":"Dalvik/2.1.0 (Linux; U; Android 5.1; OPPO A59s Build/LMY47I)"}
+         * delivery_address : {"name":"宿韵梅","phone":"17156908545","province":"北京市","city":"北京市","district":"东城区","street":"北京市东城区仓南胡同58"}
+         * stay_time : {"goods_time":10,"search_time":18}
+         * pay_account : {"id":"","type":"","username":"","pwd":""}
          */
 
-        private int task_id;
+        private long task_id;
+        private int task_type;
         private int task_status;
         private int task_amount;
-        private int task_type;
         private int task_dispense;
         private int task_complete;
         private int task_fail;
-        private boolean time_limit;
         private String talk_msg;
-        private boolean score_need;
-        private boolean comment_need;
         private String comment_content;
-        private boolean has_commented;
-        private String create_time;
+        private int buy_behavior;
+        private double create_time;
         private IpBean ip;
         private AccountBean account;
         private GoodsBean goods;
         private DeviceBean device;
         private DeliveryAddressBean delivery_address;
         private StayTimeBean stay_time;
+        private PayAccountBean pay_account;
 
-        public int getTask_id() {
+        public long getTask_id() {
             return task_id;
         }
 
-        public void setTask_id(int task_id) {
+        public void setTask_id(long task_id) {
             this.task_id = task_id;
         }
 
@@ -140,36 +138,12 @@ public class TaskBean {
             this.task_fail = task_fail;
         }
 
-        public boolean isTime_limit() {
-            return time_limit;
-        }
-
-        public void setTime_limit(boolean time_limit) {
-            this.time_limit = time_limit;
-        }
-
         public String getTalk_msg() {
             return talk_msg;
         }
 
         public void setTalk_msg(String talk_msg) {
             this.talk_msg = talk_msg;
-        }
-
-        public boolean isScore_need() {
-            return score_need;
-        }
-
-        public void setScore_need(boolean score_need) {
-            this.score_need = score_need;
-        }
-
-        public boolean isComment_need() {
-            return comment_need;
-        }
-
-        public void setComment_need(boolean comment_need) {
-            this.comment_need = comment_need;
         }
 
         public String getComment_content() {
@@ -180,19 +154,19 @@ public class TaskBean {
             this.comment_content = comment_content;
         }
 
-        public boolean isHas_commented() {
-            return has_commented;
+        public int getBuy_behavior() {
+            return buy_behavior;
         }
 
-        public void setHas_commented(boolean has_commented) {
-            this.has_commented = has_commented;
+        public void setBuy_behavior(int buy_behavior) {
+            this.buy_behavior = buy_behavior;
         }
 
-        public String getCreate_time() {
+        public double getCreate_time() {
             return create_time;
         }
 
-        public void setCreate_time(String create_time) {
+        public void setCreate_time(double create_time) {
             this.create_time = create_time;
         }
 
@@ -244,30 +218,12 @@ public class TaskBean {
             this.stay_time = stay_time;
         }
 
-        @Override
-        public String toString() {
-            return "TaskData{" +
-                    "task_id=" + task_id +
-                    ", task_status=" + task_status +
-                    ", task_amount=" + task_amount +
-                    ", task_type=" + task_type +
-                    ", task_dispense=" + task_dispense +
-                    ", task_complete=" + task_complete +
-                    ", task_fail=" + task_fail +
-                    ", time_limit=" + time_limit +
-                    ", talk_msg='" + talk_msg + '\'' +
-                    ", score_need=" + score_need +
-                    ", comment_need=" + comment_need +
-                    ", comment_content='" + comment_content + '\'' +
-                    ", has_commented=" + has_commented +
-                    ", create_time='" + create_time + '\'' +
-                    ", ip=" + ip +
-                    ", account=" + account +
-                    ", goods=" + goods +
-                    ", device=" + device +
-                    ", delivery_address=" + delivery_address +
-                    ", stay_time=" + stay_time +
-                    '}';
+        public PayAccountBean getPay_account() {
+            return pay_account;
+        }
+
+        public void setPay_account(PayAccountBean pay_account) {
+            this.pay_account = pay_account;
         }
 
         public static class IpBean {
@@ -304,22 +260,13 @@ public class TaskBean {
             public void setMac_address(String mac_address) {
                 this.mac_address = mac_address;
             }
-
-            @Override
-            public String toString() {
-                return "IpBean{" +
-                        "city='" + city + '\'' +
-                        ", content='" + content + '\'' +
-                        ", mac_address='" + mac_address + '\'' +
-                        '}';
-            }
         }
 
         public static class AccountBean {
             /**
-             * id : 23
-             * user : 2337630557
-             * pwd : xh19nyayrwb
+             * id : 269
+             * user : 2356727178
+             * pwd : qqqq8888
              * type : 0
              */
 
@@ -359,32 +306,22 @@ public class TaskBean {
             public void setType(int type) {
                 this.type = type;
             }
-
-            @Override
-            public String toString() {
-                return "AccountBean{" +
-                        "id=" + id +
-                        ", user='" + user + '\'' +
-                        ", pwd='" + pwd + '\'' +
-                        ", type=" + type +
-                        '}';
-            }
         }
 
         public static class GoodsBean {
             /**
-             * id : 5
-             * goods_id : 1395698343
-             * cat_id : 8464
-             * goods_name : 18种花型雪纺碎花长裙夏季高腰宽松a字裙ins半身裙女夏中长款裙子
-             * mall_name : 姿想旗舰店
-             * keyword : 18种花型雪纺碎花长裙夏季高腰宽松a字裙ins半身裙女夏中长款裙子
-             * search_price : 28.24
-             * choose_info :
+             * id : 8
+             * goods_id : 8183196997
+             * cat_id : 6441
+             * goods_name :  酸甜杨梅干九制梅子果蜜饯办公室户外休闲随身独立小包装零食
+             * mall_name : 益C果城恒康美专卖店
+             * keyword : 酸甜杨梅干九制梅子果蜜饯
+             * search_price : 7.9
+             * choose_info : 团购价:15.9,正常价:16.9%%%300g
              */
 
-            private int id;
-            private int goods_id;
+            private long id;
+            private long goods_id;
             private int cat_id;
             private String goods_name;
             private String mall_name;
@@ -392,33 +329,19 @@ public class TaskBean {
             private String search_price;
             private String choose_info;
 
-            @Override
-            public String toString() {
-                return "GoodsBean{" +
-                        "id=" + id +
-                        ", goods_id=" + goods_id +
-                        ", cat_id=" + cat_id +
-                        ", goods_name='" + goods_name + '\'' +
-                        ", mall_name='" + mall_name + '\'' +
-                        ", keyword='" + keyword + '\'' +
-                        ", search_price='" + search_price + '\'' +
-                        ", choose_info='" + choose_info + '\'' +
-                        '}';
-            }
-
-            public int getId() {
+            public long getId() {
                 return id;
             }
 
-            public void setId(int id) {
+            public void setId(long id) {
                 this.id = id;
             }
 
-            public int getGoods_id() {
+            public long getGoods_id() {
                 return goods_id;
             }
 
-            public void setGoods_id(int goods_id) {
+            public void setGoods_id(long goods_id) {
                 this.goods_id = goods_id;
             }
 
@@ -473,20 +396,20 @@ public class TaskBean {
 
         public static class DeviceBean {
             /**
-             * id : 3958
-             * bluetooth : 02:00:00:00:00:00
-             * imei : A00000719CDFA7
+             * id : 1846
+             * bluetooth : B8:37:65:19:2A:90
+             * imei : 864297033467033
              * brand : OPPO
-             * android : 6.0.1
-             * mac : 02:00:00:00:00:00
-             * system : A57_11_A.26_180329
-             * sn : aa65011
-             * imsi : 460036041518319
-             * model : OPPO A57
-             * useragent : Dalvik/2.1.0 (Linux; U; Android 6.0.1; OPPO A57 Build/MMB29M)
+             * android : 5.1
+             * mac : b8:37:65:19:2a:91
+             * system : A59s_11_A.12_180302
+             * sn : GQNFCUS499999999
+             * imsi : 460005912308999
+             * model : OPPO A59s
+             * useragent : Dalvik/2.1.0 (Linux; U; Android 5.1; OPPO A59s Build/LMY47I)
              */
 
-            private int id;
+            private long id;
             private String bluetooth;
             private String imei;
             private String brand;
@@ -498,28 +421,11 @@ public class TaskBean {
             private String model;
             private String useragent;
 
-            @Override
-            public String toString() {
-                return "DeviceBean{" +
-                        "id=" + id +
-                        ", bluetooth='" + bluetooth + '\'' +
-                        ", imei='" + imei + '\'' +
-                        ", brand='" + brand + '\'' +
-                        ", android='" + android + '\'' +
-                        ", mac='" + mac + '\'' +
-                        ", system='" + system + '\'' +
-                        ", sn='" + sn + '\'' +
-                        ", imsi='" + imsi + '\'' +
-                        ", model='" + model + '\'' +
-                        ", useragent='" + useragent + '\'' +
-                        '}';
-            }
-
-            public int getId() {
+            public long getId() {
                 return id;
             }
 
-            public void setId(int id) {
+            public void setId(long id) {
                 this.id = id;
             }
 
@@ -606,12 +512,12 @@ public class TaskBean {
 
         public static class DeliveryAddressBean {
             /**
-             * name : 康念之
-             * phone : 15513348714
+             * name : 宿韵梅
+             * phone : 17156908545
              * province : 北京市
              * city : 北京市
              * district : 东城区
-             * street : 北京市东城区东四北大街329号
+             * street : 北京市东城区仓南胡同58
              */
 
             private String name;
@@ -620,18 +526,6 @@ public class TaskBean {
             private String city;
             private String district;
             private String street;
-
-            @Override
-            public String toString() {
-                return "DeliveryAddressBean{" +
-                        "name='" + name + '\'' +
-                        ", phone='" + phone + '\'' +
-                        ", province='" + province + '\'' +
-                        ", city='" + city + '\'' +
-                        ", district='" + district + '\'' +
-                        ", street='" + street + '\'' +
-                        '}';
-            }
 
             public String getName() {
                 return name;
@@ -684,20 +578,12 @@ public class TaskBean {
 
         public static class StayTimeBean {
             /**
-             * goods_time : 3
-             * search_time : 14
+             * goods_time : 10
+             * search_time : 18
              */
 
             private int goods_time;
             private int search_time;
-
-            @Override
-            public String toString() {
-                return "StayTimeBean{" +
-                        "goods_time=" + goods_time +
-                        ", search_time=" + search_time +
-                        '}';
-            }
 
             public int getGoods_time() {
                 return goods_time;
@@ -713,6 +599,52 @@ public class TaskBean {
 
             public void setSearch_time(int search_time) {
                 this.search_time = search_time;
+            }
+        }
+
+        public static class PayAccountBean {
+            /**
+             * id :
+             * type :
+             * username :
+             * pwd :
+             */
+
+            private String id;
+            private String type;
+            private String username;
+            private String pwd;
+
+            public String getId() {
+                return id;
+            }
+
+            public void setId(String id) {
+                this.id = id;
+            }
+
+            public String getType() {
+                return type;
+            }
+
+            public void setType(String type) {
+                this.type = type;
+            }
+
+            public String getUsername() {
+                return username;
+            }
+
+            public void setUsername(String username) {
+                this.username = username;
+            }
+
+            public String getPwd() {
+                return pwd;
+            }
+
+            public void setPwd(String pwd) {
+                this.pwd = pwd;
             }
         }
     }

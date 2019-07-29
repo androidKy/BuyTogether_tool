@@ -2,6 +2,7 @@ package com.buy.together.fragment.viewmodel
 
 import android.content.Context
 import android.text.TextUtils
+import com.accessibility.service.data.TaskBean
 import com.accessibility.service.function.ClearDataService
 import com.accessibility.service.listener.TaskListener
 import com.androidnetworking.AndroidNetworking
@@ -12,18 +13,18 @@ import com.buy.together.base.BaseViewModel
 import com.buy.together.bean.CityListBean
 import com.buy.together.bean.CloseProxyBean
 import com.buy.together.bean.ProxyIPBean
-import com.buy.together.bean.TaskBean
 import com.buy.together.fragment.view.MainView
 import com.buy.together.hook.sp.DeviceParams
 import com.buy.together.utils.Constant
 import com.buy.together.utils.ParseDataUtil
-import com.buy.together.utils.TestData
 import com.google.gson.Gson
 import com.safframework.log.L
 import com.utils.common.DevicesUtil
 import com.utils.common.ThreadUtils
 import com.utils.common.TimeUtils
 import com.utils.common.ToastUtils
+import com.utils.common.pdd_api.ApiManager
+import com.utils.common.pdd_api.DataListener
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -48,24 +49,20 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     fun getTask() {
         L.init(MainViewModel::class.java.simpleName)
 
-        /* AndroidNetworking.get(Constants.URL_GET_TASK)
-             .build()
-             .getAsOkHttpResponse(object : OkHttpResponseListener {
-                 override fun onResponse(response: Response?) {
-                     response?.body()?.string()?.let {
-                         L.i("返回任务：$it")
-                         parseStringForTask(it)
-                     }
-                 }
+        SPUtils.getInstance(Constant.SP_DEVICE_PARAMS).clear()
+        val imei = DevicesUtil.getIMEI(context)
+        L.i("真实imei：$imei")
+        ApiManager.instance
+            .setDataListener(object : DataListener {
+                override fun onSucceed(result: String) {
+                    parseStringForTask(result)
+                }
 
-                 override fun onError(anError: ANError?) {
-                     anError?.apply {
-                         L.e(message, this)
-                         mainView.onFailed(message)
-                     }
-                 }
-             })*/
-        parseStringForTask(TestData.taskBean_str)
+                override fun onFailed(errorMsg: String) {
+                    mainView.onFailed(errorMsg)
+                }
+            })
+            .getNormalTask(imei)
     }
 
     private fun parseStringForTask(result: String) {
@@ -80,7 +77,9 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                     exceptionTask.code = 400
                     exceptionTask
                 }
+
                 saveTaskData2SP(flatIt)
+                saveUploadParams(taskBean)
                 saveDeviceParams(taskBean)
                 Observable.just(taskBean)
             }.subscribeOn(Schedulers.io())
@@ -207,7 +206,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                     val provinceList = cityListBean.data.cityList   //省
                     for (province in provinceList) {
                         for (city in province.data) {
-                            L.i("cityName: ${city.name} cityCode: ${city.cityid}")
+//                            L.i("cityName: ${city.name} cityCode: ${city.cityid}")
                             if (cityName == city.name) {
                                 result = city.cityid
                                 L.i("target cityName: $cityName cityID: $result")
@@ -368,6 +367,22 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         val spUtils = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
 
         spUtils.put(Constant.KEY_TASK_DATA, strData)
+    }
+
+    /**
+     * 保存请求接口需要上传的参数
+     */
+    private fun saveUploadParams(taskBean: TaskBean) {
+        val spUtils = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+        taskBean.task?.apply {
+            spUtils.apply {
+                put(Constant.KEY_TASK_ID, task_id)
+
+                account?.let {
+                    put(Constant.KEY_ACCOUNT_ID, it.id)
+                }
+            }
+        }
     }
 
     /**

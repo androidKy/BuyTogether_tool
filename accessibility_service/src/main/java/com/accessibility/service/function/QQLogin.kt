@@ -7,6 +7,9 @@ import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.TaskDataUtil
 import com.safframework.log.L
+import com.utils.common.SPUtils
+import com.utils.common.pdd_api.ApiManager
+import com.utils.common.pdd_api.DataListener
 
 /**
  * Description:QQ登录
@@ -60,7 +63,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
     private fun verifyCode() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("输入验证码", 0, false, 15)
+            .setNodeParams("输入验证码", 0, false, 10)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("开始验证码校验")
@@ -87,6 +90,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
 
         override fun onTaskFailed(failedText: String) {
             L.i("验证登录失败：$failedText")
+            responTaskFailed("验证登录失败: $failedText")
         }
 
     }
@@ -168,7 +172,8 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                 override fun onTaskFinished() {
                     //重新请求QQ账号
                     L.i("QQ账号已经被封")
-
+                    updateAccount()
+                    getAccount()
                 }
 
                 override fun onTaskFailed(failedText: String) {
@@ -177,6 +182,40 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
             })
             .create()
             .execute()
+    }
+
+    /**
+     * 更新账号状态
+     */
+    fun updateAccount() {
+        val accountId = SPUtils.getInstance(myAccessibilityService, "pinduoduo_task_sp").getInt("key_account_id")
+        L.i("账号无效，更新状态，账号ID：$accountId")
+        ApiManager.instance
+            .updateQQAcount(accountId, false)
+    }
+
+    /**
+     * 拉取账号
+     */
+    private fun getAccount() {
+        val taskId = SPUtils.getInstance(myAccessibilityService, "pinduoduo_task_sp").getInt("key_task_id")
+        L.i("账号无效，重新拉取账号，任务ID：$taskId")
+        if (taskId > 0) {
+            ApiManager.instance
+                .setDataListener(object : DataListener {
+                    override fun onSucceed(result: String) {
+                        //todo 重新输入账号和密码
+                    }
+
+                    override fun onFailed(errorMsg: String) {
+                        responTaskFailed("重新拉去账号失败: $errorMsg")
+                    }
+                })
+                .getQQAccount(taskId.toString())
+        } else {
+            responTaskFailed("任务ID不存在，拉取账号失败")
+        }
+
     }
 
     fun responTaskFailed(msg: String) {

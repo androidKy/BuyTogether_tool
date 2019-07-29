@@ -263,41 +263,26 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
      */
     private fun choosePayChannel() {
         L.i("新增地址完成，选择支付方式：")
-        NodeController.Builder()
-            .setNodeService(nodeService)
-            .setNodeParams("选择地址")
+
+        val payXY = ADB_XY.PAY_NOW.ali_pay
+
+        AdbScriptController.Builder()
+            .setSwipeXY(ADB_XY.PAY_NOW.origin_swipe_up, ADB_XY.PAY_NOW.target_swipe_up)
+            .setXY(ADB_XY.PAY_NOW.more_pay_channel)
+            .setSwipeXY(ADB_XY.PAY_NOW.origin_swipe_up, ADB_XY.PAY_NOW.target_swipe_up)
+            .setXY(payXY)
+            .setXY(ADB_XY.PAY_NOW.pay_now_btn)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    L.i("选择地址节点找到")
+                    payByAlipay()
                 }
 
                 override fun onTaskFailed(failedText: String) {
-                    L.i("$failedText was not found.")
+
                 }
             })
             .create()
             .execute()
-
-
-        /*   val payXY = ADB_XY.PAY_NOW.ali_pay
-
-           AdbScriptController.Builder()
-               .setSwipeXY(ADB_XY.PAY_NOW.origin_swipe_up, ADB_XY.PAY_NOW.target_swipe_up)
-               .setXY(ADB_XY.PAY_NOW.more_pay_channel)
-               .setSwipeXY(ADB_XY.PAY_NOW.origin_swipe_up, ADB_XY.PAY_NOW.target_swipe_up)
-               .setXY(payXY)
-               .setXY(ADB_XY.PAY_NOW.pay_now_btn)
-               .setTaskListener(object : TaskListener {
-                   override fun onTaskFinished() {
-                       payByAlipay()
-                   }
-
-                   override fun onTaskFailed(failedText: String) {
-
-                   }
-               })
-               .create()
-               .execute()*/
 
     }
 

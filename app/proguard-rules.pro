@@ -22,3 +22,10 @@
 
 -keep class com.baidu.ocr.sdk.**{*;}
 -dontwarn com.baidu.ocr.**
+
+-keep class com.uc.crashsdk.** { *; }
+-keep interface com.uc.crashsdk.** { *; }
+
+-dontwarn com.tencent.bugly.**
+-keep public class com.tencent.bugly.**{*;}
+-keep class android.support.**{*;}
