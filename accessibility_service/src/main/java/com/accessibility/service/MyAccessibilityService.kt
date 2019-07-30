@@ -310,9 +310,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
             .setScreenDensity(mScreenWidth, mScreenHeight)
             .setTaskFinishedListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    L.i("任务完成，重新开始下一轮任务")
-                    initParams()
-                    mTaskListener?.onTaskFinished()
+                    responTaskFinished()
+
                 }
 
                 override fun onTaskFailed(failedText: String) {
@@ -321,6 +320,12 @@ class MyAccessibilityService : BaseAccessibilityService() {
             })
             .doOnEvent()
 
+    }
+
+    private fun responTaskFinished() {
+        L.i("任务完成，重新开始下一轮任务")
+        initParams()
+        mTaskListener?.onTaskFinished()
     }
 
     private fun responTaskFailed(msg: String) {

@@ -38,13 +38,34 @@ public class PackageManagerUtils {
 
     public void restartApplication(Context context) {
         // 关闭辅助点击
-        // CMDUtil.execCmd("settings put secure accessibility_enabled 0");
-        //CMDUtil.execCmd("am force-stop com.ky.ad;am start -n com.ky.ad/com.ky.ad.MainActivity");
+        ThreadUtils.executeByCached(new ThreadUtils.Task<Boolean>() {
+            @Override
+            public Boolean doInBackground() throws Throwable {
+                CMDUtil cmdUtil = new CMDUtil();
+                cmdUtil.execCmd("settings put secure accessibility_enabled 1");
+                cmdUtil.execCmd("am force-stop com.shopping.pdd;am start -n com.shopping.pdd/com.buy.together.MainActivity");
+                return false;
+            }
 
-//        final Intent intent = context.getPackageManager().getLaunchIntentForPackage(Common.PACKAGE_NAME);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        context.startActivity(intent);
-//        android.os.Process.killProcess(android.os.Process.myPid());
+            @Override
+            public void onSuccess(Boolean result) {
+
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onFail(Throwable t) {
+
+            }
+        });
+        //android.os.Process.killProcess(android.os.Process.myPid());
+       /* final Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);*/
     }
 
 //    public void forceStopApplication() {

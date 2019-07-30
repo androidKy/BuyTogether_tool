@@ -2,7 +2,6 @@ package com.buy.together.hook
 
 import android.text.TextUtils
 import com.buy.together.hook.sp.DeviceParams
-import com.safframework.log.L
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 
@@ -91,7 +90,7 @@ class DeviceParamsHook : HookListener {
         override fun afterHookedMethod(param: MethodHookParam?) {
             param?.run {
                 val value = HookUtil.getValueFromSP(key)
-                L.i("key: $key value: $value")
+                HookUtil().log("修改设备参数", "key: $key value: $value")
                 if (!TextUtils.isEmpty(value)) {
                     result = value
                 }
@@ -114,7 +113,7 @@ class DeviceParamsHook : HookListener {
 
         fun setResult(key: String, param: MethodHookParam) {
             val value = HookUtil.getValueFromSP(key)
-            L.i("key: $key value: $value")
+            HookUtil().log("修改设备参数", "key: $key value: $value")
             if (!TextUtils.isEmpty(value))
                 param.result = value
         }

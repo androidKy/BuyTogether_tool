@@ -51,6 +51,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             }
         } catch (e: Exception) {
             L.e(e.message, e)
+            responFailed("任务过程中出现异常")
         }
     }
 
@@ -92,7 +93,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
                     12, 123, 124, 1234 -> talkWithSaler()
                     13, 132, 134 -> collectGoods()
                     14, 142, 143 -> buyGoods()
-                    else -> L.i("任务完成")
+                    else -> responSuccess()
                 }
             }
         }
@@ -107,17 +108,17 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             .setTaskListener(object : TaskListener {
                 override fun onTaskFailed(failedText: String) {
                     L.i("$failedText was not found.")
+                    responFailed("$failedText node was not found.")
                 }
 
                 override fun onTaskFinished() {
-                    L.i("聊天后返回")
                     nodeService.performBackClick(2, object : AfterClickedListener {
                         override fun onClicked() {
                             TaskDataUtil.instance.getTask_type()?.apply {
                                 when (this) {
                                     23, 123, 1234 -> collectGoods()
                                     24, 124, 324 -> buyGoods()
-                                    else -> L.i("任务完成")
+                                    else -> responSuccess()
                                 }
                             }
                         }
@@ -150,7 +151,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
                             1234, 134, 234, 34 -> buyGoods()
                             132, 32, 324 -> talkWithSaler()
 
-                            else -> L.i("任务完成")
+                            else -> responSuccess()
                         }
                     }
                 }
@@ -168,7 +169,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
 
         val choose_info = TaskDataUtil.instance.getChoose_info()
         L.i("商品参数size：${choose_info?.size}")
-        if (choose_info == null || choose_info.isEmpty()) {
+        if (choose_info == null || choose_info.isEmpty() || choose_info.size == 1) {
             L.i("商品参数为空")
             NodeController.Builder()
                 .setNodeService(nodeService)
@@ -317,23 +318,16 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
      * 支付宝支付
      */
     private fun payByAlipay() {
-        NodeController.Builder()
-            .setNodeService(nodeService)
-            .setNodeParams("立即支付")
-            //.setNodeParams("付款方式")
-            .setNodeParams("立即付款")
-            .setTaskListener(object : TaskListener {
+        AliPayLogin(nodeService)
+            .login(object : TaskListener {
                 override fun onTaskFinished() {
                     responSuccess()
                 }
 
                 override fun onTaskFailed(failedText: String) {
-                    responFailed("$failedText was not found.")
+                    responFailed(failedText)
                 }
-
             })
-            .create()
-            .execute()
     }
 
 

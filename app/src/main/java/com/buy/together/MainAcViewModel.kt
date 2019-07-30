@@ -4,8 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import com.accessibility.service.util.Constant
+import com.accessibility.service.util.UpdateSPManager
 import com.buy.together.base.BaseViewModel
-import com.buy.together.utils.Constant
 import com.proxy.service.core.AppInfo
 import com.proxy.service.core.AppProxyManager
 import com.safframework.log.L
@@ -83,15 +84,18 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
     fun updateTask(isSucceed: Boolean, remark: String) {
         PackageManagerUtils.getInstance().killApplication(Constant.BUY_TOGETHER_PKG)
         PackageManagerUtils.getInstance().killApplication(Constant.QQ_TIM_PKG)
+        PackageManagerUtils.getInstance().killApplication(Constant.ALI_PAY_PKG)
 
         val taskId = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_ID)
         ApiManager.instance
             .setDataListener(object : DataListener {
                 override fun onSucceed(result: String) {
+                    UpdateSPManager(context).updateTaskStatus(1)
                     mainAcView.onResponUpdateTask()
                 }
 
                 override fun onFailed(errorMsg: String) {
+                    UpdateSPManager(context).updateTaskStatus(-1)
                     mainAcView.onResponUpdateTask()
                 }
             })

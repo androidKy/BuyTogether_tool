@@ -7,11 +7,11 @@ import android.support.v7.app.AppCompatActivity
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.listener.TaskListener
+import com.accessibility.service.util.Constant
 import com.buy.together.fragment.MainFragment
-import com.buy.together.utils.Constant
 import com.proxy.service.LocalVpnService.START_VPN_SERVICE_REQUEST_CODE
 import com.safframework.log.L
-import com.utils.common.ToastUtils
+import com.utils.common.PackageManagerUtils
 import me.goldze.mvvmhabit.utils.SPUtils
 
 class MainActivity : AppCompatActivity(), MainAcView {
@@ -59,6 +59,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
             startActivity(intent)
             return
         }
+        // PackageManagerUtils.getInstance().restartApplication(this)
         startTask()
     }
 
@@ -84,7 +85,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
         override fun onTaskFailed(failedText: String) {
             L.i("任务失败：重新开始任务.errorMsg:$failedText")
-            ToastUtils.showToast(this@MainActivity, "任务失败：$failedText")
+            // ToastUtils.showToast(this@MainActivity, "任务失败：$failedText")
             mMainAcViewModel?.updateTask(false, failedText)
         }
     }
@@ -94,9 +95,9 @@ class MainActivity : AppCompatActivity(), MainAcView {
      * @see MainAcViewModel.updateTask
      */
     override fun onResponUpdateTask() {
-        mTaskRunning = false
-        startTask()
+        PackageManagerUtils.getInstance().restartApplication(this)
     }
+
     /**
      *
      */

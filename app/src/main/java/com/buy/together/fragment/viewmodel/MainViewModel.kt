@@ -5,6 +5,7 @@ import android.text.TextUtils
 import com.accessibility.service.data.TaskBean
 import com.accessibility.service.function.ClearDataService
 import com.accessibility.service.listener.TaskListener
+import com.accessibility.service.util.Constant
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
@@ -15,14 +16,10 @@ import com.buy.together.bean.CloseProxyBean
 import com.buy.together.bean.ProxyIPBean
 import com.buy.together.fragment.view.MainView
 import com.buy.together.hook.sp.DeviceParams
-import com.buy.together.utils.Constant
 import com.buy.together.utils.ParseDataUtil
 import com.google.gson.Gson
 import com.safframework.log.L
-import com.utils.common.DevicesUtil
-import com.utils.common.ThreadUtils
-import com.utils.common.TimeUtils
-import com.utils.common.ToastUtils
+import com.utils.common.*
 import com.utils.common.pdd_api.ApiManager
 import com.utils.common.pdd_api.DataListener
 import io.reactivex.Observable
@@ -49,6 +46,26 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     fun getTask() {
         L.init(MainViewModel::class.java.simpleName)
 
+        val taskStatus = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_STATUS, -1)
+        val taskIp = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_ID, 0)
+        L.i("taskStatus: $taskStatus taskIP:$taskIp")
+        if (taskStatus == 0) {  //未完成的任务必须上报未完成，才能请求到接下来的任务
+            val taskId = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_ID)
+            ApiManager.instance
+                .setDataListener(object : DataListener {
+                    override fun onSucceed(result: String) {
+                        startGetTask()
+                    }
+
+                    override fun onFailed(errorMsg: String) {
+                        L.i("上报任务失败：$errorMsg")
+                    }
+                })
+                .updateTaskStatus(taskId.toString(), false, "", "", "任务中断，未知错误")
+        } else startGetTask()
+    }
+
+    private fun startGetTask() {
         SPUtils.getInstance(Constant.SP_DEVICE_PARAMS).clear()
         val imei = DevicesUtil.getIMEI(context)
         L.i("真实imei：$imei")
@@ -78,9 +95,6 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                     exceptionTask
                 }
 
-                saveTaskData2SP(flatIt)
-                saveUploadParams(taskBean)
-                saveDeviceParams(taskBean)
                 Observable.just(taskBean)
             }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -91,11 +105,23 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     }
 
     /**
+     * 保存数据到SP
+     */
+    private fun saveData(taskBean: TaskBean) {
+        saveAlipayAccount(taskBean)
+        saveTaskData2SP(Gson().toJson(taskBean))
+        saveUploadParams(taskBean)
+        saveDeviceParams(taskBean)
+    }
+
+    /**
      * 解析数据为键值对，显示到表格上
      */
     fun parseTask(taskBean: TaskBean) {
         val subscribe = Observable.just(taskBean)
             .flatMap {
+                saveData(it)
+
                 val datas = try {
                     val hashMapData = ParseDataUtil.parseTaskBean2HashMap(it)
 
@@ -119,7 +145,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     }
 
     /**
-     * 清理数据
+     * 清理PDD和QQ的数据
      */
     fun clearData() {
         ClearDataService().clearData(object : TaskListener {
@@ -140,7 +166,8 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     fun getPorts(taskBean: TaskBean) {
         L.i("开始申请端口: $taskBean")
         //匹配相应的城市
-        val cityName = taskBean.task.delivery_address.city
+        //val cityName = taskBean.task.delivery_address.city //todo 城市数据暂时写死测试
+        val cityName = "佛山市"
         L.i("target cityName: $cityName")
         val currentDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).run { format(Date()) }
         L.i("currentDate: $currentDate")
@@ -196,7 +223,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      * 获取任务城市的相应code
      */
     private fun getCityCode(cityName: String, cityData: String) {
-        L.i("cityData string: $cityData cityName: $cityName")
+        L.i("cityName: $cityName cityData string: $cityData ")
         ThreadUtils.executeByCached(object : ThreadUtils.Task<String>() {
             override fun doInBackground(): String {
                 var result: String = ""
@@ -223,7 +250,9 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                 //城市ID获取完成，开始打开端口
                 if (!TextUtils.isEmpty(result)) {
                     //判断是否有缓存
-                    val portsCache = SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_IP_PORTS)
+                    val portsCache = SPUtils.getInstance(Constant.SP_IP_PORTS).getString(
+                        Constant.KEY_IP_PORTS
+                    )
                     if (TextUtils.isEmpty(portsCache))
                         requestPorts(result)
                     else {
@@ -231,9 +260,9 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                         mainView.onRequestPortsResult(portsCache)
                     }
                 } else {
-                    L.i("city id == null")
+                    L.i("该城市没有IP，重新获取地址")
                     //todo 该城市没有IP，重新获取地址
-                    ToastUtils.showToast(context, "city id == null")
+                    ToastUtils.showToast(context, "$cityName 没有相应的IP")
                 }
             }
 
@@ -277,10 +306,17 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                         L.i("request ports result: $this")
                         val proxyIpBean = Gson().fromJson(this, ProxyIPBean::class.java)
                         if (proxyIpBean?.data?.code == 200) {
+                            //上报IP信息
+                            uploadIpInfo(proxyIpBean)
+
                             //保存已申请的端口
                             SPUtils.getInstance(Constant.SP_IP_PORTS).put(Constant.KEY_IP_PORTS, this)
                             SPUtils.getInstance(Constant.SP_IP_PORTS)
                                 .put(Constant.KEY_CUR_PORT, proxyIpBean.data.port[0].toString())
+
+                            //保存任务状态,此时任务开始，未完成
+                            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).put(Constant.KEY_TASK_STATUS, 0)
+
                             mainView.onRequestPortsResult(this)
                         } else {  //重新请求
                             L.i("请求数据出错：code = ${proxyIpBean?.data?.code}")
@@ -295,6 +331,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                 }
             })
     }
+
 
     /**
      * 关闭端口
@@ -321,7 +358,6 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                     L.i("关闭端口失败：${anError?.response?.body()?.string()} errorMsg: ${anError?.errorDetail}")
                     mainView.onResponClosePort(null)
                 }
-
             })
     }
 
@@ -359,6 +395,14 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         })
     }
 
+    /**
+     * 保存支付宝账号
+     */
+    private fun saveAlipayAccount(taskBean: TaskBean) {
+        taskBean.task?.run {
+            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).put(Constant.KEY_ALIPAY_ACCOUNT, pay_account.username)
+        }
+    }
 
     /**
      * 保存任务数据到SP
@@ -403,6 +447,64 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
             }
         }
 
+    }
+
+    /**
+     * 上传IP信息
+     */
+    private fun uploadIpInfo(proxyIPBean: ProxyIPBean) {
+        ThreadUtils.executeByCached(object : ThreadUtils.Task<TaskBean>() {
+            override fun doInBackground(): TaskBean? {
+                val taskBeanStr = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getString(
+                    Constant.KEY_TASK_DATA
+                )
+                if (!TextUtils.isEmpty(taskBeanStr)) {
+                    return Gson().fromJson(taskBeanStr, TaskBean::class.java)
+                }
+                return null
+            }
+
+            override fun onSuccess(taskBean: TaskBean?) {
+                taskBean?.task?.run {
+                    ApiManager.instance
+                        .setDataListener(object : DataListener {
+                            override fun onSucceed(result: String) {
+
+                            }
+
+                            override fun onFailed(errorMsg: String) {
+
+                            }
+                        })
+                        .uploadIpInfo(
+                            task_id.toString(), delivery_address.city,
+                            proxyIPBean.data.domain, DevicesUtil.getWifiMacAddr(context)
+                        )
+                }
+            }
+
+            override fun onCancel() {
+            }
+
+            override fun onFail(t: Throwable?) {
+            }
+
+        })
+    }
+
+    /**
+     * 执行一个定时器去定时获取任务
+     */
+    fun startTaskTimer() {
+        TimerUtils.instance.start(object : TimerTask() {
+            override fun run() {
+                getTask()
+            }
+        }, 1 * 60 * 1000L)
+    }
+
+    fun stopTaskTimer() {
+        TimerUtils.instance.stop()
     }
 
     /**

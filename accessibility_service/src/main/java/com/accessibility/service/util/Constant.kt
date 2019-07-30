@@ -1,4 +1,4 @@
-package com.buy.together.utils
+package com.accessibility.service.util
 
 class Constant {
     companion object {
@@ -7,6 +7,7 @@ class Constant {
         const val QQ_TIM_PKG: String = "com.tencent.tim"
         const val QQ_LIATE_PKG: String = "com.tencent.qqlite"
         const val QQ_FULL_PKG: String = "com.tencent.mobileqq"
+        const val ALI_PAY_PKG: String = "com.eg.android.AlipayGphone"
 
 
         const val SP_TASK_FILE_NAME = "pinduoduo_task_sp"
@@ -17,6 +18,9 @@ class Constant {
         const val KEY_TASK_DATA = "key_task_data"
         const val KEY_TASK_ID = "key_task_id"
         const val KEY_ACCOUNT_ID = "key_account_id"
+        const val KEY_TASK_STATUS = "key_task_status"
+
+        const val KEY_ALIPAY_ACCOUNT = "key_alipay_account"
 
         const val KEY_CITY_DATA = "key_cities"
         const val KEY_CITY_GET_DATE = "key_city_get_date"

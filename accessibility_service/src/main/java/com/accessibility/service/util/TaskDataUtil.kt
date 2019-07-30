@@ -1,6 +1,8 @@
 package com.accessibility.service.util
 
+import android.text.TextUtils
 import com.accessibility.service.data.TaskBean
+import com.safframework.log.L
 
 /**
  * Description:
@@ -74,7 +76,9 @@ class TaskDataUtil private constructor() {
      */
     fun getGoods_keyword(): String? {
         return mTaskServiceData?.run {
-            task?.goods?.keyword
+            task?.goods?.keyword?.split(",")?.run {
+                get(0)
+            }
         }
     }
 
@@ -116,11 +120,19 @@ class TaskDataUtil private constructor() {
      * 获取选择的商品信息
      */
     fun getChoose_info(): List<String>? {
-        return mTaskServiceData?.run {
+        val serviceChooseInfo = mTaskServiceData?.run {
             task?.goods?.choose_info ?: ""
-        }.run {
-            this?.split(",")
         }
+        if (!TextUtils.isEmpty(serviceChooseInfo)) {
+
+            try {
+                return serviceChooseInfo?.split("规格:")?.get(1)?.split(",")
+            } catch (e: Exception) {
+                L.e(e.message)
+            }
+        }
+
+        return null
     }
 
     /**

@@ -86,8 +86,10 @@ class NodeExecute(
             mHandler?.sendMessageDelayed(message, 1000)
         } else if (nodeResult == null && mStartTime > timeout) {    //找不到时是否需要下滑查找
             dealNodeFailed(index, textOrId, editInputText, isClicked, isScrolled)
-        } else if (nodeResult != null && mStartTime < timeout) {
+        } else if (nodeResult != null) {
             dealNodeSucceed(index, textOrId, editInputText, isClicked, nodeResult)
+        }else{
+            dealNodeFailed(index, textOrId, editInputText, isClicked, isScrolled)
         }
     }
 

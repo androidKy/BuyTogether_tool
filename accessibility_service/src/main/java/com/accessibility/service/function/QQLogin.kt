@@ -1,11 +1,15 @@
 package com.accessibility.service.function
 
+import android.text.TextUtils
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
+import com.accessibility.service.data.AccountBean
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
+import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
+import com.google.gson.Gson
 import com.safframework.log.L
 import com.utils.common.SPUtils
 import com.utils.common.pdd_api.ApiManager
@@ -21,9 +25,18 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
 
     fun login(taskListener: TaskListener) {
         mTaskListener = taskListener
+        val userName = TaskDataUtil.instance.getLogin_name()
+        if (!TextUtils.isEmpty(userName)) {
+            login(userName!!, TaskDataUtil.instance.getLogin_psw()!!)
+        } else {
+            responTaskFailed("账号或者密码为空")
+        }
+    }
+
+    fun login(userName: String, userPsw: String) {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("TIM登录")
+            .setNodeParams("TIM登录", 0, 20)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("已跳转到QQ登录界面")
@@ -40,9 +53,9 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                         //.setXY("777,1600", 10 * 1000L)
                         //.setXY("540,310")
                         .setXY("540,320")   //账号输入框
-                        .setText(TaskDataUtil.instance.getLogin_name()!!)
+                        .setText(userName)
                         .setXY("540,450")   //密码输入框
-                        .setText(TaskDataUtil.instance.getLogin_psw()!!)
+                        .setText(userPsw)
                         .setXY("540,680")  //登录按钮
                         .create()
                         .execute()
@@ -102,7 +115,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
     private fun checkLoginResult() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("登录失败", 0, false, 3)
+            .setNodeParams("登录失败", 0, false, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     dealInputError()
@@ -188,7 +201,8 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
      * 更新账号状态
      */
     fun updateAccount() {
-        val accountId = SPUtils.getInstance(myAccessibilityService, "pinduoduo_task_sp").getInt("key_account_id")
+        val accountId =
+            SPUtils.getInstance(myAccessibilityService, Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_ACCOUNT_ID)
         L.i("账号无效，更新状态，账号ID：$accountId")
         ApiManager.instance
             .updateQQAcount(accountId, false)
@@ -198,17 +212,31 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
      * 拉取账号
      */
     private fun getAccount() {
-        val taskId = SPUtils.getInstance(myAccessibilityService, "pinduoduo_task_sp").getInt("key_task_id")
+        val taskId =
+            SPUtils.getInstance(myAccessibilityService, Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_ID)
         L.i("账号无效，重新拉取账号，任务ID：$taskId")
         if (taskId > 0) {
             ApiManager.instance
                 .setDataListener(object : DataListener {
                     override fun onSucceed(result: String) {
-                        //todo 重新输入账号和密码
+                        try {
+                            //L.i("获取账号结果：$result")
+                            Gson().fromJson(result, AccountBean::class.java).account.run {
+                                mTaskListener?.let {
+                                    //更新账号信息
+                                    if (!TextUtils.isEmpty(user) && !TextUtils.isEmpty(pwd)) {
+                                        login(user, pwd)
+                                    } else responTaskFailed("账号密码为空")
+                                }
+                            }
+                        } catch (e: Exception) {
+                            L.e(e.message)
+                            responTaskFailed("账号返回数据格式有误: ${e?.message}")
+                        }
                     }
 
                     override fun onFailed(errorMsg: String) {
-                        responTaskFailed("重新拉去账号失败: $errorMsg")
+                        responTaskFailed("重新拉取账号失败: $errorMsg")
                     }
                 })
                 .getQQAccount(taskId.toString())

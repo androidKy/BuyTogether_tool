@@ -2,7 +2,7 @@ package com.buy.together.hook.sp;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import com.buy.together.utils.Constant;
+import com.accessibility.service.util.Constant;
 import com.crossbowffs.remotepreferences.RemotePreferences;
 import com.utils.common.Constants;
 

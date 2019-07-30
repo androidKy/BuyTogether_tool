@@ -2,7 +2,7 @@ package com.buy.together.hook
 
 import android.os.Bundle
 import android.view.View
-import com.buy.together.utils.Constant
+import com.accessibility.service.util.Constant
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage

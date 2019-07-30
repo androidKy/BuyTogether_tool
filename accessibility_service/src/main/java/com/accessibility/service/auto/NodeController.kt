@@ -61,7 +61,7 @@ class NodeController {
 
         fun setNodeParams(textList: List<String>, isScrolled: Boolean): Builder {
             for (text in textList)
-                setNodeParams(text, 0, true, isScrolled)
+                setNodeParams(text, 0, true, isScrolled,5,true)
 
             return this@Builder
         }
@@ -120,10 +120,12 @@ class NodeController {
             return this@Builder
         }
 
-        fun setNodeParams(text: String, nodeFlag: Int, isClicked: Boolean, isScrolled: Boolean): Builder {
-            setNodeParams(text, nodeFlag, isClicked, isScrolled, "null")
+        fun setNodeParams(text: String, nodeFlag: Int, isClicked: Boolean, isScrolled: Boolean,timeout: Int,findNextFlag: Boolean): Builder {
+            setNodeParams(text, nodeFlag, isClicked, isScrolled, "null",timeout,findNextFlag)
             return this@Builder
         }
+
+
 
         fun setNodeParams(
             text: String,

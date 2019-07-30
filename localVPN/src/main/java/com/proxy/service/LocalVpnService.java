@@ -19,6 +19,7 @@ import com.proxy.service.header.IPHeader;
 import com.proxy.service.header.TCPHeader;
 import com.proxy.service.header.UDPHeader;
 import com.proxy.service.tcp.TcpProxyServer;
+import com.safframework.log.L;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -81,14 +82,15 @@ public class LocalVpnService extends VpnService implements Runnable {
     }
 
     @Override
-
     public void onCreate() {
+        L.i("onCreate()");
         System.out.printf("VPNService(%s) created.\n", ID);
         // Start a new session by creating a new thread.
         m_VPNThread = new Thread(this, "VPNServiceThread");
         m_VPNThread.start();
         super.onCreate();
     }
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -445,7 +447,7 @@ public class LocalVpnService extends VpnService implements Runnable {
         this.m_VPNOutputStream = null;
     }
 
-    private synchronized void dispose() {
+    public synchronized void dispose() {
         // 断开VPN
         disconnectVPN();
 
@@ -462,6 +464,9 @@ public class LocalVpnService extends VpnService implements Runnable {
             m_DnsProxy = null;
             writeLog("LocalDnsProxy stopped.");
         }
+        if (m_VPNThread != null) {
+            m_VPNThread.interrupt();
+        }
 
         stopSelf();
         IsRunning = false;
@@ -470,10 +475,12 @@ public class LocalVpnService extends VpnService implements Runnable {
 
     @Override
     public void onDestroy() {
-        System.out.printf("VPNService(%s) destoried.\n", ID);
+        L.i("onDestroy()");
         if (m_VPNThread != null) {
             m_VPNThread.interrupt();
         }
+        //  System.out.printf("VPNService(%s) destoried.\n", ID);
+
     }
 
 }

@@ -6,8 +6,6 @@ import android.content.Intent;
 import com.safframework.log.L;
 import com.utils.common.ToastUtils;
 
-import java.lang.ref.WeakReference;
-
 import static android.content.Context.MODE_PRIVATE;
 import static com.proxy.service.LocalVpnService.START_VPN_SERVICE_REQUEST_CODE;
 
@@ -17,10 +15,27 @@ import static com.proxy.service.LocalVpnService.START_VPN_SERVICE_REQUEST_CODE;
  **/
 public class LocalVpnManager {
 
-    private static boolean mInitProxyData = false;
-    private static WeakReference<Intent> mLocalIntentRef = null;
 
-    public static void initData(Context context, String authUser, String authPsw, String domain, String port) {
+    private LocalVpnManager() {
+
+    }
+
+    private static LocalVpnManager mInstance;
+
+    public static LocalVpnManager getInstance() {
+        if (mInstance == null) {
+            synchronized (LocalVpnManager.class) {
+                if (mInstance == null)
+                    mInstance = new LocalVpnManager();
+            }
+
+        }
+        return mInstance;
+    }
+
+    private boolean mInitProxyData = false;
+
+    public void initData(Context context, String authUser, String authPsw, String domain, String port) {
         String proxyDataUrl = "http://(" + authUser + ":" + authPsw + ")@" + domain + ":" + port;
         L.i("save proxyUrl: " + proxyDataUrl);
 
@@ -34,7 +49,7 @@ public class LocalVpnManager {
         mInitProxyData = true;
     }
 
-    public static void startVpnService(Activity activity) {
+    public void startVpnService(Activity activity) {
         if (!mInitProxyData) {
             ToastUtils.Companion.showToast(activity, "未设置代理数据");
             return;
@@ -46,20 +61,19 @@ public class LocalVpnManager {
 
         Intent intent = LocalVpnService.prepare(activity);
         if (intent == null) {
+            L.i("LocalVpnService prepare result is null.");
             Intent localIntent = new Intent(activity, LocalVpnService.class);
             activity.startService(localIntent);
-
-            if (mLocalIntentRef != null)
-                mLocalIntentRef.clear();
-            mLocalIntentRef = new WeakReference<Intent>(localIntent);
-        } else activity.startActivityForResult(intent, START_VPN_SERVICE_REQUEST_CODE);
+        } else {
+            L.i("LocalVpnService prepare result is not null.");
+            activity.startActivityForResult(intent, START_VPN_SERVICE_REQUEST_CODE);
+        }
     }
 
 
-    public static void stopVpnService(Activity activity) {
-        if (mLocalIntentRef != null && mLocalIntentRef.get() != null) {
-            activity.stopService(mLocalIntentRef.get());
-            mLocalIntentRef.clear();
-        }
+    public void stopVpnService(Activity activity) {
+        LocalVpnService localVpnService = LocalVpnService.mInstance;
+        if (localVpnService != null)
+            localVpnService.dispose();
     }
 }

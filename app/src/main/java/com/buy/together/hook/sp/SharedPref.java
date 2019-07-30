@@ -1,6 +1,6 @@
 package com.buy.together.hook.sp;
 
-import com.buy.together.utils.Constant;
+import com.accessibility.service.util.Constant;
 import com.safframework.log.L;
 import com.utils.common.Constants;
 import de.robv.android.xposed.XSharedPreferences;

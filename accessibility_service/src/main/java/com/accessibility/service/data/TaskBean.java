@@ -63,7 +63,7 @@ public class TaskBean {
          * pay_account : {"id":"","type":"","username":"","pwd":""}
          */
 
-        private long task_id;
+        private int task_id;
         private int task_type;
         private int task_status;
         private int task_amount;
@@ -82,11 +82,11 @@ public class TaskBean {
         private StayTimeBean stay_time;
         private PayAccountBean pay_account;
 
-        public long getTask_id() {
+        public int getTask_id() {
             return task_id;
         }
 
-        public void setTask_id(long task_id) {
+        public void setTask_id(int task_id) {
             this.task_id = task_id;
         }
 

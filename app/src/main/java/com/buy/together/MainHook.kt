@@ -1,10 +1,10 @@
 package com.buy.together
 
 import android.text.TextUtils
+import com.accessibility.service.util.Constant
 import com.buy.together.hook.CloakHook
 import com.buy.together.hook.DeviceParamsHook
 import com.buy.together.hook.LoginHook
-import com.buy.together.utils.Constant
 import com.utils.common.Constants
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.callbacks.XC_LoadPackage

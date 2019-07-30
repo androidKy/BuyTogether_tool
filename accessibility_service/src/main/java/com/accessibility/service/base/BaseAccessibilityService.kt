@@ -11,6 +11,7 @@ import com.accessibility.service.data.TaskBean
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.page.PageEnum
+import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
 import com.google.gson.Gson
 import com.safframework.log.L
@@ -94,7 +95,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
     fun initTaskData() {
         try {
             if (mIsInited) return
-            SPUtils.getInstance(this, "pinduoduo_task_sp").getString("key_task_data")
+            SPUtils.getInstance(this, Constant.SP_TASK_FILE_NAME).getString(Constant.KEY_TASK_DATA)
                 .let {
                     L.i("无障碍服务初始化数据: $it")
                     if (!TextUtils.isEmpty(it)) {

@@ -2,14 +2,14 @@ package com.buy.together.fragment
 
 import android.text.TextUtils
 import android.widget.FrameLayout
+import com.accessibility.service.data.TaskBean
+import com.accessibility.service.util.Constant
 import com.buy.together.R
 import com.buy.together.base.BaseFragment
 import com.buy.together.bean.CloseProxyBean
 import com.buy.together.bean.ProxyIPBean
-import com.accessibility.service.data.TaskBean
 import com.buy.together.fragment.view.MainView
 import com.buy.together.fragment.viewmodel.MainViewModel
-import com.buy.together.utils.Constant
 import com.google.gson.Gson
 import com.proxy.service.LocalVpnManager
 import com.proxy.service.LocalVpnService
@@ -106,13 +106,19 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     }
 
     override fun onResponTask(taskBean: TaskBean) {
-        if (taskBean.code == 200) {
-            mTaskBean = taskBean
-            mViewModel?.parseTask(taskBean)
-        } else {
-            L.i("获取数据失败：${taskBean.msg}")
-            context?.run {
-                ToastUtils.showToast(this, "获取数据失败：${taskBean.msg}")
+        when {
+            taskBean.code == 200 -> {
+                mViewModel?.stopTaskTimer()
+                mTaskBean = taskBean
+                mViewModel?.parseTask(taskBean)
+            }
+            taskBean.code == 201 -> //没有待领取的任务，启动一个定时器去定时获取
+                mViewModel?.startTaskTimer()
+            else -> {
+                L.i("获取数据失败：${taskBean.msg}")
+                context?.run {
+                    ToastUtils.showToast(this, "获取数据失败：${taskBean.msg}")
+                }
             }
         }
     }
@@ -127,6 +133,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
 
     override fun onFailed(msg: String?) {
         L.i("获取任务失败：$msg")
+        mViewModel?.startTaskTimer()
         context?.run {
             ToastUtils.showToast(this, "获取任务失败")
         }
@@ -205,9 +212,8 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         activity?.run {
             val proxyIPBean = Gson().fromJson(result, ProxyIPBean::class.java)
             proxyIPBean?.data?.apply {
-                LocalVpnManager.initData(this@run, authuser, authpass, domain, port?.get(0)?.toString())
-
-                LocalVpnManager.startVpnService(this@run)
+                LocalVpnManager.getInstance().initData(this@run, authuser, authpass, domain, port?.get(0)?.toString())
+                LocalVpnManager.getInstance().startVpnService(this@run)
             }
         }
     }
@@ -219,7 +225,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         L.i("LocalVpnService status changed: $status isRunning: $isRunning MainThread: ${ThreadUtils.isMainThread()}")
         if (isRunning!!)   //代理连接成功
         {
-            protectSocket()
+            //protectSocket()
 
             LocalVpnService.IsRunning = true
             startPdd()
@@ -265,7 +271,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         super.onDestroyView()
         mViewModel?.clearSubscribes()
         activity?.apply {
-            LocalVpnManager.stopVpnService(this)
+            LocalVpnManager.getInstance().stopVpnService(this)
         }
     }
 
