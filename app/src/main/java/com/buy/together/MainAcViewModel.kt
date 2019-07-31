@@ -11,6 +11,7 @@ import com.proxy.service.core.AppInfo
 import com.proxy.service.core.AppProxyManager
 import com.safframework.log.L
 import com.utils.common.PackageManagerUtils
+import com.utils.common.ThreadUtils
 import com.utils.common.pdd_api.ApiManager
 import com.utils.common.pdd_api.DataListener
 import me.goldze.mvvmhabit.utils.SPUtils
@@ -82,24 +83,43 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
      * 完成一轮任务，更新任务完成情况
      */
     fun updateTask(isSucceed: Boolean, remark: String) {
-        PackageManagerUtils.getInstance().killApplication(Constant.BUY_TOGETHER_PKG)
-        PackageManagerUtils.getInstance().killApplication(Constant.QQ_TIM_PKG)
-        PackageManagerUtils.getInstance().killApplication(Constant.ALI_PAY_PKG)
-
-        val taskId = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_ID)
-        ApiManager.instance
-            .setDataListener(object : DataListener {
-                override fun onSucceed(result: String) {
-                    UpdateSPManager(context).updateTaskStatus(1)
-                    mainAcView.onResponUpdateTask()
+        ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
+            override fun doInBackground(): Boolean {
+                var result = false
+                PackageManagerUtils.getInstance().apply {
+                    result = killApplication(Constant.BUY_TOGETHER_PKG)
+                    result = killApplication(Constant.QQ_TIM_PKG)
+                    result = killApplication(Constant.ALI_PAY_PKG)
                 }
+                //PackageManagerUtils.getInstance().killApplication(Constant.ALI_PAY_PKG)
+                return result
+            }
 
-                override fun onFailed(errorMsg: String) {
-                    UpdateSPManager(context).updateTaskStatus(-1)
-                    mainAcView.onResponUpdateTask()
-                }
-            })
-            .updateTaskStatus(taskId.toString(), isSucceed, "账号名", "订单号", remark)
+            override fun onSuccess(result: Boolean?) {
+                val taskId = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_ID)
+                ApiManager.instance
+                    .setDataListener(object : DataListener {
+                        override fun onSucceed(result: String) {
+                            UpdateSPManager(context).updateTaskStatus(1)
+                            mainAcView.onResponUpdateTask()
+                        }
+
+                        override fun onFailed(errorMsg: String) {
+                            UpdateSPManager(context).updateTaskStatus(0)
+                            mainAcView.onResponUpdateTask()
+                        }
+                    })
+                    .updateTaskStatus(taskId.toString(), isSucceed, "账号名", "订单号", remark)
+            }
+
+            override fun onCancel() {
+            }
+
+            override fun onFail(t: Throwable?) {
+            }
+
+        })
+
 
         //todo 账号名和订单号
     }

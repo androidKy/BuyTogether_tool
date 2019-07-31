@@ -52,6 +52,10 @@ public class HookUtil {
         XposedBridge.log(tag + ": " + msg);
     }
 
+    public static void logStatic(String tag,String msg){
+        XposedBridge.log(tag + ": " + msg);
+    }
+
     public static String getValueFromSP(String key) {
         return SharedPref.getXValue(key);
     }

@@ -54,6 +54,24 @@ class TaskDataUtil private constructor() {
     }
 
     /**
+     * 获取支付宝账号
+     */
+    fun getAlipayAccount(): String? {
+        return mTaskServiceData?.run {
+            task?.pay_account?.username
+        }
+    }
+
+    /**
+     * 获取支付宝密码
+     */
+    fun getAlipayPsw(): String? {
+        return mTaskServiceData?.run {
+            task?.pay_account?.pwd
+        }
+    }
+
+    /**
      * 获取商品名字
      */
     fun getGoods_name(): String? {

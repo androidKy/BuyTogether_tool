@@ -7,23 +7,26 @@ import java.io.*;
  * - @Time:  2019/3/30 17:59
  */
 public class CMDUtil {
-    private  final String TAG = "CMDUtil";
+    private final String TAG = "CMDUtil";
 
-    private  final String COMMAND_EXIT = "exit\n";
-    private  final String COMMAND_LINE_END = "\n";
+    private final String COMMAND_EXIT = "exit\n";
+    private final String COMMAND_LINE_END = "\n";
 
     //静默安装
-    public  boolean installSlient(String path) {
+    public boolean installSlient(String path) {
         String cmd = "pm install -r " + path;
         return execCmd(cmd).contains("Success");
     }
 
-    public  boolean uninstallSlient(String packageName) {
+    public boolean uninstallSlient(String packageName) {
         String cmd = "pm uninstall " + packageName;
         return execCmd(cmd).contains("Success");
     }
 
-    public  String execCmd(String command) {
+    public String execCmd(String command) {
+        if (ThreadUtils.isMainThread()) {
+            return "cmd executed can't run in mainThread.";
+        }
         ProcessBuilder pb = new ProcessBuilder("su");
         pb.redirectErrorStream(true);
 
@@ -72,8 +75,7 @@ public class CMDUtil {
         return result.toString();
     }
 
-    public  void executeCMD(String cmd)
-    {
+    public void executeCMD(String cmd) {
         try {
             // 申请获取root权限，这一步很重要，不然会没有作用
             Process process = Runtime.getRuntime().exec("su");
@@ -95,7 +97,7 @@ public class CMDUtil {
      *
      * @param process
      */
-    public  void killProcess(Process process) {
+    public void killProcess(Process process) {
         int pid = getProcessId(process.toString());
         if (pid != 0) {
             try {
@@ -115,7 +117,7 @@ public class CMDUtil {
      * @param str
      * @return
      */
-    public  int getProcessId(String str) {
+    public int getProcessId(String str) {
         try {
             int i = str.indexOf("=") + 1;
             int j = str.indexOf("]");
@@ -131,7 +133,7 @@ public class CMDUtil {
      *
      * @param process
      */
-    public  void closeAllStream(Process process) {
+    public void closeAllStream(Process process) {
         try {
             InputStream in = process.getInputStream();
             if (in != null)
@@ -160,7 +162,7 @@ public class CMDUtil {
      *
      * @param process
      */
-    public  void processDestroy(Process process) {
+    public void processDestroy(Process process) {
         if (process != null) {
             try {
                 if (process.exitValue() != 0) {
@@ -180,7 +182,7 @@ public class CMDUtil {
      *
      * @param process
      */
-    public  void asyncProcessDestroy(final Process process) {
+    public void asyncProcessDestroy(final Process process) {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {

@@ -102,6 +102,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
      */
     fun startTask() {
         mVpnFailedConnectCount = 0
+        LocalVpnManager.getInstance().stopVpnService(activity!!)
         mViewModel?.getTask()
     }
 
@@ -113,9 +114,13 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
                 mViewModel?.parseTask(taskBean)
             }
             taskBean.code == 201 -> //没有待领取的任务，启动一个定时器去定时获取
+            {
                 mViewModel?.startTaskTimer()
+                mContainer?.removeAllViews()
+            }
             else -> {
                 L.i("获取数据失败：${taskBean.msg}")
+                mContainer?.removeAllViews()
                 context?.run {
                     ToastUtils.showToast(this, "获取数据失败：${taskBean.msg}")
                 }
@@ -155,7 +160,10 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
 
               }*/
         } else {
-            ToastUtils.showToast(context!!, "清理数据失败")
+            context?.apply {
+                ToastUtils.showToast(this, "应用未获得root权限")
+            }
+
         }
     }
 
@@ -263,7 +271,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     }
 
     override fun onLogReceived(logString: String) {
-        L.i("LocalVpnService onLogReceived: $logString")
+        //L.i("LocalVpnService onLogReceived: $logString")
     }
 
 

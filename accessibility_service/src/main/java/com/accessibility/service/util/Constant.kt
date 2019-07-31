@@ -32,7 +32,8 @@ class Constant {
 
 
         const val CONTENT_TYPE = "multipart/form-data"
-        const val URL_PROXY_IP = "http://ip.25ios.com:8089/ea2b1b139898ce70988dc8cb1c1e3467.php" //代理IP接口
+        //const val URL_PROXY_IP = "http://ip.25ios.com:8089/ea2b1b139898ce70988dc8cb1c1e3467.php" //代理IP接口
+        const val URL_PROXY_IP = "http://ip.25ios.com:8089/6796324d5300e5978673d71c50780067.php"
         const val POST_PARAM_METHOD = "method"
         const val POST_PARAM_NUMBER: String = "number"
         const val POST_PARAM_IMEI = "imei"

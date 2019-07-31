@@ -29,11 +29,12 @@ public class PackageManagerUtils {
         return mInstance;
     }
 
-    public void killApplication(String packageName) {
+    public boolean killApplication(String packageName) {
         if (TextUtils.isEmpty(packageName)) {
-            return;
+            return false;
         }
-        new CMDUtil().execCmd("am force-stop " + packageName);
+        String result = new CMDUtil().execCmd("am force-stop " + packageName);
+        return result.contains("Success");
     }
 
     public void restartApplication(Context context) {

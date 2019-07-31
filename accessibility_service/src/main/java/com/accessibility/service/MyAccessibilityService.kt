@@ -311,16 +311,23 @@ class MyAccessibilityService : BaseAccessibilityService() {
             .setTaskFinishedListener(object : TaskListener {
                 override fun onTaskFinished() {
                     responTaskFinished()
-
                 }
 
                 override fun onTaskFailed(failedText: String) {
-                    mTaskListener?.onTaskFailed(failedText)
+                    //mTaskListener?.onTaskFailed(failedText)
+                    responTaskFailed(failedText)
                 }
             })
             .doOnEvent()
-
     }
+
+    /**
+     * 上传订单号
+     */
+    private fun uploadOrderInfo() {
+        //todo 上传订单号
+    }
+
 
     private fun responTaskFinished() {
         L.i("任务完成，重新开始下一轮任务")
@@ -329,7 +336,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
     }
 
     private fun responTaskFailed(msg: String) {
-        setCurPageType(PageEnum.START_PAGE)
+        initParams()
         mTaskListener?.onTaskFailed(msg)
     }
 
@@ -338,6 +345,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
      */
     private fun initParams() {
         setCurPageType(PageEnum.START_PAGE)
+        mIsInited = false
+        mIsLogined = false
     }
 
 }

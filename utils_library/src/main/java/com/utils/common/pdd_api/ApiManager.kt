@@ -16,7 +16,7 @@ class ApiManager {
     private var mDataListener: DataListener? = null
 
     companion object {
-        private const val URL_DOMAIN: String = "192.168.1.157:8000"
+        private const val URL_DOMAIN: String = "192.168.1.180:8080"
         private const val URL_HTTP: String = "http://"
         const val POST_JSON_CONTENT_TYPE: String = "application/json"
 
@@ -148,6 +148,10 @@ class ApiManager {
                     }
                 })
         }
+    }
+
+    fun updateTaskStatus(taskId: String, isSucceed: Boolean, remark: String) {
+        updateTaskStatus(taskId, isSucceed, "", "", remark)
     }
 
     /**

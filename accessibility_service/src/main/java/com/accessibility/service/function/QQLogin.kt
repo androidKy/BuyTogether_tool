@@ -4,16 +4,15 @@ import android.text.TextUtils
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
-import com.accessibility.service.data.AccountBean
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
-import com.google.gson.Gson
 import com.safframework.log.L
 import com.utils.common.SPUtils
 import com.utils.common.pdd_api.ApiManager
 import com.utils.common.pdd_api.DataListener
+import org.json.JSONObject
 
 /**
  * Description:QQ登录
@@ -221,14 +220,18 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                     override fun onSucceed(result: String) {
                         try {
                             //L.i("获取账号结果：$result")
-                            Gson().fromJson(result, AccountBean::class.java).account.run {
+                            JSONObject(result).apply {
+                                //todo 返回的QQ账号格式
+
+                            }
+                          /*  Gson().fromJson(result, AccountBean::class.java).account.run {
                                 mTaskListener?.let {
                                     //更新账号信息
                                     if (!TextUtils.isEmpty(user) && !TextUtils.isEmpty(pwd)) {
                                         login(user, pwd)
                                     } else responTaskFailed("账号密码为空")
                                 }
-                            }
+                            }*/
                         } catch (e: Exception) {
                             L.e(e.message)
                             responTaskFailed("账号返回数据格式有误: ${e?.message}")

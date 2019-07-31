@@ -279,7 +279,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
                 }
 
                 override fun onTaskFailed(failedText: String) {
-
+                    responFailed(failedText)
                 }
             })
             .create()
@@ -296,12 +296,12 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("支付成功，下单完成，重新开始下一轮任务")
-                    mTaskFinishedListener?.onTaskFinished()
+                    responSuccess()
                 }
 
                 override fun onTaskFailed(failedText: String) {
                     L.i("$failedText was not found.支付失败")
-
+                    responFailed(failedText)
                 }
 
             })

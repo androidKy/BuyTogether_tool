@@ -14,31 +14,33 @@ import com.utils.common.ToastUtils
  * Created by Quinin on 2019-07-18.
  **/
 class MyVpnService : BaseService() {
+    private var mLocalVpnIntent: Intent? = null
     private var mInitProxyData = false
-    private var mLocanVpnIntent: Intent? = null
 
     override fun onCreate() {
         super.onCreate()
-
         //createNotification(VPN_NOTIFICATION_ID, CHANNEL_NAME)
+        L.i("MyVpnService onCreate()")
+        mLocalVpnIntent = Intent(this, LocalVpnService::class.java)
+        startService(mLocalVpnIntent)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        intent?.run {
+        /*intent?.run {
             val authUser = getStringExtra(LocalVpnService.AUTHUSER_KEY)
             val authPsw = getStringExtra(LocalVpnService.AUTHPSW_KEY)
             val domain = getStringExtra(LocalVpnService.DOMAIN_KEY)
             val port = getStringExtra(LocalVpnService.PORT_KEY)
             L.i("vpnService authUser:$authUser authPsw:$authPsw domain:$domain port:$port")
             initProxyData(authUser, authPsw, domain, port)
-        }
+        }*/
 
         return START_STICKY
     }
 
 
     override fun onBind(intent: Intent?): IBinder? {
-        return MyBinder()
+        return null
     }
 
     /**
@@ -99,21 +101,26 @@ class MyVpnService : BaseService() {
          * 断掉代理IP
          */
         fun disconnect() {
-            mLocanVpnIntent?.apply {
-                stopService(this)
-            }
+            /* mLocanVpnIntent?.apply {
+                 stopService(this)
+             }*/
         }
     }
 
     private fun startConnect(activity: Activity) {
-        mLocanVpnIntent = Intent(activity, LocalVpnService::class.java)
-        startService(mLocanVpnIntent)
+        /* mLocanVpnIntent = Intent(activity, LocalVpnService::class.java)
+         startService(mLocanVpnIntent)*/
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mLocanVpnIntent?.apply {
+        L.i("MyVpnService onDestroy()")
+        mLocalVpnIntent?.run {
+            L.i("停止VPN服务")
             stopService(this)
         }
+        /* mLocanVpnIntent?.apply {
+             stopService(this)
+         }*/
     }
 }

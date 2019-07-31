@@ -50,7 +50,6 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         val taskIp = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_ID, 0)
         L.i("taskStatus: $taskStatus taskIP:$taskIp")
         if (taskStatus == 0) {  //未完成的任务必须上报未完成，才能请求到接下来的任务
-            val taskId = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_ID)
             ApiManager.instance
                 .setDataListener(object : DataListener {
                     override fun onSucceed(result: String) {
@@ -61,7 +60,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                         L.i("上报任务失败：$errorMsg")
                     }
                 })
-                .updateTaskStatus(taskId.toString(), false, "", "", "任务中断，未知错误")
+                .updateTaskStatus(taskIp.toString(), false, "任务中断，未知错误")
         } else startGetTask()
     }
 
@@ -112,6 +111,8 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         saveTaskData2SP(Gson().toJson(taskBean))
         saveUploadParams(taskBean)
         saveDeviceParams(taskBean)
+        //保存任务状态,此时任务开始，未完成
+        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).put(Constant.KEY_TASK_STATUS, 0)
     }
 
     /**
@@ -155,7 +156,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
 
             override fun onTaskFailed(failedText: String) {
                 L.i("清理数据失败: $failedText")
-                mainView.onClearDataResult("failed")
+                mainView.onClearDataResult(failedText)
             }
         })
     }
@@ -166,8 +167,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     fun getPorts(taskBean: TaskBean) {
         L.i("开始申请端口: $taskBean")
         //匹配相应的城市
-        //val cityName = taskBean.task.delivery_address.city //todo 城市数据暂时写死测试
-        val cityName = "佛山市"
+        val cityName = taskBean.task.delivery_address.city
         L.i("target cityName: $cityName")
         val currentDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).run { format(Date()) }
         L.i("currentDate: $currentDate")
@@ -263,6 +263,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                     L.i("该城市没有IP，重新获取地址")
                     //todo 该城市没有IP，重新获取地址
                     ToastUtils.showToast(context, "$cityName 没有相应的IP")
+                    uploadIpError(cityName)
                 }
             }
 
@@ -275,6 +276,24 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
             }
 
         })
+    }
+
+    /**
+     * 上报城市没有该IP
+     */
+    private fun uploadIpError(cityName: String) {
+        val taskIp = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_ID, 0)
+        ApiManager.instance
+            .setDataListener(object : DataListener {
+                override fun onSucceed(result: String) {
+                    getTask()
+                }
+
+                override fun onFailed(errorMsg: String) {
+
+                }
+            })
+            .updateTaskStatus(taskIp.toString(), false, "$cityName 没有相应的代理IP")
     }
 
     /**
@@ -314,8 +333,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                             SPUtils.getInstance(Constant.SP_IP_PORTS)
                                 .put(Constant.KEY_CUR_PORT, proxyIpBean.data.port[0].toString())
 
-                            //保存任务状态,此时任务开始，未完成
-                            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).put(Constant.KEY_TASK_STATUS, 0)
+
 
                             mainView.onRequestPortsResult(this)
                         } else {  //重新请求
@@ -420,6 +438,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         val spUtils = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
         taskBean.task?.apply {
             spUtils.apply {
+                L.i("保存的任务ID：$task_id")
                 put(Constant.KEY_TASK_ID, task_id)
 
                 account?.let {

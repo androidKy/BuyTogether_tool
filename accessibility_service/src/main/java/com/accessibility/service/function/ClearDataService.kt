@@ -1,6 +1,7 @@
 package com.accessibility.service.function
 
 import com.accessibility.service.listener.TaskListener
+import com.accessibility.service.util.Constant
 import com.safframework.log.L
 import com.utils.common.CMDUtil
 import com.utils.common.ThreadUtils
@@ -18,7 +19,8 @@ class ClearDataService {
             override fun doInBackground(): Boolean {
                 val cmdResult = CMDUtil().execCmd(
                     "pm clear com.tencent.tim;" +
-                            "pm clear com.xunmeng.pinduoduo;"
+                            "pm clear com.xunmeng.pinduoduo;" +
+                            "pm clear ${Constant.ALI_PAY_PKG};"
                     /*   "cd /sdcard/;" +
                        "rm -fr Android;" +
                        "rm -fr Tencent;" +
@@ -36,7 +38,9 @@ class ClearDataService {
             }
 
             override fun onSuccess(result: Boolean?) {
-                taskListener.onTaskFinished()
+                if (result!!)
+                    taskListener.onTaskFinished()
+                else taskListener.onTaskFailed("工具应用未获得root权限")
             }
 
             override fun onCancel() {

@@ -11,7 +11,6 @@ import com.accessibility.service.util.Constant
 import com.buy.together.fragment.MainFragment
 import com.proxy.service.LocalVpnService.START_VPN_SERVICE_REQUEST_CODE
 import com.safframework.log.L
-import com.utils.common.PackageManagerUtils
 import me.goldze.mvvmhabit.utils.SPUtils
 
 class MainActivity : AppCompatActivity(), MainAcView {
@@ -95,7 +94,9 @@ class MainActivity : AppCompatActivity(), MainAcView {
      * @see MainAcViewModel.updateTask
      */
     override fun onResponUpdateTask() {
-        PackageManagerUtils.getInstance().restartApplication(this)
+        //PackageManagerUtils.getInstance().restartApplication(this)
+        mTaskRunning = false
+        startTask()
     }
 
     /**

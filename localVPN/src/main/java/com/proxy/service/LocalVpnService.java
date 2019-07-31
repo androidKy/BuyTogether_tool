@@ -2,8 +2,7 @@ package com.proxy.service;
 
 import android.app.Activity;
 import android.app.PendingIntent;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -33,6 +32,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class LocalVpnService extends VpnService implements Runnable {
+
+    public static final String BROADCAST_STOP_VPN = "com.vpn.stop";
 
     public static final int START_VPN_SERVICE_REQUEST_CODE = 1985;
     public static final String AUTHUSER_KEY = "authUser";
@@ -86,7 +87,11 @@ public class LocalVpnService extends VpnService implements Runnable {
         L.i("onCreate()");
         System.out.printf("VPNService(%s) created.\n", ID);
         // Start a new session by creating a new thread.
-        m_VPNThread = new Thread(this, "VPNServiceThread");
+        registerReceiver(mVpnStopReceiver, new IntentFilter(BROADCAST_STOP_VPN));
+        m_VPNThread = new Thread(this);
+        if (m_VPNThread.isInterrupted()) {
+            L.i("m_VPNThread was already interrupted");
+        }
         m_VPNThread.start();
         super.onCreate();
     }
@@ -210,11 +215,11 @@ public class LocalVpnService extends VpnService implements Runnable {
             while (true) {
                 if (IsRunning) {
                     //加载配置文件
-                    writeLog("set shadowsocks/(http proxy)");
+                    //writeLog("set shadowsocks/(http proxy)");
                     try {
                         ProxyConfig.Instance.m_ProxyList.clear();
                         ProxyConfig.Instance.addProxyToList(ProxyUrl);
-                        writeLog("Proxy is: %s", ProxyConfig.Instance.getDefaultProxy());
+                        // writeLog("Proxy is: %s", ProxyConfig.Instance.getDefaultProxy());
                     } catch (Exception e) {
                         String errString = e.getMessage();
                         if (errString == null || errString.isEmpty()) {
@@ -224,11 +229,11 @@ public class LocalVpnService extends VpnService implements Runnable {
                         onStatusChanged(errString, false);
                         continue;
                     }
-                    String welcomeInfoString = ProxyConfig.Instance.getWelcomeInfo();
+                  /*  String welcomeInfoString = ProxyConfig.Instance.getWelcomeInfo();
                     if (welcomeInfoString != null && !welcomeInfoString.isEmpty()) {
                         writeLog("%s", ProxyConfig.Instance.getWelcomeInfo());
-                    }
-                    writeLog("Global mode is " + (ProxyConfig.Instance.globalMode ? "on" : "off"));
+                    }*/
+                    //writeLog("Global mode is " + (ProxyConfig.Instance.globalMode ? "on" : "off"));
 
                     runVPN();
                 } else {
@@ -242,7 +247,7 @@ public class LocalVpnService extends VpnService implements Runnable {
             writeLog("Fatal error: %s", e.toString());
         } finally {
             writeLog("App terminated.");
-            dispose();
+            // dispose();
         }
     }
 
@@ -409,7 +414,7 @@ public class LocalVpnService extends VpnService implements Runnable {
             for (AppInfo app : AppProxyManager.Instance.proxyAppInfo) {
 //                builder.addAllowedApplication("com.vm.shadowsocks");//需要把自己加入代理，不然会无法进行网络链接
 //                builder.addAllowedApplication("com.bull.vpn");//需要把自己加入代理，不然会无法进行网络链接
-                builder.addAllowedApplication("com.net.request");//需要把自己加入代理，不然会无法进行网络链接
+                //builder.addAllowedApplication("com.net.request");//需要把自己加入代理，不然会无法进行网络链接
                 try {
                     builder.addAllowedApplication(app.getPkgName());
 //                    writeLog("Proxy App: " + app.getAppLabel() + " , PackName:" + app.getPkgName());
@@ -434,7 +439,8 @@ public class LocalVpnService extends VpnService implements Runnable {
         return pfdDescriptor;
     }
 
-    public void disconnectVPN() {
+    private void disconnectVPN() {
+
         try {
             if (m_VPNInterface != null) {
                 m_VPNInterface.close();
@@ -447,10 +453,13 @@ public class LocalVpnService extends VpnService implements Runnable {
         this.m_VPNOutputStream = null;
     }
 
-    public synchronized void dispose() {
+    private void dispose() {
+        L.i("断开VPN服务");
         // 断开VPN
         disconnectVPN();
 
+        IsRunning = false;
+        onRevoke();
         // 停止TcpServer
         if (m_TcpProxyServer != null) {
             m_TcpProxyServer.stop();
@@ -464,23 +473,47 @@ public class LocalVpnService extends VpnService implements Runnable {
             m_DnsProxy = null;
             writeLog("LocalDnsProxy stopped.");
         }
-        if (m_VPNThread != null) {
-            m_VPNThread.interrupt();
+
+        try {
+            if (m_VPNThread != null) {
+                m_VPNThread.interrupt();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        stopSelf();
-        IsRunning = false;
-        System.exit(0);
+        //System.exit(0);
     }
 
     @Override
     public void onDestroy() {
         L.i("onDestroy()");
-        if (m_VPNThread != null) {
-            m_VPNThread.interrupt();
+        try {
+            if (m_VPNThread != null) {
+                m_VPNThread.interrupt();
+                m_VPNThread = null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        //  System.out.printf("VPNService(%s) destoried.\n", ID);
 
+        unregisterReceiver(mVpnStopReceiver);
+        //  System.out.printf("VPNService(%s) destoried.\n", ID);
+    }
+
+    private VpnStateReceiver mVpnStopReceiver = new VpnStateReceiver();
+
+    class VpnStateReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent == null || intent.getAction() == null)
+                return;
+
+            if (intent.getAction().equals(BROADCAST_STOP_VPN)) {
+                L.i("接收到停止VPN服务的广播");
+                dispose();
+            }
+        }
     }
 
 }
