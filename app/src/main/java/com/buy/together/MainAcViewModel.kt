@@ -97,7 +97,8 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
 
             override fun onSuccess(result: Boolean?) {
                 val taskId = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_ID)
-                ApiManager.instance
+                val orderNumber = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getString(Constant.KEY_ORDER_NUMBER)
+                ApiManager()
                     .setDataListener(object : DataListener {
                         override fun onSucceed(result: String) {
                             UpdateSPManager(context).updateTaskStatus(1)
@@ -109,7 +110,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
                             mainAcView.onResponUpdateTask()
                         }
                     })
-                    .updateTaskStatus(taskId.toString(), isSucceed, "账号名", "订单号", remark)
+                    .updateTaskStatus(taskId.toString(), isSucceed, "账号名", orderNumber, remark)
             }
 
             override fun onCancel() {

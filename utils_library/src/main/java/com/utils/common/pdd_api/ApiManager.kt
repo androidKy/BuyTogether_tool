@@ -28,9 +28,9 @@ class ApiManager {
         const val URL_GET_ADDRESS: String = "$URL_HTTP$URL_DOMAIN/others/address/"
 
 
-        val instance: ApiManager by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
+        /*val instance: ApiManager by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
             ApiManager()
-        }
+        }*/
     }
 
     init {
@@ -64,16 +64,22 @@ class ApiManager {
      * 获取QQ账号
      * @param taskId 任务ID
      */
-    fun getQQAccount(taskId: String) {
+    fun getQQAccount(taskId: String, dataListener: DataListener) {
+
         AndroidNetworking.get("$URL_GET_ACCOUNT$taskId")
             .build()
             .getAsOkHttpResponse(object : OkHttpResponseListener {
                 override fun onResponse(response: Response?) {
-                    responseSucceed(response, "获取QQ账号成功")
+                    response?.body()?.string()?.run{
+                        dataListener.onSucceed(this)
+                    }
                 }
 
                 override fun onError(anError: ANError?) {
-                    responseError(anError, "获取账号失败")
+                    //responseError(anError, "获取账号失败")
+                    anError?.errorDetail?.run {
+                        dataListener.onFailed(this)
+                    }
                 }
             })
     }
@@ -129,7 +135,7 @@ class ApiManager {
     /**
      * 上报账号使用情况
      */
-    fun updateQQAcount(accountId: Int, isValid: Boolean) {
+    fun updateQQAcount(accountId: Int, isValid: Int) {
         JSONObject().run {
             put("id", accountId)
             put("effective", isValid)

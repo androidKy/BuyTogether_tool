@@ -146,6 +146,19 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         val accessibilityNodeInfo = rootInActiveWindow ?: return null
 
         val nodeList = accessibilityNodeInfo.findAccessibilityNodeInfosByText(text)
+
+        //选择地址时，省和市的名字相同会出错
+        /* if (text == "北京市" || text == "重庆市" || text == "上海市" || text == "天津市") {
+             if (nodeList.size > 1) {
+                 L.i("四大直辖市 size: ${nodeList.size}")
+                 for (i in 0 until nodeList.size) {
+                     L.i("节点:${nodeList[i].text} isClickable: ${nodeList[i].isClickable}")
+                     if (!nodeList[i].isClickable)
+                         return nodeList[i]
+                 }
+             }
+         }*/
+
 //        L.i("nodeList size = ${nodeList.size}")
         if (nodeList.size > 0) {
             for (node in nodeList) {
@@ -240,11 +253,14 @@ abstract class BaseAccessibilityService : AccessibilityService() {
      * @param nodeInfo recyclerViewNode
      */
     fun performViewClick(nodeInfo: AccessibilityNodeInfo?) {
+        L.i("performViewClick click ${nodeInfo?.text} ")
         var nodeInfo1: AccessibilityNodeInfo? = nodeInfo ?: return
         while (nodeInfo1 != null) {
             if (nodeInfo1.isClickable) {
+                L.i("${nodeInfo1.className} was clicked")
                 nodeInfo1.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                break
+
+                return
             }
             nodeInfo1 = nodeInfo1.parent
         }
@@ -278,15 +294,11 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         performViewClick(nodeInfo, delayTime, null)
     }
 
-    fun performViewClick(nodeInfo: AccessibilityNodeInfo?, clickedListener: AfterClickedListener?) {
-        performViewClick(nodeInfo, 0, clickedListener)
-    }
-
     fun performViewClick(nodeInfo: AccessibilityNodeInfo?, delayTime: Long, clickedListener: AfterClickedListener?) {
         mHandler.postDelayed({
             performViewClick(nodeInfo)
-            L.i("${nodeInfo?.text} was clicked. clickedListener: $clickedListener")
             clickedListener?.onClicked()
+            // clickedListener?.onClicked()
         }, delayTime * 1000L)
     }
 

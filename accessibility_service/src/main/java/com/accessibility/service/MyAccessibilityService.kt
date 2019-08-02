@@ -144,12 +144,10 @@ class MyAccessibilityService : BaseAccessibilityService() {
         L.i("mIsLogined : $mIsLogined")
 
         val goodName = TaskDataUtil.instance.getGoods_name()
-        val keyWord = TaskDataUtil.instance.getGoods_keyword()
         val searchPrice = TaskDataUtil.instance.getSearchPrice()
         val mallName = TaskDataUtil.instance.getMall_name()
 
-        if (goodName.isNullOrEmpty() || mallName.isNullOrEmpty() ||
-            keyWord.isNullOrEmpty() || searchPrice.isNullOrEmpty()
+        if (goodName.isNullOrEmpty() || mallName.isNullOrEmpty() || searchPrice.isNullOrEmpty()
         ) {
             L.i("商品信息为空，自动查找商品失败")
             responTaskFailed("商品信息为空，自动查找商品失败")
@@ -162,7 +160,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("开始确认商品")
-                    confirmGoods(goodName, searchPrice, mallName)
+                    clickSearchEditText(goodName, searchPrice, mallName)
                 }
 
                 override fun onTaskFailed(failedText: String) {
@@ -171,13 +169,51 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 }
             })
             .setNodeParams("搜索", false)
-            .setNodeParams("com.xunmeng.pinduoduo:id/a8f", 2, 3, true)
-            .setNodeParams("com.xunmeng.pinduoduo:id/fq", 2, 3)
-            .setNodeParams(WidgetConstant.EDITTEXT, 3, false, keyWord)
-            .setNodeParams("搜索")
             .create()
             .execute()
 
+        /*
+           .setNodeParams("com.xunmeng.pinduoduo:id/a8f", 2, 3, true)
+           .setNodeParams("com.xunmeng.pinduoduo:id/fq", 2, 3)
+           .setNodeParams(WidgetConstant.EDITTEXT, 3, false, keyWord)
+           .setNodeParams("搜索")
+           .create()
+           .execute()*/
+
+    }
+
+    /**
+     * 点击搜索框
+     */
+    private fun clickSearchEditText(goodName: String, searchPrice: String, mallName: String) {
+        AdbScriptController.Builder()
+            .setXY("540,245")      //搜索框的坐标
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    val keyWord = TaskDataUtil.instance.getGoods_keyword()
+                    NodeController.Builder()
+                        .setNodeService(this@MyAccessibilityService)
+                        .setNodeParams(WidgetConstant.EDITTEXT, 3, false, keyWord!!)
+                        .setNodeParams("搜索")
+                        .setTaskListener(object : TaskListener {
+                            override fun onTaskFinished() {
+                                confirmGoods(goodName, searchPrice, mallName)
+                            }
+
+                            override fun onTaskFailed(failedText: String) {
+                                responTaskFailed("商品搜索失败")
+                            }
+                        })
+                        .create()
+                        .execute()
+                }
+
+                override fun onTaskFailed(failedText: String) {
+                    responTaskFailed("应用未获得root权限")
+                }
+            })
+            .create()
+            .execute()
     }
 
     /**
@@ -310,7 +346,10 @@ class MyAccessibilityService : BaseAccessibilityService() {
             .setScreenDensity(mScreenWidth, mScreenHeight)
             .setTaskFinishedListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    responTaskFinished()
+                    //uploadOrderInfo()
+                    mHandler.postDelayed({
+                        responTaskFinished()
+                    }, 20 * 1000)
                 }
 
                 override fun onTaskFailed(failedText: String) {
@@ -319,13 +358,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 }
             })
             .doOnEvent()
-    }
-
-    /**
-     * 上传订单号
-     */
-    private fun uploadOrderInfo() {
-        //todo 上传订单号
     }
 
 

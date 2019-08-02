@@ -5,6 +5,7 @@ import android.os.Looper
 import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.listener.NodeFoundListener
+import com.safframework.log.L
 
 /**
  * Description:
@@ -24,6 +25,7 @@ class ScrollUtils constructor(val nodeService: BaseAccessibilityService, val rec
              }
          }
      }*/
+    private var mIsNodeFound: Boolean = false
 
     private var mForwardTime: Int = 10
     private var mBackwardTime: Int = 10
@@ -33,8 +35,12 @@ class ScrollUtils constructor(val nodeService: BaseAccessibilityService, val rec
     private var mNodeFoundListener: NodeFoundListener? = null
     private var mNodeText: String? = null
     private var mNodeId: String? = null
-    private var mIsNodeFound: Boolean = false
 
+    init {
+        mIsNodeFound = false
+        mForwardTime = 10
+        mBackwardTime = 10
+    }
 
     private val mHandler = Handler(Looper.getMainLooper()) {
         when (it.what) {
@@ -97,13 +103,16 @@ class ScrollUtils constructor(val nodeService: BaseAccessibilityService, val rec
 
     fun scrollForward() {
         if (mForwardTime > 0) {
+            L.i("向上滑动：$mForwardTime mIsNodeFound:$mIsNodeFound")
             nodeService.performScrollForward(recyclerViewNode)
             mForwardTime--
 
-            findNode()
-
             mHandler.sendEmptyMessageDelayed(MSG_FORWARD_WHAT, 1000)
+            findNode()
         } else {
+            if (!mIsNodeFound) {
+                mNodeFoundListener?.onNodeFound(null)
+            }
             mScrollListener?.onScrollFinished(recyclerViewNode)
             mHandler.removeMessages(MSG_FORWARD_WHAT)
         }
@@ -111,12 +120,12 @@ class ScrollUtils constructor(val nodeService: BaseAccessibilityService, val rec
 
     fun scrollBackward() {
         if (mBackwardTime > 0) {
+            L.i("向下拉：$mBackwardTime")
             nodeService.performScrollBackward(recyclerViewNode)
             mBackwardTime--
 
-            findNode()
-
             mHandler.sendEmptyMessageDelayed(MSG_BACKWARD_WHAT, 1000)
+            findNode()
         } else {
             if (!mIsNodeFound) {
                 mNodeFoundListener?.onNodeFound(null)
@@ -128,22 +137,29 @@ class ScrollUtils constructor(val nodeService: BaseAccessibilityService, val rec
 
     private fun findNode() {
         if (mIsNodeFound) {
-            mHandler.removeMessages(MSG_BACKWARD_WHAT)
+            removeMsg()
             return
         }
         mNodeText?.apply {
             nodeService.findViewByFullText(this)?.apply {
-                mNodeFoundListener?.onNodeFound(this)
                 mIsNodeFound = true
+                removeMsg()
+                mNodeFoundListener?.onNodeFound(this)
             }
         }
 
         mNodeId?.apply {
             nodeService.findViewById(this)?.apply {
-                mNodeFoundListener?.onNodeFound(this)
                 mIsNodeFound = true
+                removeMsg()
+                mNodeFoundListener?.onNodeFound(this)
             }
         }
+    }
+
+    private fun removeMsg() {
+        mHandler.removeMessages(MSG_BACKWARD_WHAT)
+        mHandler.removeMessages(MSG_FORWARD_WHAT)
     }
 
     interface ScrollListener {

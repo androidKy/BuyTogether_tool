@@ -126,7 +126,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
                 }
             })
             .setNodeParams("客服")
-            .setNodeParams("com.xunmeng.pinduoduo:id/ai9", 2, false, TaskDataUtil.instance.getTalk_msg()!!)
+            .setNodeParams(WidgetConstant.EDITTEXT, 3, false, TaskDataUtil.instance.getTalk_msg()!!)
             .setNodeParams("发送")
             .create()
             .execute()
@@ -167,26 +167,31 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
     private fun buyGoods() {
         L.i("购买商品，并且选择商品各个参数")
 
+        NodeController.Builder()
+            .setNodeService(nodeService)
+            .setNodeParams("发起拼单")
+            .setNodeParams("确定", 0, false, 5)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    chooseInfo()
+                }
+
+                override fun onTaskFailed(failedText: String) {
+                    chooseAddress()
+                }
+            })
+            .create()
+            .execute()
+    }
+
+    /**
+     * 选择商品参数
+     */
+    private fun chooseInfo() {
         val choose_info = TaskDataUtil.instance.getChoose_info()
         L.i("商品参数size：${choose_info?.size}")
-        if (choose_info == null || choose_info.isEmpty() || choose_info.size == 1) {
-            L.i("商品参数为空")
-            NodeController.Builder()
-                .setNodeService(nodeService)
-                .setTaskListener(object : TaskListener {
-                    override fun onTaskFailed(failedText: String) {
-                        L.i("$failedText was not found.")
-                    }
-
-                    override fun onTaskFinished() {
-                        L.i("商品选择完成，准备支付")
-                        //createAddress()
-                        payNow()
-                    }
-                })
-                .setNodeParams("发起拼单")
-                .create()
-                .execute()
+        if (choose_info == null || choose_info.isEmpty()) {
+            responFailed("商品的选择参数不则会给你缺")
             return
         }
 
@@ -195,15 +200,15 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             .setTaskListener(object : TaskListener {
                 override fun onTaskFailed(failedText: String) {
                     L.i("$failedText was not found.")
+                    responFailed("$failedText was not found.")
                 }
 
                 override fun onTaskFinished() {
                     L.i("商品选择完成，准备支付")
                     //createAddress()
-                    payNow()
+                    chooseAddress()
                 }
             })
-            .setNodeParams("发起拼单")  //todo 是拼单还是单独购买
             .setNodeParams(choose_info, true)
             .setNodeParams("确定")
             .create()
@@ -213,39 +218,12 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
     /**
      * 立即支付
      */
-    private fun payNow() {
-        val taskDataUtil = TaskDataUtil.instance
-        val buyerName = taskDataUtil.getBuyer_name()
-        val buyerPhone = taskDataUtil.getBuyer_phone()
-        val streetName = taskDataUtil.getStreet()
-        val provinceName = taskDataUtil.getProvince()
-        val cityName = taskDataUtil.getCity()
-        val districtName = taskDataUtil.getDistrict()
-
-        if (buyerName.isNullOrEmpty()) {
-            responFailed("收货信息为空")
-            return
-        }
-
-
+    private fun chooseAddress() {
         AdbScriptController.Builder()
             .setXY(ADB_XY.PAY_NOW.add_address, 3000L)
-            .setXY(ADB_XY.PAY_NOW.name)
-            .setText(buyerName)
-            .setXY(ADB_XY.PAY_NOW.phone)
-            .setText(buyerPhone!!)
-            .setXY(ADB_XY.PAY_NOW.detailed)
-            .setText(streetName!!)
-            .setXY(ADB_XY.PAY_NOW.choose_local)     //todo 选省份和城市还有区域要下滑选指定的地址
-            .setXY(ADB_XY.PAY_NOW.province)
-            .setXY(ADB_XY.PAY_NOW.city)
-            .setXY(ADB_XY.PAY_NOW.region)
-            .setXY(ADB_XY.PAY_NOW.save_address)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    //选择支付渠道
-                    choosePayChannel()
-                    //payByOther()
+                   startFillAddress()
                 }
 
                 override fun onTaskFailed(failedText: String) {
@@ -259,13 +237,28 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             .execute()
     }
 
+    private fun startFillAddress(){
+        FillAddressService.getInstance(nodeService)
+            .setTaskFinishedListener(object:TaskListener{
+                override fun onTaskFinished() {
+                    choosePayChannel()
+                }
+
+                override fun onTaskFailed(failedText: String) {
+                    responFailed(failedText)
+                }
+            })
+            .doOnEvent()
+    }
+
+
     /**
      * 选择支付渠道
      */
     private fun choosePayChannel() {
         L.i("新增地址完成，选择支付方式：")
-
         val payXY = ADB_XY.PAY_NOW.ali_pay
+
 
         AdbScriptController.Builder()
             .setSwipeXY(ADB_XY.PAY_NOW.origin_swipe_up, ADB_XY.PAY_NOW.target_swipe_up)

@@ -12,15 +12,17 @@ import com.utils.common.ThreadUtils
  **/
 class ClearDataService {
 
-    fun clearData(taskListener: TaskListener) {
-        //请求root权限，并且清理QQ登录的数据
+    fun clearData(isClearAliPay: Boolean, taskListener: TaskListener) {
         L.i("clear data")
         ThreadUtils.executeBySingle(object : ThreadUtils.Task<Boolean>() {
             override fun doInBackground(): Boolean {
+                var clearDataCmd = "pm clear ${Constant.QQ_TIM_PKG};" +
+                        "pm clear ${Constant.BUY_TOGETHER_PKG};"
+                if (isClearAliPay)
+                    clearDataCmd = clearDataCmd + "pm clear ${Constant.ALI_PAY_PKG};"
+
                 val cmdResult = CMDUtil().execCmd(
-                    "pm clear com.tencent.tim;" +
-                            "pm clear com.xunmeng.pinduoduo;" +
-                            "pm clear ${Constant.ALI_PAY_PKG};"
+                    clearDataCmd
                     /*   "cd /sdcard/;" +
                        "rm -fr Android;" +
                        "rm -fr Tencent;" +
@@ -51,5 +53,10 @@ class ClearDataService {
             }
 
         })
+    }
+
+    fun clearData(taskListener: TaskListener) {
+        //请求root权限，并且清理QQ登录的数据
+        clearData(false, taskListener)
     }
 }

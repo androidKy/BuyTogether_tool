@@ -21,6 +21,8 @@ class Constant {
         const val KEY_TASK_STATUS = "key_task_status"
 
         const val KEY_ALIPAY_ACCOUNT = "key_alipay_account"
+        const val KEY_ALIPAY_ACCOUNT_SWITCH = "key_alipay_switch"   //支付宝账号是否切换
+        const val KEY_ORDER_NUMBER = "key_order_number"
 
         const val KEY_CITY_DATA = "key_cities"
         const val KEY_CITY_GET_DATE = "key_city_get_date"

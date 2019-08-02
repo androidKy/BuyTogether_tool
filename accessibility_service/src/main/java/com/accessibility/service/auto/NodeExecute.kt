@@ -8,7 +8,7 @@ import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.listener.TaskListener
-import com.accessibility.service.util.ScrollUtils
+import com.accessibility.service.util.AdbScrollUtils
 import com.accessibility.service.util.WidgetConstant
 import com.safframework.log.L
 
@@ -36,9 +36,7 @@ class NodeExecute(
     }
 
 
-
-
-    private var mHandler:Handler = Handler(Looper.getMainLooper()) {
+    private var mHandler: Handler = Handler(Looper.getMainLooper()) {
 
         when (it.what) {
             MSG_NOT_FOUND -> {
@@ -70,7 +68,7 @@ class NodeExecute(
         val timeout = nodeTimeOutList[index]
         val isScrolled = nodeScrolledList[index]
 
-        L.i("查找节点的线程名：${Thread.currentThread().name} 节点：$textOrId")
+        // L.i("查找节点的线程名：${Thread.currentThread().name} 节点：$textOrId")
         L.i("node index = $index")
         L.i(
             "开始查找节点：textOrId: $textOrId; isFoundById: $nodeFlag; isClicked: $isClicked; " +
@@ -78,18 +76,18 @@ class NodeExecute(
         )
 
         val nodeResult = findNode(textOrId, nodeFlag)
-        if (nodeResult == null && mStartTime <= timeout) {
-            mStartTime += 1
-            val message = mHandler?.obtainMessage()
-            message?.arg1 = index
-            message?.what = MSG_NOT_FOUND
-            mHandler?.sendMessageDelayed(message, 1000)
-        } else if (nodeResult == null && mStartTime > timeout) {    //找不到时是否需要下滑查找
-            dealNodeFailed(index, textOrId, editInputText, isClicked, isScrolled)
-        } else if (nodeResult != null) {
-            dealNodeSucceed(index, textOrId, editInputText, isClicked, nodeResult)
-        }else{
-            dealNodeFailed(index, textOrId, editInputText, isClicked, isScrolled)
+        when {
+            nodeResult == null && mStartTime <= timeout -> {
+                mStartTime += 1
+                val message = mHandler.obtainMessage()
+                message?.arg1 = index
+                message?.what = MSG_NOT_FOUND
+                mHandler.sendMessageDelayed(message, 1000)
+            }
+            nodeResult == null && mStartTime > timeout -> //找不到时是否需要下滑查找
+                dealNodeFailed(index, textOrId, editInputText, isClicked, isScrolled)
+            nodeResult != null -> dealNodeSucceed(index, textOrId, editInputText, isClicked, nodeResult)
+            else -> dealNodeFailed(index, textOrId, editInputText, isClicked, isScrolled)
         }
     }
 
@@ -114,11 +112,25 @@ class NodeExecute(
     }
 
     fun dealNodeFailed(index: Int, textOrId: String, editInputText: String, isClicked: Boolean, isScrolled: Boolean) {
+        mHandler.removeMessages(MSG_START)
+        mHandler.removeMessages(MSG_NOT_FOUND)
         mStartTime = 0
         L.i("$textOrId node was not found ")
 
         if (isScrolled) {
-            nodeService.findViewByClassName(
+            AdbScrollUtils.instantce
+                .setNodeService(nodeService)
+                .setFindText(textOrId)
+                .setTaskListener(object : NodeFoundListener {
+                    override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
+                        L.i("Adb 滑动查找的结果：${nodeInfo?.text}")
+                        if (nodeInfo == null) taskListener.onTaskFailed(textOrId)
+                        else dealNodeSucceed(index, textOrId, editInputText, isClicked, nodeInfo)
+                    }
+                })
+                .startScroll()
+            return
+            /*nodeService.findViewByClassName(
                 nodeService.rootInActiveWindow,
                 WidgetConstant.RECYCLERVIEW,
                 object : NodeFoundListener {
@@ -127,11 +139,6 @@ class NodeExecute(
                             ScrollUtils(nodeService, this)
                                 .setForwardTotalTime(20)
                                 .setNodeText(textOrId)
-                                .setScrollListener(object : ScrollUtils.ScrollListener {
-                                    override fun onScrollFinished(nodeInfo: AccessibilityNodeInfo) {
-                                        L.i("下滑完成")
-                                    }
-                                })
                                 .setNodeFoundListener(object : NodeFoundListener {
                                     override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                                         if (nodeInfo == null) taskListener.onTaskFailed(textOrId)
@@ -144,8 +151,8 @@ class NodeExecute(
                                 .scrollForward()
                         }
                     }
-                })
-            return
+                })*/
+
         }
 
         if (index < nodeTextList.size - 1) {   //当查找一个节点通过多种方法时
@@ -170,6 +177,8 @@ class NodeExecute(
         isClicked: Boolean,
         nodeResult: AccessibilityNodeInfo
     ) {
+        mHandler.removeMessages(MSG_START)
+        mHandler.removeMessages(MSG_NOT_FOUND)
         mStartTime = 0
         L.i("nodeResult: ${nodeResult.text}")
         nodeResult.apply {
@@ -177,17 +186,16 @@ class NodeExecute(
                 WidgetConstant.setEditText(editInputText, this)
             }
 
-            if (isClicked)  //点击
-                nodeService.performViewClick(this, 2, object : AfterClickedListener {
+            if (isClicked) {  //点击
+                nodeService.performViewClick(this, 1, object : AfterClickedListener {
                     override fun onClicked() {
-                        L.i("$textOrId was clicked")
                         if (index == nodeTextList.size - 1) {
                             taskListener.onTaskFinished()
                         } else
                             findNode(index + 1)
                     }
                 })
-            else {  //不点击，直接找下一个节点
+            } else {  //不点击，直接找下一个节点
                 if (index == nodeTextList.size - 1)
                     taskListener.onTaskFinished()
                 else

@@ -76,25 +76,24 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     }
 
     private fun initTableView(tableDatas: ArrayList<ArrayList<String>>) {
-
-        val lockTableView = LockTableView(context, mContainer, tableDatas)
-
-        lockTableView.setLockFristColumn(true) //是否锁定第一列
-            .setLockFristRow(true) //是否锁定第一行
-            .setMaxColumnWidth(300) //列最大宽度
-            .setMinColumnWidth(60) //列最小宽度
-            //.setColumnWidth(1, 30) //设置指定列文本宽度
-            //.setColumnWidth(2, 0)
-            .setMinRowHeight(20)//行最小高度
-            .setMaxRowHeight(50)//行最大高度
-            .setTextViewSize(16) //单元格字体大小
-            .setFristRowBackGroudColor(R.color.table_head)//表头背景色
-            .setTableHeadTextColor(R.color.beijin)//表头字体颜色
-            .setTableContentTextColor(R.color.border_color)//单元格字体颜色
-            .setCellPadding(5)//设置单元格内边距(dp)
-        //.setNullableString("N/A") //空值替换值
-
-        lockTableView.show()
+        context?.run {
+            LockTableView(context, mContainer, tableDatas).apply {
+                this@apply.setLockFristColumn(true) //是否锁定第一列
+                    .setLockFristRow(true) //是否锁定第一行
+                    .setMaxColumnWidth(300) //列最大宽度
+                    .setMinColumnWidth(60) //列最小宽度
+                    //.setColumnWidth(1, 30) //设置指定列文本宽度
+                    //.setColumnWidth(2, 0)
+                    .setMinRowHeight(20)//行最小高度
+                    .setMaxRowHeight(50)//行最大高度
+                    .setTextViewSize(16) //单元格字体大小
+                    .setFristRowBackGroudColor(R.color.table_head)//表头背景色
+                    .setTableHeadTextColor(R.color.beijin)//表头字体颜色
+                    .setTableContentTextColor(R.color.border_color)//单元格字体颜色
+                    .setCellPadding(5)//设置单元格内边距(dp)
+                    .show()
+            }
+        }
     }
 
     /**
@@ -238,6 +237,8 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
             LocalVpnService.IsRunning = true
             startPdd()
             // mViewModel?.checkVpnConnected()
+        } else {
+            //todo vpn连接失败
         }
     }
 

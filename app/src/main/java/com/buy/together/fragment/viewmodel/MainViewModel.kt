@@ -50,14 +50,14 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         val taskIp = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_ID, 0)
         L.i("taskStatus: $taskStatus taskIP:$taskIp")
         if (taskStatus == 0) {  //未完成的任务必须上报未完成，才能请求到接下来的任务
-            ApiManager.instance
+            ApiManager()
                 .setDataListener(object : DataListener {
                     override fun onSucceed(result: String) {
                         startGetTask()
                     }
 
                     override fun onFailed(errorMsg: String) {
-                        L.i("上报任务失败：$errorMsg")
+                        L.i("网络连接错误，上报任务状态失败：$errorMsg")
                     }
                 })
                 .updateTaskStatus(taskIp.toString(), false, "任务中断，未知错误")
@@ -68,7 +68,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         SPUtils.getInstance(Constant.SP_DEVICE_PARAMS).clear()
         val imei = DevicesUtil.getIMEI(context)
         L.i("真实imei：$imei")
-        ApiManager.instance
+        ApiManager()
             .setDataListener(object : DataListener {
                 override fun onSucceed(result: String) {
                     parseStringForTask(result)
@@ -107,7 +107,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      * 保存数据到SP
      */
     private fun saveData(taskBean: TaskBean) {
-        saveAlipayAccount(taskBean)
+        saveAlipayAccountSwitch(taskBean)
         saveTaskData2SP(Gson().toJson(taskBean))
         saveUploadParams(taskBean)
         saveDeviceParams(taskBean)
@@ -149,7 +149,10 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      * 清理PDD和QQ的数据
      */
     fun clearData() {
-        ClearDataService().clearData(object : TaskListener {
+        val isClearAlipay =
+            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getBoolean(Constant.KEY_ALIPAY_ACCOUNT_SWITCH, true)
+
+        ClearDataService().clearData(isClearAlipay, object : TaskListener {
             override fun onTaskFinished() {
                 mainView.onClearDataResult("Success")
             }
@@ -283,7 +286,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      */
     private fun uploadIpError(cityName: String) {
         val taskIp = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_ID, 0)
-        ApiManager.instance
+        ApiManager()
             .setDataListener(object : DataListener {
                 override fun onSucceed(result: String) {
                     getTask()
@@ -414,11 +417,22 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     }
 
     /**
-     * 保存支付宝账号
+     * 保存支付宝账号,确定支付宝账号是否切换
      */
-    private fun saveAlipayAccount(taskBean: TaskBean) {
+    private fun saveAlipayAccountSwitch(taskBean: TaskBean) {
         taskBean.task?.run {
-            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).put(Constant.KEY_ALIPAY_ACCOUNT, pay_account.username)
+            pay_account?.username?.apply {
+                SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).let {
+
+                    val lastAlipayAccount = it.getString(Constant.KEY_ALIPAY_ACCOUNT)
+
+                    if (this@apply == lastAlipayAccount) {
+                        it.put(Constant.KEY_ALIPAY_ACCOUNT_SWITCH, false)
+                    } else it.put(Constant.KEY_ALIPAY_ACCOUNT_SWITCH, true)
+
+                    it.put(Constant.KEY_ALIPAY_ACCOUNT, this@apply)
+                }
+            }
         }
     }
 
@@ -485,7 +499,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
 
             override fun onSuccess(taskBean: TaskBean?) {
                 taskBean?.task?.run {
-                    ApiManager.instance
+                    ApiManager()
                         .setDataListener(object : DataListener {
                             override fun onSucceed(result: String) {
 

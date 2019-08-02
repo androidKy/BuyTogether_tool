@@ -1,13 +1,15 @@
 package com.accessibility.service.function
 
-import android.text.TextUtils
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
+import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
 import com.accessibility.service.util.WidgetConstant
+import com.safframework.log.L
+import com.utils.common.SPUtils
 
 /**
  * Description:
@@ -21,10 +23,65 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
         mTaskListener = taskListener
 
         val account = TaskDataUtil.instance.getAlipayAccount()
-        if (!TextUtils.isEmpty(account))
-            login(account!!, TaskDataUtil.instance.getAlipayPsw()!!)
-        else responTaskFailed("支付宝账号或者密码不能为空")
+        val psw = TaskDataUtil.instance.getAlipayPsw()
+        L.i("支付宝登录：账号：$account 密码：$psw")
+        if (account.isNullOrEmpty() || psw.isNullOrEmpty()) {
+            responTaskFailed("支付宝账号或者密码不能为空")
+            return
+        }
+
+        val isSwitchAccount = SPUtils.getInstance(myAccessibilityService.applicationContext, Constant.SP_TASK_FILE_NAME)
+            .getBoolean(Constant.KEY_ALIPAY_ACCOUNT_SWITCH)
+        L.i("是否需要切换支付宝账号：$isSwitchAccount")
+        if (isSwitchAccount)
+            login(account, psw)
+        else {
+            payDirectly()
+        }
     }
+
+    /**
+     * 直接用余额支付
+     */
+    private fun payDirectly() {
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("订单编号", 1, false)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    val orderNumber = myAccessibilityService.findViewByText("订单编号")?.text?.toString()
+                    L.i("订单编号: $orderNumber")
+                    if (!orderNumber.isNullOrEmpty())
+                        SPUtils.getInstance(myAccessibilityService.applicationContext, Constant.SP_TASK_FILE_NAME)
+                            .put(Constant.KEY_ORDER_NUMBER, orderNumber)
+
+
+                    NodeController.Builder()
+                        .setNodeService(myAccessibilityService)
+                        .setNodeParams("立即付款", 1)
+                        //.setNodeParams("立即付款", 1)
+                        .setTaskListener(object : TaskListener {
+                            override fun onTaskFinished() {
+                                responTaskSuccess()
+                            }
+
+                            override fun onTaskFailed(failedText: String) {
+                                responTaskFailed("支付宝付款失败")
+                            }
+                        })
+                        .create()
+                        .execute()
+                }
+
+                override fun onTaskFailed(failedText: String) {
+
+                }
+
+            })
+            .create()
+            .execute()
+    }
+
 
     fun login(userName: String, userPsw: String) {
         NodeController.Builder()
@@ -57,7 +114,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                 }
 
                 override fun onTaskFailed(failedText: String) {
-
+                    responTaskFailed("未获得root权限")
                 }
             })
             .create()
@@ -71,7 +128,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
             .setNodeParams("登录")
-            .setNodeParams("付款方式")
+            .setNodeParams("付款方式", 0, 60)
             .setNodeParams("账户余额", 0, true, true, 8, false)
             .setNodeParams("立即付款")
             .setTaskListener(object : TaskListener {
@@ -84,6 +141,8 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                     responTaskFailed("支付宝登录失败，请检查是否设置安全验证登录方式")
                 }
             })
+            .create()
+            .execute()
     }
 
     fun responTaskSuccess() {

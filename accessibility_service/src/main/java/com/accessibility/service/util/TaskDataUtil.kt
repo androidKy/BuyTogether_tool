@@ -66,9 +66,18 @@ class TaskDataUtil private constructor() {
      * 获取支付宝密码
      */
     fun getAlipayPsw(): String? {
-        return mTaskServiceData?.run {
+        return  mTaskServiceData?.run {
             task?.pay_account?.pwd
         }
+
+       /* val base64Psw = mTaskServiceData?.run {
+            task?.pay_account?.pwd
+        }
+        if (!TextUtils.isEmpty(base64Psw)) {
+            return String(BASE64Decoder().decodeBuffer(base64Psw))
+        }
+
+        return ""*/
     }
 
     /**
