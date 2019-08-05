@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
     inner class TaskListenerImpl : TaskListener {
         override fun onTaskFinished() {
-            L.i("任务完成，重新开始任务")
+            L.i("任务完成，更新任务状态")
             mMainAcViewModel?.updateTask(true, "success")
 
         }
@@ -94,6 +94,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
      * @see MainAcViewModel.updateTask
      */
     override fun onResponUpdateTask() {
+        L.i("更新任务状态完成，重新开始任务")
         //PackageManagerUtils.getInstance().restartApplication(this)
         mTaskRunning = false
         startTask()

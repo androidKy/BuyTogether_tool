@@ -1,5 +1,6 @@
 package com.utils.common.pdd_api
 
+import android.text.TextUtils
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.OkHttpResponseListener
@@ -47,7 +48,7 @@ class ApiManager {
      * 获取普通任务
      */
     fun getNormalTask(imei: String) {
-        AndroidNetworking.get(URL_GET_TASK)
+        AndroidNetworking.get("$URL_GET_TASK?imei=$imei")
             .build()
             .getAsOkHttpResponse(object : OkHttpResponseListener {
                 override fun onResponse(response: Response?) {
@@ -70,7 +71,7 @@ class ApiManager {
             .build()
             .getAsOkHttpResponse(object : OkHttpResponseListener {
                 override fun onResponse(response: Response?) {
-                    response?.body()?.string()?.run{
+                    response?.body()?.string()?.run {
                         dataListener.onSucceed(this)
                     }
                 }
@@ -184,7 +185,6 @@ class ApiManager {
                     override fun onError(anError: ANError?) {
                         responseError(anError, "更新任务状态失败")
                     }
-
                 })
         }
 
@@ -201,6 +201,9 @@ class ApiManager {
                 result?.let {
                     L.i("$log：$it")
                     mDataListener?.onSucceed(it)
+                }
+                if (TextUtils.isEmpty(result)) {
+                    mDataListener?.onFailed("获取的数据为空")
                 }
             }
 

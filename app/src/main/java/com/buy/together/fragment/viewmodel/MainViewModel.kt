@@ -45,27 +45,38 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      */
     fun getTask() {
         L.init(MainViewModel::class.java.simpleName)
+        SPUtils.getInstance(Constant.SP_DEVICE_PARAMS).run {
+            clear()
+        }
+       /* SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).run {
+            val cacheTaskData = getString(Constant.KEY_TASK_DATA, "")
+            if (!TextUtils.isEmpty(cacheTaskData)) {
+                parseStringForTask(cacheTaskData)
+            } else {
+                startGetTask()
+            }
+        }*/
 
-        val taskStatus = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_STATUS, -1)
-        val taskIp = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_ID, 0)
-        L.i("taskStatus: $taskStatus taskIP:$taskIp")
-        if (taskStatus == 0) {  //未完成的任务必须上报未完成，才能请求到接下来的任务
-            ApiManager()
-                .setDataListener(object : DataListener {
-                    override fun onSucceed(result: String) {
-                        startGetTask()
-                    }
+         val taskStatus = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_STATUS, -1)
+         val taskIp = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_ID, 0)
+         L.i("taskStatus: $taskStatus taskIP:$taskIp")
+         if (taskStatus == 0) {  //未完成的任务必须上报未完成，才能请求到接下来的任务
+             ApiManager()
+                 .setDataListener(object : DataListener {
+                     override fun onSucceed(result: String) {
+                         startGetTask()
+                     }
 
-                    override fun onFailed(errorMsg: String) {
-                        L.i("网络连接错误，上报任务状态失败：$errorMsg")
-                    }
-                })
-                .updateTaskStatus(taskIp.toString(), false, "任务中断，未知错误")
-        } else startGetTask()
+                     override fun onFailed(errorMsg: String) {
+                         L.i("网络连接错误，上报任务状态失败：$errorMsg")
+                         mainView.onFailed("网络连接错误")
+                     }
+                 })
+                 .updateTaskStatus(taskIp.toString(), false, "任务中断，未知错误")
+         } else startGetTask()
     }
 
     private fun startGetTask() {
-        SPUtils.getInstance(Constant.SP_DEVICE_PARAMS).clear()
         val imei = DevicesUtil.getIMEI(context)
         L.i("真实imei：$imei")
         ApiManager()

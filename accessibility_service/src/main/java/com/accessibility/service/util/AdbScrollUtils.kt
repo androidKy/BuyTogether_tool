@@ -132,7 +132,7 @@ class AdbScrollUtils {
 
 
     private fun initData() {
-        mHandler?.removeMessages(MSG_ADB_SCROLL)
+        mHandler.removeMessages(MSG_ADB_SCROLL)
         mScrollTotalTime = SCROLL_TOTAL_DEFAULT_TIME
         mStartXY = DEFAULT_START_XY
         mStopXY = DEFAULT_STOP_XY

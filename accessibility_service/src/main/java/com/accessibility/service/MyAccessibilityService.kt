@@ -168,7 +168,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
                     responTaskFailed("$failedText was not found.搜索失败")
                 }
             })
-            .setNodeParams("搜索", false)
+            .setNodeParams("搜索", 0, 30)
             .create()
             .execute()
 
@@ -220,22 +220,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
      * 确认商品是需要刷的商品
      */
     private fun confirmGoods(goodName: String, searchPrice: String, mallName: String) {
-        /* mHandler.postDelayed({
-             val nodeList = findViewsByFullText(goodName)
-             nodeList?.run {
-                 if (size > 0) {
-
-                 }
-             }
-         }, 1000)*/
-
-        /* val screenWidth = getSharedPreferences("spUtils", Context.MODE_PRIVATE).getInt("key_screen_width", 0)
-         val screenHeight = getSharedPreferences("spUtils", Context.MODE_PRIVATE).getInt("key_screen_height", 0)
-         AdbScriptController.Builder()
-             .setSwipeXY("${screenWidth / 2},${screenHeight * 0.7}", "${screenWidth / 2},${screenHeight * 0.6}")
-             .create()
-             .execute()*/
-
         NodeController.Builder()
             .setNodeService(this)
             .setTaskListener(object : TaskListener {
@@ -261,29 +245,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
             .execute()
     }
 
-    /**
-     * 确认商品名称是否一样
-     */
-    /* private fun confirmGoodName(goodName: String, searchPrice: String, mallName: String) {
-         NodeController.Builder()
-             .setNodeService(this)
-             .setTaskListener(object : TaskListener {
-                 override fun onTaskFinished() {
-                     confirmMallName(goodName, searchPrice, mallName)
-                 }
-
-                 override fun onTaskFailed(failedText: String) {
-                     //商品名称不一样,返回向下滑动继续查找
-                     L.i("$failedText was not found.商品名称不一样，返回继续查找")
-                     performBackClick()
-
-                     continueLookGood(goodName, searchPrice, mallName)
-                 }
-             })
-             .setNodeParams(goodName, 0, false, 2)
-             .create()
-             .execute()
-     }*/
 
     /**
      * 确认店铺名称
@@ -299,7 +260,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
                             doTask()
                         }
                     })
-                    //mTaskListener?.onTaskFinished()
                 }
 
                 override fun onTaskFailed(failedText: String) {
@@ -312,7 +272,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
                         }
                     })
                 }
-
             })
             .setNodeParams("客服")
             .setNodeParams(mallName, 0, false, 10)

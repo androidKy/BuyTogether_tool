@@ -102,6 +102,11 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
                     .setDataListener(object : DataListener {
                         override fun onSucceed(result: String) {
                             UpdateSPManager(context).updateTaskStatus(1)
+                            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).run{
+                                remove(Constant.KEY_ORDER_NUMBER)
+                                remove(Constant.KEY_TASK_DATA)
+                            }
+
                             mainAcView.onResponUpdateTask()
                         }
 
@@ -110,7 +115,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
                             mainAcView.onResponUpdateTask()
                         }
                     })
-                    .updateTaskStatus(taskId.toString(), isSucceed, "账号名", orderNumber, remark)
+                    .updateTaskStatus(taskId.toString(), isSucceed, "账号名", orderNumber, remark) //账号名  
             }
 
             override fun onCancel() {
@@ -121,8 +126,6 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
 
         })
 
-
-        //todo 账号名和订单号
     }
 
 }

@@ -141,7 +141,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                             }
 
                             override fun onTaskFailed(failedText: String) {
-                                responTaskFailed("$failedText was not found.授权登录失败")
+                                responTaskFailed("验证码校验失败")
                             }
                         })
                         .setNodeParams("授权并登录", 0, 2)
@@ -199,6 +199,8 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                     updateAccount(accountId, 2)
                     if (mLoginFailedCount <= 10) {
                         getAccount()
+                    } else {
+                        responTaskFailed("重新拉取账号超过10次")
                     }
                 }
 

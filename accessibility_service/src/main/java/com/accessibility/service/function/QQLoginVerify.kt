@@ -150,6 +150,7 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
                         .setNodeParams("完成", 0, 3)
                         .setTaskListener(object : TaskListener {
                             override fun onTaskFinished() {
+                                //todo 验证码校验结果判断，如果失败就更新验证码
                                 mTaskListener?.onTaskFinished()
                             }
 

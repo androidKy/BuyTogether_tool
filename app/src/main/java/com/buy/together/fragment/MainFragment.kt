@@ -34,8 +34,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     private var mContainer: FrameLayout? = null
     private var mViewModel: MainViewModel? = null
     private var mVpnFailedConnectCount: Int = 0 //VPN连接失败次数
-    //private var mMyVpnServiceIntent: Intent? = null
-    // private var mServiceConnect: ServiceConnectionImpl? = null
+    private var mIsResumed: Boolean = false  //Fragment是否被创建
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_main
@@ -77,7 +76,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
 
     private fun initTableView(tableDatas: ArrayList<ArrayList<String>>) {
         context?.run {
-            LockTableView(context, mContainer, tableDatas).apply {
+            LockTableView(this, mContainer, tableDatas).apply {
                 this@apply.setLockFristColumn(true) //是否锁定第一列
                     .setLockFristRow(true) //是否锁定第一行
                     .setMaxColumnWidth(300) //列最大宽度
@@ -96,18 +95,36 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        mIsResumed = false
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mIsResumed = true
+    }
+
     /**
      * 开始任务
      */
     fun startTask() {
-        mVpnFailedConnectCount = 0
-        LocalVpnManager.getInstance().stopVpnService(activity!!)
-        mViewModel?.getTask()
+        if (mIsResumed) {
+            mVpnFailedConnectCount = 0
+            LocalVpnManager.getInstance().stopVpnService(activity!!)
+            mViewModel?.getTask()
+        } else {
+            L.i("onResume()还没执行")
+            mContainer?.postDelayed({
+                startTask()
+            }, 500)
+        }
     }
 
     override fun onResponTask(taskBean: TaskBean) {
         when {
             taskBean.code == 200 -> {
+                mContainer?.removeAllViews()
                 mViewModel?.stopTaskTimer()
                 mTaskBean = taskBean
                 mViewModel?.parseTask(taskBean)
@@ -238,7 +255,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
             startPdd()
             // mViewModel?.checkVpnConnected()
         } else {
-            //todo vpn连接失败
+            //VPN 连接失败
         }
     }
 

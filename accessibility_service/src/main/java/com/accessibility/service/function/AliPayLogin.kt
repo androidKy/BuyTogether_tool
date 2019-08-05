@@ -41,7 +41,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     }
 
     /**
-     * 直接用余额支付
+     * 下发的支付宝账号和之前的一致，直接用余额支付
      */
     private fun payDirectly() {
         NodeController.Builder()
@@ -51,30 +51,17 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                 override fun onTaskFinished() {
                     val orderNumber = myAccessibilityService.findViewByText("订单编号")?.text?.toString()
                     L.i("订单编号: $orderNumber")
-                    if (!orderNumber.isNullOrEmpty())
+                    val uploadOrderNumber = orderNumber?.split("编号")?.get(1)
+                    if (!uploadOrderNumber.isNullOrEmpty()) {
                         SPUtils.getInstance(myAccessibilityService.applicationContext, Constant.SP_TASK_FILE_NAME)
-                            .put(Constant.KEY_ORDER_NUMBER, orderNumber)
+                            .put(Constant.KEY_ORDER_NUMBER, uploadOrderNumber)
+                    }
 
-
-                    NodeController.Builder()
-                        .setNodeService(myAccessibilityService)
-                        .setNodeParams("立即付款", 1)
-                        //.setNodeParams("立即付款", 1)
-                        .setTaskListener(object : TaskListener {
-                            override fun onTaskFinished() {
-                                responTaskSuccess()
-                            }
-
-                            override fun onTaskFailed(failedText: String) {
-                                responTaskFailed("支付宝付款失败")
-                            }
-                        })
-                        .create()
-                        .execute()
+                    inputPayPsw()
                 }
 
                 override fun onTaskFailed(failedText: String) {
-
+                    responTaskFailed("$failedText was not found.")
                 }
 
             })
@@ -82,7 +69,64 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
             .execute()
     }
 
+    /**
+     * 输入支付¬密码
+     */
+    private fun inputPayPsw() {
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("立即付款", 1)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    adbInputPsw()
+                }
 
+                override fun onTaskFailed(failedText: String) {
+                    responTaskFailed("支付宝付款环节失败")
+                }
+            })
+            .create()
+            .execute()
+    }
+
+    /**
+     * 通过ADB输入密码
+     */
+    private fun adbInputPsw() {
+        //todo 匹配密码按钮的点击坐标
+        val delayTime = 400L
+        AdbScriptController.Builder()
+            .setXY("540,1535", delayTime)  //8
+            .setXY("175,1200", delayTime)  //1
+            .setXY("540,1535", delayTime)  //8
+            .setXY("900,1535", delayTime)  //9
+            .setXY("175,1200", delayTime)  //1
+            .setXY("540,1700", delayTime)  //0
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFailed(failedText: String) {
+                    responTaskFailed("支付密码输入错误")
+                }
+
+                override fun onTaskFinished() {
+                    //支付成功
+                    responTaskSuccess()     //todo 支付成功后，根据什么条件来判断支付成功
+                    //paySuccess()
+                }
+            })
+            .create()
+            .execute()
+    }
+
+    /**
+     * 是否支付成功
+     */
+    private fun paySuccess() {
+
+    }
+
+    /**
+     * 下发的支付宝账号和已登录的不一致
+     */
     fun login(userName: String, userPsw: String) {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
@@ -104,6 +148,9 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
             .execute()
     }
 
+    /**
+     * 输入支付宝密码
+     */
     fun inputPsw(userPsw: String) {
         AdbScriptController.Builder()
             .setXY("540,850", 3000)
@@ -130,10 +177,10 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
             .setNodeParams("登录")
             .setNodeParams("付款方式", 0, 60)
             .setNodeParams("账户余额", 0, true, true, 8, false)
-            .setNodeParams("立即付款")
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    responTaskSuccess()
+                    //responTaskSuccess()
+                    inputPayPsw()
                 }
 
                 override fun onTaskFailed(failedText: String) {
