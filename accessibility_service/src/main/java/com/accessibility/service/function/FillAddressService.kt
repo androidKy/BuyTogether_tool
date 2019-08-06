@@ -93,9 +93,9 @@ class FillAddressService private constructor(private val nodeService: MyAccessib
         var districtName = taskDataUtil.getDistrict()
 
         L.i("省：$provinceName 市：$cityName 区：$districtName")
-      /*  provinceName = "北京市"
-        cityName = "北京市"
-        districtName = "朝阳区"*/
+        /*  provinceName = "北京市"
+          cityName = "北京市"
+          districtName = "朝阳区"*/
 
         NodeController.Builder()
             .setNodeService(nodeService)
@@ -108,7 +108,7 @@ class FillAddressService private constructor(private val nodeService: MyAccessib
 
                 override fun onTaskFailed(failedText: String) {
                     L.i("$failedText was not found.")
-                    responFailed("选择$provinceName 省失败")
+                    responFailed("选择${provinceName}失败")
                 }
 
             })
@@ -130,7 +130,7 @@ class FillAddressService private constructor(private val nodeService: MyAccessib
                     }
 
                     override fun onTaskFailed(failedText: String) {
-                        responFailed("选择$cityName 城市失败")
+                        responFailed("选择${cityName}失败")
                     }
                 })
                 .create()
@@ -145,7 +145,7 @@ class FillAddressService private constructor(private val nodeService: MyAccessib
                     }
 
                     override fun onTaskFailed(failedText: String) {
-                        responFailed("选择$cityName 城市失败")
+                        responFailed("选择${cityName}失败")
                     }
                 })
                 .create()
@@ -167,7 +167,7 @@ class FillAddressService private constructor(private val nodeService: MyAccessib
                 }
 
                 override fun onTaskFailed(failedText: String) {
-                    responFailed("选择$districtName 区失败")
+                    responFailed("选择${districtName}失败")
                 }
             })
             .create()

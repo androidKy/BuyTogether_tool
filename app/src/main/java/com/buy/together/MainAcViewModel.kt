@@ -72,7 +72,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
         val width = com.utils.common.DisplayUtils.getRealWidth(context)
         val height = com.utils.common.DisplayUtils.getRealHeight(context)
 
-        SPUtils.getInstance().apply {
+        SPUtils.getInstance(Constant.SP_DEVICE_PARAMS).apply {
             put(Constant.KEY_SCREEN_DENSITY, "$width,$height")
             put(Constant.KEY_SCREEN_WIDTH, width)
             put(Constant.KEY_SCREEN_HEIGHT, height)
@@ -102,7 +102,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
                     .setDataListener(object : DataListener {
                         override fun onSucceed(result: String) {
                             UpdateSPManager(context).updateTaskStatus(1)
-                            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).run{
+                            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).run {
                                 remove(Constant.KEY_ORDER_NUMBER)
                                 remove(Constant.KEY_TASK_DATA)
                             }

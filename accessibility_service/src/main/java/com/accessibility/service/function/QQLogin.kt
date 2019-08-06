@@ -48,7 +48,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                             }
 
                             override fun onTaskFailed(failedText: String) {
-                                responTaskFailed("$failedText cmd was executed failed.")
+                                responTaskFailed(failedText)
                             }
                         })
                         //.setXY("777,1600", 10 * 1000L)
@@ -65,7 +65,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                 }
 
                 override fun onTaskFailed(failedText: String) {
-                    responTaskFailed("$failedText node was not found.登录失败")
+                    responTaskFailed("跳转不到QQ登录界面")
                 }
 
             })
@@ -118,7 +118,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
     private fun checkLoginResult() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("登录失败", 0, false, 8)
+            .setNodeParams("登录失败", 0, false, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     //dealInputError()
@@ -127,28 +127,35 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                 }
 
                 override fun onTaskFailed(failedText: String) {
-                    NodeController.Builder()
-                        .setNodeService(myAccessibilityService)
-                        .setTaskListener(object : TaskListener {
-                            override fun onTaskFinished() {
-                                L.i("登录成功")
-                                val accountId =
-                                    SPUtils.getInstance(myAccessibilityService, Constant.SP_TASK_FILE_NAME)
-                                        .getInt(Constant.KEY_ACCOUNT_ID)
-                                updateAccount(accountId, 1)
-                                myAccessibilityService.setIsLogined(true)
-                                mTaskListener?.onTaskFinished()
-                            }
-
-                            override fun onTaskFailed(failedText: String) {
-                                responTaskFailed("验证码校验失败")
-                            }
-                        })
-                        .setNodeParams("授权并登录", 0, 2)
-                        .create()
-                        .execute()
+                    authLogin()
                 }
             })
+            .create()
+            .execute()
+    }
+
+    /**
+     * 授权登录
+     */
+    private fun authLogin() {
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    L.i("登录成功")
+                    val accountId =
+                        SPUtils.getInstance(myAccessibilityService, Constant.SP_TASK_FILE_NAME)
+                            .getInt(Constant.KEY_ACCOUNT_ID)
+                    updateAccount(accountId, 1)
+                    myAccessibilityService.setIsLogined(true)
+                    mTaskListener?.onTaskFinished()
+                }
+
+                override fun onTaskFailed(failedText: String) {
+                    responTaskFailed("验证码校验失败")
+                }
+            })
+            .setNodeParams("授权并登录", 0, 5)
             .create()
             .execute()
     }

@@ -27,6 +27,22 @@ class AdbScriptController private constructor() {
         var delayTimeList: ArrayList<Long> = ArrayList()    //执行下一次操作延迟的时间 默认是2秒
         var taskListener: TaskListener? = null
 
+        fun setXY(xyList: List<String>): Builder {
+            for (i in 0 until xyList.size) {
+                setXY(xyList[i], DEFAULT_DELAY_TIME)
+            }
+
+            return this@Builder
+        }
+
+        fun setXY(xyList: List<String>, delayTime: Long): Builder {
+            for (i in 0 until xyList.size) {
+                setXY(xyList[i], delayTime)
+            }
+
+            return this@Builder
+        }
+
         fun setXY(xy: String): Builder {
             setXY(xy, DEFAULT_DELAY_TIME)
             return this@Builder
@@ -107,7 +123,9 @@ class AdbScriptController private constructor() {
 
             override fun onSuccess(result: Boolean?) {
                 L.i("执行命令结果： $result")
-                taskListener?.onTaskFinished()
+                if (result!!)
+                    taskListener?.onTaskFinished()
+                else taskListener?.onTaskFailed("adb命令执行错误")
             }
 
             override fun onCancel() {

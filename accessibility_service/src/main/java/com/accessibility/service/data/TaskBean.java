@@ -10,7 +10,7 @@ public class TaskBean {
     /**
      * code : 200
      * msg : 成功
-     * task : {"task_id":133,"task_type":1,"task_status":1,"task_amount":20,"task_dispense":1,"task_complete":0,"task_fail":0,"talk_msg":"","comment_content":"","buy_behavior":0,"create_time":1.564390811833056E9,"ip":{"city":"","content":"","mac_address":""},"account":{"id":269,"user":"2356727178","pwd":"qqqq8888","type":0},"goods":{"id":8,"goods_id":8183196997,"cat_id":6441,"goods_name":" 酸甜杨梅干九制梅子果蜜饯办公室户外休闲随身独立小包装零食","mall_name":"益C果城恒康美专卖店","keyword":"酸甜杨梅干九制梅子果蜜饯","search_price":"7.9","choose_info":"团购价:15.9,正常价:16.9%%%300g"},"device":{"id":1846,"bluetooth":"B8:37:65:19:2A:90","imei":"864297033467033","brand":"OPPO","android":"5.1","mac":"b8:37:65:19:2a:91","system":"A59s_11_A.12_180302","sn":"GQNFCUS499999999","imsi":"460005912308999","model":"OPPO A59s","useragent":"Dalvik/2.1.0 (Linux; U; Android 5.1; OPPO A59s Build/LMY47I)"},"delivery_address":{"name":"宿韵梅","phone":"17156908545","province":"北京市","city":"北京市","district":"东城区","street":"北京市东城区仓南胡同58"},"stay_time":{"goods_time":10,"search_time":18},"pay_account":{"id":"","type":"","username":"","pwd":""}}
+     * task : {"task_id":133,"task_type":1,"task_status":1,"task_amount":20,"task_dispense":1,"task_complete":0,"task_fail":0,"talk_msg":"","comment_content":"","buy_behavior":0,"create_time":1.564390811833056E9,"ip":{"city":"","content":"","mac_address":""},"account":{"id":269,"user":"2356727178","login_pwd":"qqqq8888","type":0},"goods":{"id":8,"goods_id":8183196997,"cat_id":6441,"goods_name":" 酸甜杨梅干九制梅子果蜜饯办公室户外休闲随身独立小包装零食","mall_name":"益C果城恒康美专卖店","keyword":"酸甜杨梅干九制梅子果蜜饯","search_price":"7.9","choose_info":"团购价:15.9,正常价:16.9%%%300g"},"device":{"id":1846,"bluetooth":"B8:37:65:19:2A:90","imei":"864297033467033","brand":"OPPO","android":"5.1","mac":"b8:37:65:19:2a:91","system":"A59s_11_A.12_180302","sn":"GQNFCUS499999999","imsi":"460005912308999","model":"OPPO A59s","useragent":"Dalvik/2.1.0 (Linux; U; Android 5.1; OPPO A59s Build/LMY47I)"},"delivery_address":{"name":"宿韵梅","phone":"17156908545","province":"北京市","city":"北京市","district":"东城区","street":"北京市东城区仓南胡同58"},"stay_time":{"goods_time":10,"search_time":18},"pay_account":{"id":"","type":"","username":"","login_pwd":""}}
      */
 
     private int code;
@@ -55,12 +55,12 @@ public class TaskBean {
          * buy_behavior : 0
          * create_time : 1.564390811833056E9
          * ip : {"city":"","content":"","mac_address":""}
-         * account : {"id":269,"user":"2356727178","pwd":"qqqq8888","type":0}
+         * account : {"id":269,"user":"2356727178","login_pwd":"qqqq8888","type":0}
          * goods : {"id":8,"goods_id":8183196997,"cat_id":6441,"goods_name":" 酸甜杨梅干九制梅子果蜜饯办公室户外休闲随身独立小包装零食","mall_name":"益C果城恒康美专卖店","keyword":"酸甜杨梅干九制梅子果蜜饯","search_price":"7.9","choose_info":"团购价:15.9,正常价:16.9%%%300g"}
          * device : {"id":1846,"bluetooth":"B8:37:65:19:2A:90","imei":"864297033467033","brand":"OPPO","android":"5.1","mac":"b8:37:65:19:2a:91","system":"A59s_11_A.12_180302","sn":"GQNFCUS499999999","imsi":"460005912308999","model":"OPPO A59s","useragent":"Dalvik/2.1.0 (Linux; U; Android 5.1; OPPO A59s Build/LMY47I)"}
          * delivery_address : {"name":"宿韵梅","phone":"17156908545","province":"北京市","city":"北京市","district":"东城区","street":"北京市东城区仓南胡同58"}
          * stay_time : {"goods_time":10,"search_time":18}
-         * pay_account : {"id":"","type":"","username":"","pwd":""}
+         * pay_account : {"id":"","type":"","username":"","login_pwd":""}
          */
 
         private int task_id;
@@ -266,7 +266,7 @@ public class TaskBean {
             /**
              * id : 269
              * user : 2356727178
-             * pwd : qqqq8888
+             * login_pwd : qqqq8888
              * type : 0
              */
 
@@ -607,13 +607,22 @@ public class TaskBean {
              * id :
              * type :
              * username :
-             * pwd :
+             * login_pwd :
              */
 
             private String id;
             private String type;
             private String username;
-            private String pwd;
+            private String login_pwd;
+            private String pay_pwd;
+
+            public String getPay_pwd() {
+                return pay_pwd;
+            }
+
+            public void setPay_pwd(String pay_pwd) {
+                this.pay_pwd = pay_pwd;
+            }
 
             public String getId() {
                 return id;
@@ -639,12 +648,12 @@ public class TaskBean {
                 this.username = username;
             }
 
-            public String getPwd() {
-                return pwd;
+            public String getLogin_pwd() {
+                return login_pwd;
             }
 
-            public void setPwd(String pwd) {
-                this.pwd = pwd;
+            public void setLogin_pwd(String login_pwd) {
+                this.login_pwd = login_pwd;
             }
         }
     }

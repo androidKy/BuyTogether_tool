@@ -108,7 +108,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             .setTaskListener(object : TaskListener {
                 override fun onTaskFailed(failedText: String) {
                     L.i("$failedText was not found.")
-                    responFailed("$failedText node was not found.")
+                    responFailed("与客服沟通失败")
                 }
 
                 override fun onTaskFinished() {
@@ -200,7 +200,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             .setTaskListener(object : TaskListener {
                 override fun onTaskFailed(failedText: String) {
                     L.i("$failedText was not found.")
-                    responFailed("$failedText was not found.")
+                    responFailed("选择商品规格失败")
                 }
 
                 override fun onTaskFinished() {
@@ -223,7 +223,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             .setXY(ADB_XY.PAY_NOW.add_address, 3000L)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                   startFillAddress()
+                    startFillAddress()
                 }
 
                 override fun onTaskFailed(failedText: String) {
@@ -237,9 +237,9 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             .execute()
     }
 
-    private fun startFillAddress(){
+    private fun startFillAddress() {
         FillAddressService.getInstance(nodeService)
-            .setTaskFinishedListener(object:TaskListener{
+            .setTaskFinishedListener(object : TaskListener {
                 override fun onTaskFinished() {
                     choosePayChannel()
                 }

@@ -11,7 +11,7 @@ import com.safframework.log.L
  * Description:
  * Created by Quinin on 2019-07-10.
  **/
-class ScrollUtils constructor(val nodeService: BaseAccessibilityService, val recyclerViewNode: AccessibilityNodeInfo) {
+class ScrollUtils constructor(private val nodeService: BaseAccessibilityService, private val recyclerViewNode: AccessibilityNodeInfo) {
 
     /* companion object {
          var instance: ScrollUtils? = null
@@ -25,12 +25,16 @@ class ScrollUtils constructor(val nodeService: BaseAccessibilityService, val rec
              }
          }
      }*/
+    companion object {
+        private const val MSG_FORWARD_WHAT: Int = 10000
+        private const val MSG_BACKWARD_WHAT: Int = 20000
+    }
+
     private var mIsNodeFound: Boolean = false
 
     private var mForwardTime: Int = 10
     private var mBackwardTime: Int = 10
-    private val MSG_FORWARD_WHAT: Int = 100
-    private val MSG_BACKWARD_WHAT: Int = 200
+
     private var mScrollListener: ScrollListener? = null
     private var mNodeFoundListener: NodeFoundListener? = null
     private var mNodeText: String? = null
@@ -38,8 +42,8 @@ class ScrollUtils constructor(val nodeService: BaseAccessibilityService, val rec
 
     init {
         mIsNodeFound = false
-        mForwardTime = 10
-        mBackwardTime = 10
+        mForwardTime = (10..15).random()
+        mBackwardTime = (10..15).random()
     }
 
     private val mHandler = Handler(Looper.getMainLooper()) {

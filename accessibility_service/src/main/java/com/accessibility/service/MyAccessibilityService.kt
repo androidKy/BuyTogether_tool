@@ -118,7 +118,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
                     override fun onTaskFailed(failedText: String) {
                         L.i("$failedText was not found.")
-                        responTaskFailed("$failedText was not found.")
+                        responTaskFailed("拼多多登录授权失败")
                     }
                 })
                 .create()
@@ -165,7 +165,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
                 override fun onTaskFailed(failedText: String) {
                     L.i("$failedText was not found.")
-                    responTaskFailed("$failedText was not found.搜索失败")
+                    responTaskFailed("搜索商品失败")
                 }
             })
             .setNodeParams("搜索", 0, 30)
@@ -191,9 +191,13 @@ class MyAccessibilityService : BaseAccessibilityService() {
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     val keyWord = TaskDataUtil.instance.getGoods_keyword()
+                    if (keyWord.isNullOrEmpty()) {
+                        responTaskFailed("搜索关键词不能为空")
+                        return
+                    }
                     NodeController.Builder()
                         .setNodeService(this@MyAccessibilityService)
-                        .setNodeParams(WidgetConstant.EDITTEXT, 3, false, keyWord!!)
+                        .setNodeParams(WidgetConstant.EDITTEXT, 3, false, keyWord)
                         .setNodeParams("搜索")
                         .setTaskListener(object : TaskListener {
                             override fun onTaskFinished() {
@@ -230,7 +234,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
                 override fun onTaskFailed(failedText: String) {
                     L.i("$failedText not found.关键词查找失败")
-                    responTaskFailed(failedText)
+                    responTaskFailed("根据关键字搜索商品失败")
                     //lookforwardGood(goodName, searchPrice, mallName)
                 }
             })
@@ -274,7 +278,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 }
             })
             .setNodeParams("客服")
-            .setNodeParams(mallName, 0, false, 10)
+            .setNodeParams(mallName, 0, false, 5)
             .create()
             .execute()
     }

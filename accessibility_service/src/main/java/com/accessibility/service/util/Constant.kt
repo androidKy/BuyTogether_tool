@@ -42,6 +42,22 @@ class Constant {
         const val POST_PARAM_PLATFORMID = "platformId"
         const val POST_PARAM_AREA = "area"
         const val POST_PARAM_PORT = "port"
+
+        const val RSA_PRIVATE_KEY =
+            "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAKRYDkdpRUUV9IAq\n" +
+                    "sQ3Nhlti/SU7Kmv6mOyv4mNUGw8/pEP8QyL/c+LcOIrxxtr8FWMBB1IyElMEjhhZ\n" +
+                    "Q4+wfpLgmVWAH0RlbRzdeEVjf2F18CJIbAtyFpo+vZbdDsNn39AVHXUIKM3DobBu\n" +
+                    "XMrGH3LQJkIKR1daOpqs3Bub1Z/XAgMBAAECgYALj4mFmtFSyvjARqszd4iNh4Ob\n" +
+                    "lF4SFXafeRSZpyd2JaRxBzRT0xjRqxXWfwEy6LZlGK6X/h9i3qL+RyflBOXfuJ46\n" +
+                    "e83QcwXyCjz6eTRN8zq5fGL2RSK9qsHlPcKvu/JpsPUSSKUdxYfEdSQEW6Y72svE\n" +
+                    "ShVISVjJzFcabr15MQJBAMXa8aNdda7qCiU9N0teGrhGmoWp0j77A+r0y4jbn6CW\n" +
+                    "eCXCBhRfTXWhfLaHuP16uOD0Dg6FmIyLW4wDceTWl/ECQQDUo/1MMocGMX8yCvIP\n" +
+                    "bJfsTBltRiS47IJa9BRcJ1vKf8EywVziSqh2fSTZvmLBRX46sz1Pu1uAGLUcqyjx\n" +
+                    "BTxHAkBJi6YwrKf3GeYli4jHSjaycwQzVTni0VnWd6JEwCapAeWtW175KafYZuu9\n" +
+                    "yduY1YptjCrBeSWIcLDZ7dnjT2VxAkEAzbd1N0FuxbwfDR/vvKJXfCDHPKNupYUS\n" +
+                    "O8IE7H6bXBYqp9rP7JFD15YMj6eTzN1ZWJrNRxTAWfYNSZYBPuPMwwJBAJJvJy8t\n" +
+                    "DUtaZartVKZ+inXbdVdLK1+dWdtOpt3zB0anMLGYmZR0E5w4S+1rB8Aqb5WXxmAq\n" +
+                    "9hbBZKQQwOUrrPM="
     }
 
 

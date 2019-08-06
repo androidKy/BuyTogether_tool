@@ -19,9 +19,9 @@ while [ -h "$PRG" ] ; do
         PRG=`dirname "$PRG"`"/$link"
     fi
 done
-SAVED="`pwd`"
+SAVED="`login_pwd`"
 cd "`dirname \"$PRG\"`/" >/dev/null
-APP_HOME="`pwd -P`"
+APP_HOME="`login_pwd -P`"
 cd "$SAVED" >/dev/null
 
 APP_NAME="Gradle"

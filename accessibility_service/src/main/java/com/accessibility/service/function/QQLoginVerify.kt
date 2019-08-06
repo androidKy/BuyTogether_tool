@@ -150,8 +150,7 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
                         .setNodeParams("完成", 0, 3)
                         .setTaskListener(object : TaskListener {
                             override fun onTaskFinished() {
-                                //todo 验证码校验结果判断，如果失败就更新验证码
-                                mTaskListener?.onTaskFinished()
+                                checkVerifyResult()
                             }
 
                             override fun onTaskFailed(failedText: String) {
@@ -168,7 +167,31 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
             })
             .create()
             .execute()
+    }
 
+    /**
+     * 检查校验结果，如果页面没发生跳转，验证码错误，重新请求验证码
+     */
+    private fun checkVerifyResult() {
+        myAccessibilityService.apply {
+            postDelay(Runnable {
+                NodeController.Builder()
+                    .setNodeService(this)
+                    .setNodeParams("输入验证码", 0, 3)
+                    .setTaskListener(object : TaskListener {
+                        override fun onTaskFinished() {
+                            //验证码错误
+                            startVerify(mTaskListener!!)
+                        }
+
+                        override fun onTaskFailed(failedText: String) {
+                            mTaskListener?.onTaskFinished()
+                        }
+                    })
+                    .create()
+                    .execute()
+            }, 3)
+        }
     }
 
 

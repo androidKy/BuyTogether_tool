@@ -48,16 +48,18 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         SPUtils.getInstance(Constant.SP_DEVICE_PARAMS).run {
             clear()
         }
-       /* SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).run {
+        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).run {
             val cacheTaskData = getString(Constant.KEY_TASK_DATA, "")
             if (!TextUtils.isEmpty(cacheTaskData)) {
+                L.i("从缓存获取任务")
                 parseStringForTask(cacheTaskData)
             } else {
+                L.i("从服务器获取任务")
                 startGetTask()
             }
-        }*/
+        }
 
-         val taskStatus = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_STATUS, -1)
+        /* val taskStatus = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_STATUS, -1)
          val taskIp = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_ID, 0)
          L.i("taskStatus: $taskStatus taskIP:$taskIp")
          if (taskStatus == 0) {  //未完成的任务必须上报未完成，才能请求到接下来的任务
@@ -73,7 +75,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                      }
                  })
                  .updateTaskStatus(taskIp.toString(), false, "任务中断，未知错误")
-         } else startGetTask()
+         } else startGetTask()*/
     }
 
     private fun startGetTask() {
@@ -440,8 +442,6 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                     if (this@apply == lastAlipayAccount) {
                         it.put(Constant.KEY_ALIPAY_ACCOUNT_SWITCH, false)
                     } else it.put(Constant.KEY_ALIPAY_ACCOUNT_SWITCH, true)
-
-                    it.put(Constant.KEY_ALIPAY_ACCOUNT, this@apply)
                 }
             }
         }

@@ -3,6 +3,7 @@ package com.accessibility.service.util
 import android.text.TextUtils
 import com.accessibility.service.data.TaskBean
 import com.safframework.log.L
+import com.utils.common.rsa.RSAUtil
 
 /**
  * Description:
@@ -53,6 +54,7 @@ class TaskDataUtil private constructor() {
         }
     }
 
+
     /**
      * 获取支付宝账号
      */
@@ -63,12 +65,14 @@ class TaskDataUtil private constructor() {
     }
 
     /**
-     * 获取支付宝密码
+     * 获取支付宝登录密码
      */
-    fun getAlipayPsw(): String? {
-        return mTaskServiceData?.run {
-            task?.pay_account?.pwd
+    fun getAliLoginPsw(): String? {
+        val rsaPsw = mTaskServiceData?.run {
+            task?.pay_account?.login_pwd
         }
+
+        return RSAUtil.decrypt(Constant.RSA_PRIVATE_KEY, rsaPsw)
 
         /* val rsaPsw = mTaskServiceData?.run {
              task?.pay_account?.pwd
@@ -79,6 +83,17 @@ class TaskDataUtil private constructor() {
 
         // return ""
     }
+
+    /**
+     * 获取支付宝的支付密码
+     */
+    fun getAliPay_psw(): String? {
+        val rsaPayPsw = mTaskServiceData?.run {
+            task?.pay_account?.pay_pwd
+        }
+        return RSAUtil.decrypt(Constant.RSA_PRIVATE_KEY, rsaPayPsw)
+    }
+
 
     /**
      * 获取商品名字
@@ -102,11 +117,17 @@ class TaskDataUtil private constructor() {
      * 获取商品的关键词
      */
     fun getGoods_keyword(): String? {
-        return mTaskServiceData?.run {
-            task?.goods?.keyword?.split(",")?.run {
-                get(0)  //todo 随机一个关键词
+        try {
+            return mTaskServiceData?.run {
+                task?.goods?.keyword?.split(",")?.run {
+                    val index = (0 until size).random()
+                    get(index)
+                }
             }
+        } catch (e: Exception) {
+            L.e(e.message, e)
         }
+        return ""
     }
 
     /**

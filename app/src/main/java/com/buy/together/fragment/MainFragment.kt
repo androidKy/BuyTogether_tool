@@ -144,6 +144,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         }
     }
 
+
     override fun onParseDatas(taskData: ArrayList<ArrayList<String>>) {
         mTableDatas.addAll(taskData)
 
