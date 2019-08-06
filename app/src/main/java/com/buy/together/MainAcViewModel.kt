@@ -1,5 +1,6 @@
 package com.buy.together
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
@@ -11,6 +12,7 @@ import com.proxy.service.core.AppInfo
 import com.proxy.service.core.AppProxyManager
 import com.safframework.log.L
 import com.utils.common.PackageManagerUtils
+import com.utils.common.PermissionUtils
 import com.utils.common.ThreadUtils
 import com.utils.common.pdd_api.ApiManager
 import com.utils.common.pdd_api.DataListener
@@ -21,6 +23,15 @@ import me.goldze.mvvmhabit.utils.SPUtils
  * Created by Quinin on 2019-07-29.
  **/
 class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseViewModel<Context, MainAcView>() {
+
+    fun requestPermission() {
+        val permissionArray = arrayListOf(
+            Manifest.permission.READ_PHONE_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.INTERNET
+        )
+        if (!PermissionUtils.isGranted(permissionArray))
+            PermissionUtils.permission(permissionArray).request()
+    }
 
     /**
      * 添加APP到代理IP

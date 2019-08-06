@@ -9,7 +9,6 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.READ_LOGS" tools:ignore="ProtectedPermissions"/>
     <uses-permission
             android:name="android.permission.INTERACT_ACROSS_USERS"
             tools:ignore="ProtectedPermissions"/>
@@ -27,11 +26,11 @@
         <!-- 配置APP ID -->
         <meta-data
                 android:name="BUGLY_APPID"
-                android:value="bddd8c650b" />
+                android:value="bddd8c650b"/>
         <!-- 配置APP版本号 -->
         <meta-data
                 android:name="BUGLY_APP_VERSION"
-                android:value="1.0.0" />
+                android:value="1.0.0"/>
         <!-- Xposed -->
         <meta-data
                 android:name="xposedmodule"
@@ -66,6 +65,11 @@
                 <action android:name="android.screen.shot"></action>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
+        </activity>
+
+        <activity android:name="com.utils.common.PermissionUtils$PermissionActivity"
+                  android:launchMode="singleTask">
+
         </activity>
 
     </application>

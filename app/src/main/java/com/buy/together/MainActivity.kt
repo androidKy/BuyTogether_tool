@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
             addApps2Proxy()
             saveScreenDensity()
         }
+
         // crashInJava()
     }
 
@@ -49,6 +50,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
     override fun onResume() {
         super.onResume()
+        mMainAcViewModel?.requestPermission()
         if (!BaseAccessibilityService.isAccessibilitySettingsOn(
                 this,
                 MyAccessibilityService::class.java.canonicalName!!

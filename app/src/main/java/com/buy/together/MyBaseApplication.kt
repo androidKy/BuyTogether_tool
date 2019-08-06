@@ -28,6 +28,7 @@ class MyBaseApplication : BaseApplication() {
             .apply()
 
         Utils.init(this)
+        com.utils.common.Utils.init(this)
 
         CrashReport.initCrashReport(this, "bddd8c650b", false)
     }
