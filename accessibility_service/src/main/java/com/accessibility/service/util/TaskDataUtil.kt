@@ -54,6 +54,11 @@ class TaskDataUtil private constructor() {
         }
     }
 
+    fun getPdd_account_id(): Int? {
+        return mTaskServiceData?.run {
+            task?.account?.id
+        }
+    }
 
     /**
      * 获取支付宝账号
@@ -71,7 +76,7 @@ class TaskDataUtil private constructor() {
         val rsaPsw = mTaskServiceData?.run {
             task?.pay_account?.login_pwd
         }
-
+        L.d("登录密码解密前：$rsaPsw")
         return RSAUtil.decrypt(Constant.RSA_PRIVATE_KEY, rsaPsw)
 
         /* val rsaPsw = mTaskServiceData?.run {
@@ -119,9 +124,20 @@ class TaskDataUtil private constructor() {
     fun getGoods_keyword(): String? {
         try {
             return mTaskServiceData?.run {
-                task?.goods?.keyword?.split(",")?.run {
-                    val index = (0 until size).random()
-                    get(index)
+                task?.goods?.keyword?.let {
+                    if (it.contains(",")) {
+                        it.split(",")?.run {
+                            val index = (0 until size).random()
+                            get(index)
+                        }
+                    } else if (it.contains("，")) {
+                        it.split(",")?.run {
+                            val index = (0 until size).random()
+                            get(index)
+                        }
+                    } else {
+                        it
+                    }
                 }
             }
         } catch (e: Exception) {

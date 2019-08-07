@@ -76,21 +76,24 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
 
     private fun initTableView(tableDatas: ArrayList<ArrayList<String>>) {
         context?.run {
-            LockTableView(this, mContainer, tableDatas).apply {
-                this@apply.setLockFristColumn(true) //是否锁定第一列
-                    .setLockFristRow(true) //是否锁定第一行
-                    .setMaxColumnWidth(300) //列最大宽度
-                    .setMinColumnWidth(60) //列最小宽度
-                    //.setColumnWidth(1, 30) //设置指定列文本宽度
-                    //.setColumnWidth(2, 0)
-                    .setMinRowHeight(20)//行最小高度
-                    .setMaxRowHeight(50)//行最大高度
-                    .setTextViewSize(16) //单元格字体大小
-                    .setFristRowBackGroudColor(R.color.table_head)//表头背景色
-                    .setTableHeadTextColor(R.color.beijin)//表头字体颜色
-                    .setTableContentTextColor(R.color.border_color)//单元格字体颜色
-                    .setCellPadding(5)//设置单元格内边距(dp)
-                    .show()
+            mContainer?.apply {
+                removeAllViews()
+                LockTableView(this@run, this@apply, tableDatas).let {
+                    it.setLockFristColumn(true) //是否锁定第一列
+                        .setLockFristRow(true) //是否锁定第一行
+                        .setMaxColumnWidth(300) //列最大宽度
+                        .setMinColumnWidth(60) //列最小宽度
+                        //.setColumnWidth(1, 30) //设置指定列文本宽度
+                        //.setColumnWidth(2, 0)
+                        .setMinRowHeight(20)//行最小高度
+                        .setMaxRowHeight(50)//行最大高度
+                        .setTextViewSize(16) //单元格字体大小
+                        .setFristRowBackGroudColor(R.color.table_head)//表头背景色
+                        .setTableHeadTextColor(R.color.beijin)//表头字体颜色
+                        .setTableContentTextColor(R.color.border_color)//单元格字体颜色
+                        .setCellPadding(5)//设置单元格内边距(dp)
+                        .show()
+                }
             }
         }
     }
@@ -132,12 +135,12 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
             taskBean.code == 201 -> //没有待领取的任务，启动一个定时器去定时获取
             {
                 mViewModel?.startTaskTimer()
-                mContainer?.removeAllViews()
+                mViewModel?.showTip(mContainer, "没有待领取的任务")
             }
             else -> {
                 L.i("获取数据失败：${taskBean.msg}")
-                mContainer?.removeAllViews()
                 context?.run {
+                    mViewModel?.showTip(mContainer, "任务错误码：${taskBean.code}")
                     ToastUtils.showToast(this, "获取数据失败：${taskBean.msg}")
                 }
             }
@@ -157,7 +160,10 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         L.i("获取任务失败：$msg")
         mViewModel?.startTaskTimer()
         context?.run {
-            ToastUtils.showToast(this, "获取任务失败")
+            if (!msg.isNullOrEmpty()) {
+                ToastUtils.showToast(this, msg)
+                mViewModel?.showTip(mContainer, msg)
+            }
         }
     }
 
@@ -178,9 +184,9 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
               }*/
         } else {
             context?.apply {
+                mViewModel?.showTip(mContainer, "应用未获得root权限")
                 ToastUtils.showToast(this, "应用未获得root权限")
             }
-
         }
     }
 
@@ -290,7 +296,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     }
 
     override fun onLogReceived(logString: String) {
-        //L.i("LocalVpnService onLogReceived: $logString")
+        L.i("LocalVpnService onLogReceived: $logString")
     }
 
 

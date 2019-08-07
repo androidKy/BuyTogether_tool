@@ -19,7 +19,7 @@ public class RSAUtil {
 
     static {
         try {
-            cipher = Cipher.getInstance("RSA");
+            cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (NoSuchPaddingException e) {
@@ -101,7 +101,7 @@ public class RSAUtil {
         String source = "psw123456";
         System.out.println("\r加密前文字：\r\n" + source);
         //String aData = RSAUtil.encrypt(publicKey, source);
-        String aData = "fum/vwl5ApC82SVQV2doNHLo7PFlGCsaNpAej1xZpp/ULLKRw+m4RanBtRWKm5PiXcJHQluhyNe9KBEKpIyXioHYKtylVwnYCdf4bTZ/ERyshi9LwYH0pMt/NlE7LvVV8xc7ICcuvt1BSr0faRr19JvU3mUr0uP5xPzmH979Td4=";
+        String aData = "Liz1oc6akzAFpUejxHRhUv9PAocyjXKU+ZUPfvOHnZ/Sgrs/68tn9ZArjtYEhwNTCs3nXHeu2N6zf4r++ooevkJ32E9ap/48j+ujwCkNcVK0Jem6WaigpzwurZa24Oe1kukwlQeeH0FCP0a2uKsxF3p0hu9UbSvlxXRh4UHt2So=";
         System.out.println("加密后文字：\r\n" + aData);
         String dData = RSAUtil.decrypt(privateKey, aData);
         System.out.println("解密后文字: \r\n" + dData);

@@ -20,6 +20,8 @@ import com.utils.common.SPUtils
 class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     private var mTaskListener: TaskListener? = null
     private var mLoginFailedCount: Int = 0
+    private var mUserName: String? = null
+    private var mUserPsw: String? = null
 
     fun login(taskListener: TaskListener) {
         mTaskListener = taskListener
@@ -32,11 +34,15 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
             return
         }
 
-        val isSwitchAccount = SPUtils.getInstance(myAccessibilityService.applicationContext, Constant.SP_TASK_FILE_NAME)
+        mUserName = account
+        mUserPsw = psw
+
+        var isSwitchAccount = SPUtils.getInstance(myAccessibilityService.applicationContext, Constant.SP_TASK_FILE_NAME)
             .getBoolean(Constant.KEY_ALIPAY_ACCOUNT_SWITCH)
+        isSwitchAccount = false //todo 手动设置不需要切换账号登录
         L.i("是否需要切换支付宝账号：$isSwitchAccount")
         if (isSwitchAccount)
-            login(account, psw)
+            login()
         else {
             payDirectly()
         }
@@ -184,17 +190,51 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     /**
      * 下发的支付宝账号和已登录的不一致
      */
-    fun login(userName: String, userPsw: String) {
+    fun login() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
             .setNodeParams("允许")
             .setNodeParams("允许")
-            .setNodeParams("其他登录方式")
-            .setNodeParams(WidgetConstant.EDITTEXT, 3, false, userName)
+            //  .setNodeParams("其他登录方式")
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    pressOtherLogin()
+                }
+
+                override fun onTaskFailed(failedText: String) {
+                    responTaskFailed("支付宝账号输入有误")
+                }
+            })
+            .create()
+            .execute()
+    }
+
+    fun pressOtherLogin() {
+        AdbScriptController.Builder()
+            .setXY("855,1675")
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    myAccessibilityService.postDelay(Runnable {
+                        inputAccount()
+                    },3)
+                }
+
+                override fun onTaskFailed(failedText: String) {
+                    responTaskFailed("支付宝账号输入有误")
+                }
+            })
+            .create()
+            .execute()
+    }
+
+    fun inputAccount() {
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams(WidgetConstant.EDITTEXT, 3, false, mUserName!!)
             .setNodeParams("下一步")
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    inputPsw(userPsw)
+                    inputPsw()
                 }
 
                 override fun onTaskFailed(failedText: String) {
@@ -208,10 +248,10 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     /**
      * 输入支付宝密码
      */
-    fun inputPsw(userPsw: String) {
+    fun inputPsw() {
         AdbScriptController.Builder()
             .setXY("540,850", 3000)
-            .setText(userPsw)
+            .setText(mUserPsw!!)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     choosePayChannel()

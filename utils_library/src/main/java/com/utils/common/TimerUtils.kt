@@ -31,7 +31,7 @@ class TimerUtils {
         mTimer?.run {
             mTimerTask?.let {
                 mIsStarted = true
-                schedule(it, 0L, intervalTime)
+                schedule(it, intervalTime, intervalTime)
             }
         }
     }

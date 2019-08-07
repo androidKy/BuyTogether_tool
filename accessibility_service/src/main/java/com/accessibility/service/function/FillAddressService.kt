@@ -159,7 +159,7 @@ class FillAddressService private constructor(private val nodeService: MyAccessib
     private fun chooseDistrict(districtName: String) {
         NodeController.Builder()
             .setNodeService(nodeService)
-            .setNodeParams(districtName, 0, true, true, 3, false)         //市
+            .setNodeParams(districtName, 0, true, true, 3, true)         //市
             .setNodeParams("保存")
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
@@ -167,7 +167,8 @@ class FillAddressService private constructor(private val nodeService: MyAccessib
                 }
 
                 override fun onTaskFailed(failedText: String) {
-                    responFailed("选择${districtName}失败")
+                    responFailed("选择${districtName}失败") //选择区失败，随便选择一个区 todo
+
                 }
             })
             .create()

@@ -128,6 +128,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
     inner class LoginListenerImpl : TaskListener {
         override fun onTaskFinished() {
+            //登录完成后，有时候会自动跳转到见面福利的界面
+            back2main()
             searchGoods()
         }
 
@@ -136,6 +138,36 @@ class MyAccessibilityService : BaseAccessibilityService() {
         }
     }
 
+    private fun back2main() {
+        NodeController.Builder()
+            .setNodeService(this)
+            .setNodeParams("见面福利", 0, false, 20)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    performBackClick()
+                }
+
+                override fun onTaskFailed(failedText: String) {
+                    L.d("没有跳转到见面福利界面")
+                    NodeController.Builder()
+                        .setNodeService(this@MyAccessibilityService)
+                        .setNodeParams("直接退出", 0, 5)
+                        .setTaskListener(object : TaskListener {
+                            override fun onTaskFinished() {
+
+                            }
+
+                            override fun onTaskFailed(failedText: String) {
+
+                            }
+                        })
+                        .create()
+                        .execute()
+                }
+            })
+            .create()
+            .execute()
+    }
 
     /**
      * 搜索商品
@@ -154,7 +186,37 @@ class MyAccessibilityService : BaseAccessibilityService() {
             return
         }
 
+        NodeController.Builder()
+            .setNodeService(this)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    L.i("开始确认商品")
+                    clickSearchEditText(goodName, searchPrice, mallName)
+                }
 
+                override fun onTaskFailed(failedText: String) {
+                    L.i("$failedText was not found.")
+                    //responTaskFailed("搜索商品失败")
+                    searchType(goodName, searchPrice, mallName)
+
+                }
+            })
+            .setNodeParams("搜索", 0, 30)
+            .create()
+            .execute()
+
+
+        /*
+           .setNodeParams("com.xunmeng.pinduoduo:id/a8f", 2, 3, true)
+           .setNodeParams("com.xunmeng.pinduoduo:id/fq", 2, 3)
+           .setNodeParams(WidgetConstant.EDITTEXT, 3, false, keyWord)
+           .setNodeParams("搜索")
+           .create()
+           .execute()*/
+
+    }
+
+    private fun searchType(goodName: String, searchPrice: String, mallName: String) {
         NodeController.Builder()
             .setNodeService(this)
             .setTaskListener(object : TaskListener {
@@ -168,18 +230,9 @@ class MyAccessibilityService : BaseAccessibilityService() {
                     responTaskFailed("搜索商品失败")
                 }
             })
-            .setNodeParams("搜索", 0, 30)
+            .setNodeParams("分类", 0, 10)
             .create()
             .execute()
-
-        /*
-           .setNodeParams("com.xunmeng.pinduoduo:id/a8f", 2, 3, true)
-           .setNodeParams("com.xunmeng.pinduoduo:id/fq", 2, 3)
-           .setNodeParams(WidgetConstant.EDITTEXT, 3, false, keyWord)
-           .setNodeParams("搜索")
-           .create()
-           .execute()*/
-
     }
 
     /**

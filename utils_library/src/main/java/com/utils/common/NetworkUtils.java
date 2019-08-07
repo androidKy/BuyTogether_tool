@@ -105,7 +105,7 @@ public final class NetworkUtils {
      *
      * @return {@code true}: yes<br>{@code false}: no
      */
-    @RequiresPermission(INTERNET)
+    //@RequiresPermission(INTERNET)
     public static boolean isAvailable() {
         return isAvailableByDns() || isAvailableByPing(null);
     }
@@ -161,12 +161,11 @@ public final class NetworkUtils {
      * @param ip The ip address.
      * @return {@code true}: yes<br>{@code false}: no
      */
-    @RequiresPermission(INTERNET)
+    //@RequiresPermission(INTERNET)
     public static boolean isAvailableByPing(final String ip) {
         final String realIp = TextUtils.isEmpty(ip) ? "223.5.5.5" : ip;
-        //ShellUtils.CommandResult result = ShellUtils.execCmd(String.format("ping -c 1 %s", realIp), false);
-        //return result.result == 0;
-        return false;
+        ShellUtils.CommandResult result = ShellUtils.execCmd(String.format("ping -c 1 %s", realIp), false);
+        return result.result == 0;
     }
 
     /**
@@ -206,7 +205,7 @@ public final class NetworkUtils {
      *
      * @return {@code true}: yes<br>{@code false}: no
      */
-    @RequiresPermission(INTERNET)
+    //@RequiresPermission(INTERNET)
     public static boolean isAvailableByDns() {
         return isAvailableByDns("");
     }
@@ -218,7 +217,7 @@ public final class NetworkUtils {
      * @param domain The name of domain.
      * @return {@code true}: yes<br>{@code false}: no
      */
-    @RequiresPermission(INTERNET)
+    //@RequiresPermission(INTERNET)
     public static boolean isAvailableByDns(final String domain) {
         final String realDomain = TextUtils.isEmpty(domain) ? "www.baidu.com" : domain;
         InetAddress inetAddress;

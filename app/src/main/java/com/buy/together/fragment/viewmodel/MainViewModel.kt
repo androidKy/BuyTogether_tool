@@ -2,6 +2,9 @@ package com.buy.together.fragment.viewmodel
 
 import android.content.Context
 import android.text.TextUtils
+import android.view.LayoutInflater
+import android.widget.FrameLayout
+import android.widget.TextView
 import com.accessibility.service.data.TaskBean
 import com.accessibility.service.function.ClearDataService
 import com.accessibility.service.listener.TaskListener
@@ -9,6 +12,7 @@ import com.accessibility.service.util.Constant
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
+import com.buy.together.R
 import com.buy.together.base.BaseView
 import com.buy.together.base.BaseViewModel
 import com.buy.together.bean.CityListBean
@@ -45,9 +49,8 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      */
     fun getTask() {
         L.init(MainViewModel::class.java.simpleName)
-        SPUtils.getInstance(Constant.SP_DEVICE_PARAMS).run {
-            clear()
-        }
+        SPUtils.getInstance(Constant.SP_DEVICE_PARAMS).clear()
+
         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).run {
             val cacheTaskData = getString(Constant.KEY_TASK_DATA, "")
             if (!TextUtils.isEmpty(cacheTaskData)) {
@@ -162,9 +165,9 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      * 清理PDD和QQ的数据
      */
     fun clearData() {
-        val isClearAlipay =
+        var isClearAlipay =
             SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getBoolean(Constant.KEY_ALIPAY_ACCOUNT_SWITCH, true)
-
+        isClearAlipay = false //todo 手动设置不清空支付宝
         ClearDataService().clearData(isClearAlipay, object : TaskListener {
             override fun onTaskFinished() {
                 mainView.onClearDataResult("Success")
@@ -277,7 +280,6 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                     }
                 } else {
                     L.i("该城市没有IP，重新获取地址")
-                    //todo 该城市没有IP，重新获取地址
                     ToastUtils.showToast(context, "$cityName 没有相应的IP")
                     uploadIpError(cityName)
                 }
@@ -298,18 +300,21 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      * 上报城市没有该IP
      */
     private fun uploadIpError(cityName: String) {
-        val taskIp = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_ID, 0)
-        ApiManager()
-            .setDataListener(object : DataListener {
-                override fun onSucceed(result: String) {
-                    getTask()
-                }
+        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
+            val taskIp = getInt(Constant.KEY_TASK_ID, 0)
+            remove(Constant.KEY_TASK_DATA)
+            ApiManager()
+                .setDataListener(object : DataListener {
+                    override fun onSucceed(result: String) {
+                        getTask()
+                    }
 
-                override fun onFailed(errorMsg: String) {
+                    override fun onFailed(errorMsg: String) {
 
-                }
-            })
-            .updateTaskStatus(taskIp.toString(), false, "$cityName 没有相应的代理IP")
+                    }
+                })
+                .updateTaskStatus(taskIp.toString(), false, "$cityName 没有相应的代理IP")
+        }
     }
 
     /**
@@ -559,6 +564,18 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
             for (sub in mSubscribeList) {
                 sub.dispose()
             }
+        }
+    }
+
+    /**
+     * 显示提示
+     */
+    fun showTip(mContainer: FrameLayout?, tip: String) {
+        mContainer?.apply {
+            removeAllViews()
+            val tipLayoutView = LayoutInflater.from(context).inflate(R.layout.layout_tip, this, true)
+            val textView = tipLayoutView.findViewById(R.id.tv_tip) as TextView
+            textView.text = tip
         }
     }
 }

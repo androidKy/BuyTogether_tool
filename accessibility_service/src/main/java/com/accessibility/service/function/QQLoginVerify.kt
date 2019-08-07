@@ -147,7 +147,7 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
                     NodeController.Builder()
                         .setNodeService(myAccessibilityService)
                         // .setNodeParams(WidgetConstant.EDITTEXT, 3, false, false, verifyCode)
-                        .setNodeParams("完成", 0, 3)
+                        .setNodeParams("完成", 0, 10)
                         .setTaskListener(object : TaskListener {
                             override fun onTaskFinished() {
                                 checkVerifyResult()
@@ -155,6 +155,7 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
 
                             override fun onTaskFailed(failedText: String) {
                                 L.i("$failedText was not found.")
+                                responTaskFailed("登录验证失败")
                             }
                         })
                         .create()

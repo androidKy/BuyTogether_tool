@@ -25,6 +25,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Map;
@@ -354,6 +357,20 @@ public class LocalVpnService extends VpnService implements Runnable {
         }
     }
 
+    private boolean isIpv4(String ip) {
+        boolean isIpv4 = false;
+
+        try {
+            InetAddress inetAddress = InetAddress.getByName(ip);
+
+            return inetAddress instanceof Inet4Address;
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
     private ParcelFileDescriptor establishVPN() throws Exception {
         Builder builder = new Builder();
         builder.setMtu(ProxyConfig.Instance.getMTU());
@@ -396,10 +413,15 @@ public class LocalVpnService extends VpnService implements Runnable {
             String value = (String) method.invoke(null, name);
             if (value != null && !"".equals(value) && !servers.contains(value)) {
                 servers.add(value);
-                if (value.replaceAll("\\d", "").length() == 3) {//防止IPv6地址导致问题
+                /*if (value.replaceAll("\\d", "").length() == 3) {//防止IPv6地址导致问题
                     builder.addRoute(value, 32);
                 } else {
                     builder.addRoute(value, 128);
+                }*/
+                if (!isIpv4(value)) {   //判断IP是属于IPv4还是IPv6
+                    builder.addRoute(value, 128);
+                } else {
+                    builder.addRoute(value, 32);
                 }
                 if (ProxyConfig.IS_DEBUG)
                     System.out.printf("%s=%s\n", name, value);

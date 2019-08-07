@@ -31,6 +31,7 @@ class Constant {
         const val KEY_SCREEN_DENSITY = "key_screen_density" //屏幕分辨率
         const val KEY_SCREEN_WIDTH = "key_screen_width"
         const val KEY_SCREEN_HEIGHT = "key_screen_height"
+        const val KEY_FIRST_START = "key_first_start"
 
 
         const val CONTENT_TYPE = "multipart/form-data"

@@ -141,7 +141,15 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
             .setNodeService(nodeService)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFailed(failedText: String) {
-                    L.i("$failedText was not found.")
+                    L.i("$failedText was not found.商品已收藏")
+                    TaskDataUtil.instance.getTask_type()?.apply {
+                        when (this) {
+                            1234, 134, 234, 34 -> buyGoods()
+                            132, 32, 324 -> talkWithSaler()
+
+                            else -> responSuccess()
+                        }
+                    }
                 }
 
                 override fun onTaskFinished() {
