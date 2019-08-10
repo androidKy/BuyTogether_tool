@@ -96,7 +96,7 @@ class AdbScriptController private constructor() {
     }
 
     fun execute() {
-        L.i("cmdList size = ${cmdList.size}")
+        //L.i("cmdList size = ${cmdList.size}")
         if (cmdList.size == 0)
             return
 
@@ -106,7 +106,7 @@ class AdbScriptController private constructor() {
 
                 try {
                     for (i in 0 until cmdList.size) {
-                        L.i("执行命令：${cmdList[i]}")
+                        //L.i("执行命令：${cmdList[i]}")
                         Thread.sleep(delayTime[i])
                         com.utils.common.CMDUtil().execCmd(cmdList[i])
 
@@ -122,7 +122,7 @@ class AdbScriptController private constructor() {
             }
 
             override fun onSuccess(result: Boolean?) {
-                L.i("执行命令结果： $result")
+                //L.i("执行命令结果： $result")
                 if (result!!)
                     taskListener?.onTaskFinished()
                 else taskListener?.onTaskFailed("adb命令执行错误")

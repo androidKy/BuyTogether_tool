@@ -3,16 +3,13 @@ package com.accessibility.service
 import android.content.Context
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
-import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.function.LoginService
+import com.accessibility.service.function.SearchGoods
 import com.accessibility.service.function.TaskService
-import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
-import com.accessibility.service.util.TaskDataUtil
-import com.accessibility.service.util.WidgetConstant
 import com.safframework.log.L
 
 /**
@@ -93,12 +90,10 @@ class MyAccessibilityService : BaseAccessibilityService() {
             initTaskData()
             L.i("拼多多登录界面")
             setCurPageType(PageEnum.CHOOSING_LOGIN_PAGE)
-
             /*   OcrUtils.recognizePic(
                    File("/storage/emulated/0/Android/data/screenShot.png"),
                    this.applicationContext
                )
-
                return
    */
 
@@ -106,8 +101,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 .setNodeService(this@MyAccessibilityService)
                 .setNodeParams("好的", true)
                 .setNodeParams("允许", true)
-                .setNodeParams("个人中心", 0, 5, true)
-                .setNodeParams("点击登录", 0, 5, true)
+                //.setNodeParams("个人中心", 0, 5, true)
+                //.setNodeParams("点击登录", 0, 5, true)
                 .setNodeParams("请使用其它方式登录")
                 .setNodeParams("QQ登录")
                 .setTaskListener(object : TaskListener {
@@ -129,229 +124,22 @@ class MyAccessibilityService : BaseAccessibilityService() {
     inner class LoginListenerImpl : TaskListener {
         override fun onTaskFinished() {
             //登录完成后，有时候会自动跳转到见面福利的界面
-            back2main()
-            searchGoods()
+            SearchGoods(this@MyAccessibilityService)
+                .setTaskListener(object : TaskListener {
+                    override fun onTaskFinished() {
+                        doTask()
+                    }
+
+                    override fun onTaskFailed(failedText: String) {
+                        responTaskFailed(failedText)
+                    }
+                })
+                .startService()
         }
 
         override fun onTaskFailed(failedText: String) {
             responTaskFailed(failedText)
         }
-    }
-
-    private fun back2main() {
-        NodeController.Builder()
-            .setNodeService(this)
-            .setNodeParams("见面福利", 0, false, 20)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    performBackClick()
-                }
-
-                override fun onTaskFailed(failedText: String) {
-                    L.d("没有跳转到见面福利界面")
-                    NodeController.Builder()
-                        .setNodeService(this@MyAccessibilityService)
-                        .setNodeParams("直接退出", 0, 5)
-                        .setTaskListener(object : TaskListener {
-                            override fun onTaskFinished() {
-
-                            }
-
-                            override fun onTaskFailed(failedText: String) {
-
-                            }
-                        })
-                        .create()
-                        .execute()
-                }
-            })
-            .create()
-            .execute()
-    }
-
-    /**
-     * 搜索商品
-     */
-    private fun searchGoods() {
-        L.i("mIsLogined : $mIsLogined")
-
-        val goodName = TaskDataUtil.instance.getGoods_name()
-        val searchPrice = TaskDataUtil.instance.getSearchPrice()
-        val mallName = TaskDataUtil.instance.getMall_name()
-
-        if (goodName.isNullOrEmpty() || mallName.isNullOrEmpty() || searchPrice.isNullOrEmpty()
-        ) {
-            L.i("商品信息为空，自动查找商品失败")
-            responTaskFailed("商品信息为空，自动查找商品失败")
-            return
-        }
-
-        NodeController.Builder()
-            .setNodeService(this)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    L.i("开始确认商品")
-                    clickSearchEditText(goodName, searchPrice, mallName)
-                }
-
-                override fun onTaskFailed(failedText: String) {
-                    L.i("$failedText was not found.")
-                    //responTaskFailed("搜索商品失败")
-                    searchType(goodName, searchPrice, mallName)
-
-                }
-            })
-            .setNodeParams("搜索", 0, 30)
-            .create()
-            .execute()
-
-
-        /*
-           .setNodeParams("com.xunmeng.pinduoduo:id/a8f", 2, 3, true)
-           .setNodeParams("com.xunmeng.pinduoduo:id/fq", 2, 3)
-           .setNodeParams(WidgetConstant.EDITTEXT, 3, false, keyWord)
-           .setNodeParams("搜索")
-           .create()
-           .execute()*/
-
-    }
-
-    private fun searchType(goodName: String, searchPrice: String, mallName: String) {
-        NodeController.Builder()
-            .setNodeService(this)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    L.i("开始确认商品")
-                    clickSearchEditText(goodName, searchPrice, mallName)
-                }
-
-                override fun onTaskFailed(failedText: String) {
-                    L.i("$failedText was not found.")
-                    responTaskFailed("搜索商品失败")
-                }
-            })
-            .setNodeParams("分类", 0, 10)
-            .create()
-            .execute()
-    }
-
-    /**
-     * 点击搜索框
-     */
-    private fun clickSearchEditText(goodName: String, searchPrice: String, mallName: String) {
-        AdbScriptController.Builder()
-            .setXY("540,245")      //搜索框的坐标
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    val keyWord = TaskDataUtil.instance.getGoods_keyword()
-                    if (keyWord.isNullOrEmpty()) {
-                        responTaskFailed("搜索关键词不能为空")
-                        return
-                    }
-                    NodeController.Builder()
-                        .setNodeService(this@MyAccessibilityService)
-                        .setNodeParams(WidgetConstant.EDITTEXT, 3, false, keyWord)
-                        .setNodeParams("搜索")
-                        .setTaskListener(object : TaskListener {
-                            override fun onTaskFinished() {
-                                confirmGoods(goodName, searchPrice, mallName)
-                            }
-
-                            override fun onTaskFailed(failedText: String) {
-                                responTaskFailed("商品搜索失败")
-                            }
-                        })
-                        .create()
-                        .execute()
-                }
-
-                override fun onTaskFailed(failedText: String) {
-                    responTaskFailed("应用未获得root权限")
-                }
-            })
-            .create()
-            .execute()
-    }
-
-    /**
-     * 确认商品是需要刷的商品
-     */
-    private fun confirmGoods(goodName: String, searchPrice: String, mallName: String) {
-        NodeController.Builder()
-            .setNodeService(this)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    L.i("价格一致,继续对比店铺的名字是否一样")
-                    confirmMallName(goodName, searchPrice, mallName)
-                }
-
-                override fun onTaskFailed(failedText: String) {
-                    L.i("$failedText not found.关键词查找失败")
-                    responTaskFailed("根据关键字搜索商品失败")
-                    //lookforwardGood(goodName, searchPrice, mallName)
-                }
-            })
-            .setNodeParams(
-                searchPrice, 0, true,
-                isScrolled = true,
-                editInputText = "null",
-                foundNodeTimeOut = 2,
-                findNextFlag = false
-            )
-            .create()
-            .execute()
-    }
-
-
-    /**
-     * 确认店铺名称
-     */
-    private fun confirmMallName(goodName: String, searchPrice: String, mallName: String) {
-        NodeController.Builder()
-            .setNodeService(this)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    L.i("店铺名称相同，找到需要刷的商品")
-                    performBackClick(1, object : AfterClickedListener {
-                        override fun onClicked() {
-                            doTask()
-                        }
-                    })
-                }
-
-                override fun onTaskFailed(failedText: String) {
-                    performBackClick(0)
-                    performBackClick(2, object : AfterClickedListener {
-                        override fun onClicked() {
-                            //返回继续查找
-                            L.i("店铺名称不一样：$failedText was not found.返回继续查找")
-                            continueLookGood(goodName, searchPrice, mallName)
-                        }
-                    })
-                }
-            })
-            .setNodeParams("客服")
-            .setNodeParams(mallName, 0, false, 5)
-            .create()
-            .execute()
-    }
-
-    private fun continueLookGood(goodName: String, searchPrice: String, mallName: String) {
-        AdbScriptController.Builder()
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    confirmGoods(goodName, searchPrice, mallName)
-                }
-
-                override fun onTaskFailed(failedText: String) {
-                }
-            })
-            .setSwipeXY(
-                "${mScreenWidth / 2},${mScreenHeight * 0.8}",
-                "${mScreenWidth / 2},${mScreenHeight * 0.3}"
-            )
-            .create()
-            .execute()
     }
 
     /**

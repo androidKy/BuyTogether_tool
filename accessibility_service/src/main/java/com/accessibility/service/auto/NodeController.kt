@@ -61,7 +61,7 @@ class NodeController {
 
         fun setNodeParams(textList: List<String>, isScrolled: Boolean): Builder {
             for (text in textList)
-                setNodeParams(text, 0, true, isScrolled,5,true)
+                setNodeParams(text, 0, true, isScrolled, 5, true)
 
             return this@Builder
         }
@@ -120,11 +120,17 @@ class NodeController {
             return this@Builder
         }
 
-        fun setNodeParams(text: String, nodeFlag: Int, isClicked: Boolean, isScrolled: Boolean,timeout: Int,findNextFlag: Boolean): Builder {
-            setNodeParams(text, nodeFlag, isClicked, isScrolled, "null",timeout,findNextFlag)
+        fun setNodeParams(
+            text: String,
+            nodeFlag: Int,
+            isClicked: Boolean,
+            isScrolled: Boolean,
+            timeout: Int,
+            findNextFlag: Boolean
+        ): Builder {
+            setNodeParams(text, nodeFlag, isClicked, isScrolled, "null", timeout, findNextFlag)
             return this@Builder
         }
-
 
 
         fun setNodeParams(
@@ -189,7 +195,6 @@ class NodeController {
         }
 
 
-
         /**
          * 如果找到该节点则过滤后面的节点
          */
@@ -219,6 +224,9 @@ class NodeController {
     fun execute() {
         if (mLocked)
             return
+        if (nodeService == null) {
+            throw IllegalArgumentException("nodeService can not be null")
+        }
         L.i("execute : nodeSize = ${nodeTextList.size}")
         nodeService?.apply {
             mLocked = true

@@ -82,7 +82,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     }
 
     private fun startGetTask() {
-        val imei = DevicesUtil.getIMEI(context)
+        val imei = SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS).getString(Constant.KEY_REAL_DEVICE_IMEI)
         L.i("真实imei：$imei")
         ApiManager()
             .setDataListener(object : DataListener {
@@ -354,12 +354,10 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                             SPUtils.getInstance(Constant.SP_IP_PORTS)
                                 .put(Constant.KEY_CUR_PORT, proxyIpBean.data.port[0].toString())
 
-
-
                             mainView.onRequestPortsResult(this)
                         } else {  //重新请求
                             L.i("请求数据出错：code = ${proxyIpBean?.data?.code}")
-                            mainView.onResponPortsFailed("请求数据出错：code = ${proxyIpBean?.data?.code}")
+                            mainView.onResponPortsFailed("请求端口数据出错：code = ${proxyIpBean?.data?.code}")
                         }
                     }
                 }
@@ -485,6 +483,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         val spUtils = SPUtils.getInstance(Constant.SP_DEVICE_PARAMS)
         taskBean.task?.device?.run {
             spUtils.apply {
+                L.i("模拟imei: $imei")
                 put(DeviceParams.IMEI_KEY, imei)
                 put(DeviceParams.IMSI_KEY, imsi)
                 put(DeviceParams.MAC_KEY, mac)

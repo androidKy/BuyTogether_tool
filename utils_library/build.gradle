@@ -37,7 +37,7 @@ dependencies {
     api project(':saf-log')
 
     api 'com.amitshekhar.android:android-networking:1.0.2'
-
+    api 'com.google.code.gson:gson:2.8.5'
     //api 'com.ucweb.wpk:crashsdk-java:latest.release'
     api 'com.tencent.bugly:crashreport:latest.release'
 }

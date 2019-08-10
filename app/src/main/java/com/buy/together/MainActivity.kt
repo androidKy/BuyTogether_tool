@@ -32,7 +32,6 @@ class MainActivity : AppCompatActivity(), MainAcView {
         mMainAcViewModel = MainAcViewModel(this, this)
         mMainAcViewModel?.run {
             addApps2Proxy()
-            saveScreenDensity()
         }
 
         // crashInJava()

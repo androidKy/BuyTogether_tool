@@ -26,6 +26,7 @@ public class CMDUtil {
     public String execCmd(String command) {
         if (ThreadUtils.isMainThread()) {
             return "cmd executed can't run in mainThread.";
+            //throw new IllegalAccessException("cmd executed can't run in mainThread.");
         }
         ProcessBuilder pb = new ProcessBuilder("su");
         pb.redirectErrorStream(true);
@@ -49,10 +50,10 @@ public class CMDUtil {
             String line;
             while ((line = br.readLine()) != null) {
                 result.append(line);
-                System.out.println(line);
+                //System.out.println(line);
             }
-            int exitCode = process.waitFor();
-        } catch (IOException | InterruptedException e) {
+            //int exitCode = process.waitFor();
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if (os != null) {
@@ -69,7 +70,7 @@ public class CMDUtil {
                     e.printStackTrace();
                 }
             }
-            asyncProcessDestroy(process);
+            // asyncProcessDestroy(process);
         }
 
         return result.toString();

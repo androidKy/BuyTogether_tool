@@ -16,27 +16,27 @@ class DeviceParamsHook : HookListener {
         HookUtil().run {
             hookMethod(
                 loadPkgParam, HookClassName.ANDROID_TELEPHONY_TELEPHONYMANAGER, "getImei",
-                PhoneCallBack(DeviceParams.IMEI_KEY)
+                PhoneCallBack(DeviceParams.IMEI_KEY, loadPkgParam.packageName)
             )
 
             hookMethod(
                 loadPkgParam, HookClassName.ANDROID_TELEPHONY_TELEPHONYMANAGER, "getDeviceId",
-                PhoneCallBack(DeviceParams.IMEI_KEY)
+                PhoneCallBack(DeviceParams.IMEI_KEY, loadPkgParam.packageName)
             )
 
             hookMethod(
                 loadPkgParam, HookClassName.ANDROID_TELEPHONY_TELEPHONYMANAGER, "getSubscriberId",
-                PhoneCallBack(DeviceParams.IMSI_KEY)
+                PhoneCallBack(DeviceParams.IMSI_KEY, loadPkgParam.packageName)
             )
 
             hookMethod(
                 loadPkgParam, HookClassName.ANDROID_BLUETOOTH_BLUETOOTHADAPTER, "getAddress",
-                PhoneCallBack(DeviceParams.BLUTOOTH_KEY)
+                PhoneCallBack(DeviceParams.BLUTOOTH_KEY, loadPkgParam.packageName)
             )
 
             hookMethod(
                 loadPkgParam, HookClassName.ANDROID_BLUETOOTH_BLUETOOTHDEVICE, "getAddress",
-                PhoneCallBack(DeviceParams.BLUTOOTH_KEY)
+                PhoneCallBack(DeviceParams.BLUTOOTH_KEY, loadPkgParam.packageName)
             )
 
             hookField(
@@ -54,12 +54,12 @@ class DeviceParamsHook : HookListener {
 
             hookMethod(
                 loadPkgParam, HookClassName.ANDROID_OS_SYSTEMPROPERTIES, "get", String::class.java,
-                SystemPropertiesCallBack()
+                SystemPropertiesCallBack(loadPkgParam.packageName)
             )
 
             hookMethod(
                 loadPkgParam, HookClassName.ANDROID_OS_SYSTEMPROPERTIES, "get", String::class.java, String::class.java,
-                SystemPropertiesCallBack()
+                SystemPropertiesCallBack(loadPkgParam.packageName)
             )
 
             hookMethod(loadPkgParam, HookClassName.JAVA_LANG_SYSTEM, "getProperty", String::class.java,
@@ -79,18 +79,18 @@ class DeviceParamsHook : HookListener {
 
             hookMethod(
                 loadPkgParam, HookClassName.ANDROID_NET_WIFI_WIFIINFO, "getMacAddress",
-                PhoneCallBack(DeviceParams.MAC_KEY)
+                PhoneCallBack(DeviceParams.MAC_KEY, loadPkgParam.packageName)
             )
         }
     }
 
 
-    inner class PhoneCallBack(private val key: String) : XC_MethodHook() {
+    inner class PhoneCallBack(private val key: String, private val pkgName: String) : XC_MethodHook() {
 
         override fun afterHookedMethod(param: MethodHookParam?) {
             param?.run {
                 val value = HookUtil.getValueFromSP(key)
-                HookUtil().log("修改设备参数", "key: $key value: $value")
+                HookUtil().log("$pkgName 修改设备参数", "key: $key value: $value")
                 if (!TextUtils.isEmpty(value)) {
                     result = value
                 }
@@ -98,7 +98,7 @@ class DeviceParamsHook : HookListener {
         }
     }
 
-    inner class SystemPropertiesCallBack : XC_MethodHook() {
+    inner class SystemPropertiesCallBack(val pkgName: String) : XC_MethodHook() {
         override fun afterHookedMethod(param: MethodHookParam?) {
             param?.run {
                 val strArg0 = args?.get(0) as String
@@ -113,7 +113,7 @@ class DeviceParamsHook : HookListener {
 
         fun setResult(key: String, param: MethodHookParam) {
             val value = HookUtil.getValueFromSP(key)
-            HookUtil().log("修改设备参数", "key: $key value: $value")
+            HookUtil().log("$pkgName 修改设备参数", "key: $key value: $value")
             if (!TextUtils.isEmpty(value))
                 param.result = value
         }

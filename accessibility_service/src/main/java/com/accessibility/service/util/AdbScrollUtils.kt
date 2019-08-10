@@ -2,6 +2,7 @@ package com.accessibility.service.util
 
 import android.os.Handler
 import android.os.Looper
+import android.text.TextUtils
 import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.base.BaseAccessibilityService
@@ -17,10 +18,10 @@ class AdbScrollUtils {
 
     companion object {
         const val MSG_ADB_SCROLL: Int = 888
-        const val SCROLL_TOTAL_DEFAULT_TIME: Long = 20 * 1000 //默认的滑动总时间
-        const val SCROLL_SPEED_DEFAULT_TIME: Long = 2000     //默认的滑动间隔时间,1秒
+        const val SCROLL_TOTAL_DEFAULT_TIME: Long = 30 * 1000 //默认的滑动总时间
+        const val SCROLL_SPEED_DEFAULT_TIME: Long = 1500     //默认的滑动间隔时间,1秒
         const val DEFAULT_START_XY: String = "540,1740"      //默认滑动的起点
-        const val DEFAULT_STOP_XY: String = "540,1240"        //默认滑动的终点
+        const val DEFAULT_STOP_XY: String = "540,1040"        //默认滑动的终点
 
         val instantce: AdbScrollUtils by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
             AdbScrollUtils()
@@ -69,6 +70,11 @@ class AdbScrollUtils {
 
     fun setScrollTotalTime(scrollTotalTime: Long): AdbScrollUtils {
         mScrollTotalTime = scrollTotalTime
+        return this
+    }
+
+    fun setScrollSpeed(scrollSpeedTime: Long): AdbScrollUtils {
+        mScrollSpeed = scrollSpeedTime
         return this
     }
 
@@ -123,6 +129,9 @@ class AdbScrollUtils {
     }
 
     private fun findNode(): AccessibilityNodeInfo? {
+        if (TextUtils.isEmpty(mFindText)) {
+            return null
+        }
         var nodeResult = mNodeService?.findViewByFullText(mFindText)
         if (nodeResult == null) {
             nodeResult = mNodeService?.findViewById(mFindText)

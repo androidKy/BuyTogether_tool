@@ -4,6 +4,15 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+def keystorePropertiesFile = rootProject.file("sign.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+static def releaseTime() {
+    //GMT+8是因为北京时间和GMT有8个小时时差。
+    return new Date().format("MMdd_HHmm", TimeZone.getTimeZone("GMT+8"))
+}
+
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -14,15 +23,46 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+        debug {
+            keyAlias keystoreProperties['keyAlias_debug']
+            keyPassword keystoreProperties['keyPassword_debug']
+            storeFile file(keystoreProperties['storeFile_debug'])
+            storePassword keystoreProperties['storePassword_debug']
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+
+        debug{
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            //修改
+            signingConfig signingConfigs.debug
         }
     }
     dataBinding {
         enabled true
     }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            outputFileName = "pdd_v${defaultConfig.versionName}_${variant.name}}.apk"
+        }
+    }
+
 }
 
 dependencies {

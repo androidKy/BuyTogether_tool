@@ -23,12 +23,12 @@ class ApiManager {
         private const val URL_HTTP: String = "http://"
         const val POST_JSON_CONTENT_TYPE: String = "application/json"
 
-        const val URL_GET_TASK: String = "$URL_HTTP$URL_TEST_DOMAIN/task/get/"
-        const val URL_GET_COMENT_TASK: String = "$URL_HTTP$URL_TEST_DOMAIN/task/comment/"
-        const val URL_UPDATE_TASK_INFO: String = "$URL_HTTP$URL_TEST_DOMAIN/task/inform/"
-        const val URL_GET_ACCOUNT: String = "$URL_HTTP$URL_TEST_DOMAIN/others/account/?id="
-        const val URL_UPDATE_ACCOUNT: String = "$URL_HTTP$URL_TEST_DOMAIN/others/account/"
-        const val URL_GET_ADDRESS: String = "$URL_HTTP$URL_TEST_DOMAIN/others/address/"
+        const val URL_GET_TASK: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/get/"
+        const val URL_GET_COMENT_TASK: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/comment/"
+        const val URL_UPDATE_TASK_INFO: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/inform/"
+        const val URL_GET_ACCOUNT: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/account/?id="
+        const val URL_UPDATE_ACCOUNT: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/account/"
+        const val URL_GET_ADDRESS: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/address/"
 
 
         /*val instance: ApiManager by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
@@ -202,13 +202,20 @@ class ApiManager {
     }
 
     fun updateTaskStatus(taskId: String, isSucceed: Boolean, remark: String) {
-        updateTaskStatus(taskId, isSucceed, "", "", remark)
+        updateTaskStatus(taskId, isSucceed, "", "","", remark)
     }
 
     /**
      * 更新任务状态
      */
-    fun updateTaskStatus(taskId: String, isSucceed: Boolean, accountName: String, orderId: String, failedMark: String) {
+    fun updateTaskStatus(
+        taskId: String,
+        isSucceed: Boolean,
+        accountName: String,
+        orderId: String,
+        orderMoney: String,
+        failedMark: String
+    ) {
         checkNetwork(object : NetworkListener {
             override fun valid() {
                 JSONObject().run {
@@ -218,7 +225,7 @@ class ApiManager {
                     put("nickname", accountName)
                     put("order_id", orderId)
                     put("remark", failedMark)
-                    put("order_amount", "7.9")  //todo 商品金额
+                    put("order_amount", orderMoney)
 
                     AndroidNetworking.post(URL_UPDATE_TASK_INFO)
                         .setContentType(POST_JSON_CONTENT_TYPE)

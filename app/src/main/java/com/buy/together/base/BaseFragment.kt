@@ -22,8 +22,15 @@ abstract class BaseFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        mRootView = inflater.inflate(getLayoutId(),container,false)
+        mRootView = inflater.inflate(getLayoutId(), container, false)
         initView()
         return mRootView
+    }
+
+    /**
+     * 显示进度
+     */
+    fun showLoadingDialog(msg: String) {
+
     }
 }

@@ -5,6 +5,7 @@ import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.data.AccountBean
+import com.accessibility.service.data.TaskBean
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.Constant
@@ -12,6 +13,7 @@ import com.accessibility.service.util.TaskDataUtil
 import com.google.gson.Gson
 import com.safframework.log.L
 import com.utils.common.SPUtils
+import com.utils.common.ThreadUtils
 import com.utils.common.pdd_api.ApiManager
 import com.utils.common.pdd_api.DataListener
 
@@ -43,7 +45,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
     fun login(userName: String, userPsw: String) {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("TIM登录", 0, false, 20)
+            .setNodeParams("TIM登录", 0, false, 30)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("已跳转到QQ登录界面")
@@ -82,7 +84,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
     private fun verifyCode() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("输入验证码", 0, false, 10)
+            .setNodeParams("输入验证码", 0, false, 20)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("开始验证码校验")
@@ -145,7 +147,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
             .setNodeService(myAccessibilityService)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    L.i("登录成功，账号ID: $mUserId")
+                    L.i("登录成功，账号ID: $mUserId 账号名: $mUserName")
                     saveAccountName()
                     updateAccount(1)
                     myAccessibilityService.setIsLogined(true)
@@ -162,18 +164,20 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
     }
 
     /**
-     * 获取账号昵称  todo
+     * 获取账号昵称
      */
     private fun saveAccountName() {
-        val accountNode = myAccessibilityService.findViewByText(mUserName!!)
-        if (accountNode != null) {
-            accountNode.parent?.run {
-                for (i in 0 until childCount) {
-                    val child = getChild(i)
-                    L.i("childName: ${child.className} 节点内容:${child.text}")
-                }
-            }
-        }
+        SPUtils.getInstance(myAccessibilityService, Constant.SP_TASK_FILE_NAME)
+            .put(Constant.KEY_PDD_ACCOUNT, mUserName!!)
+        /* val accountNode = myAccessibilityService.findViewByText(mUserName!!)
+         if (accountNode != null) {
+             accountNode.parent?.run {
+                 for (i in 0 until childCount) {
+                     val child = getChild(i)
+                     L.i("childName: ${child.className} 节点内容:${child.text}")
+                 }
+             }
+         }*/
     }
 
     /**
@@ -217,21 +221,29 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                     override fun onSucceed(result: String) {
                         try {
                             L.i("获取账号结果：$result")
-                            Gson().fromJson(result, AccountBean::class.java).data.account.run {
-                                mTaskListener?.let {
-                                    //更新账号信息
-                                    if (!TextUtils.isEmpty(user) && !TextUtils.isEmpty(pwd)) {
-                                        mUserName = user
-                                        mUserPsw = pwd
-                                        mUserId = id
-                                        mLoginFailedCount++
-                                        login(mUserName!!, mUserPsw!!)
-                                    } else responTaskFailed("账号密码为空")
+                            val accountBean = Gson().fromJson(result, AccountBean::class.java)
+                            if (accountBean.code != 200) {
+                                L.i("重新拉取账号失败: ${accountBean.code}")
+                                return
+                            }
+                            accountBean.data.apply {
+                                account.run {
+                                    updateTaskData(this)
+                                    mTaskListener?.let {
+                                        //更新账号信息
+                                        if (!TextUtils.isEmpty(user) && !TextUtils.isEmpty(pwd)) {
+                                            mUserName = user
+                                            mUserPsw = pwd
+                                            mUserId = id
+                                            mLoginFailedCount++
+                                            login(mUserName!!, mUserPsw!!)
+                                        } else responTaskFailed("账号密码为空")
+                                    }
                                 }
                             }
                         } catch (e: Exception) {
                             L.e(e.message)
-                            responTaskFailed("账号返回数据格式有误: ${e.message}")
+                            responTaskFailed("重新获取账号失败: ${e.message}")
                         }
                     }
 
@@ -245,10 +257,53 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
     }
 
     /**
+     * 更新SP中的任务信息，当任务失败时，重新获取开始任务
+     */
+    private fun updateTaskData(account: AccountBean.DataBean.Account) {
+        L.i("更新SP中的任务信息")
+        ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
+            override fun doInBackground(): Boolean {
+                try {
+                    val taskDataStr = SPUtils.getInstance(myAccessibilityService, Constant.SP_TASK_FILE_NAME)
+                        .getString(Constant.KEY_TASK_DATA)
+                    Gson().fromJson(taskDataStr, TaskBean::class.java).apply {
+                        task.account.run {
+                            this.id = account.id
+                            this.type = account.type
+                            this.user = account.user
+                            this.pwd = account.pwd
+                        }
+                        Gson().toJson(this).let {
+                            SPUtils.getInstance(myAccessibilityService, Constant.SP_TASK_FILE_NAME)
+                                .put(Constant.KEY_TASK_DATA, it)
+
+                            return true
+                        }
+                    }
+                } catch (e: Exception) {
+                    L.e(e.message, e)
+                }
+
+                return false
+            }
+
+            override fun onSuccess(result: Boolean?) {
+                L.i("保存重新拉取的账号信息结果：$result")
+            }
+
+            override fun onCancel() {
+            }
+
+            override fun onFail(t: Throwable?) {
+            }
+        })
+    }
+
+    /**
      * 更新账号状态
      */
-    fun updateAccount(isValid: Int) {
-        L.i("账号更新状态，账号ID：$mUserId")
+    private fun updateAccount(isValid: Int) {
+        L.i("账号更新状态，账号ID：$mUserId isValid:$isValid")
         ApiManager()
             .updateQQAcount(mUserId!!, isValid)
     }

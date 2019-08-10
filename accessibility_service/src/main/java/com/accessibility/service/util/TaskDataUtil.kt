@@ -28,6 +28,36 @@ class TaskDataUtil private constructor() {
     }
 
     /**
+     * 购买行为
+     * 0:参团购买
+     * 1:拼单购买
+     * 2:单独购买
+     */
+    fun getBuy_type(): Int? {
+        return mTaskServiceData?.run {
+            task?.buy_behavior
+        }
+    }
+
+    fun getBuy_price(): Int? {
+        val buy_type = getBuy_type()
+        var buy_price = 0
+        when (buy_type) {
+            0 -> {
+
+            }
+            1 -> {
+
+            }
+            2 -> {
+
+            }
+        }
+
+        return 0
+    }
+
+    /**
      * 返回登录渠道
      */
     fun getLogin_channel(): Int? {
@@ -54,6 +84,9 @@ class TaskDataUtil private constructor() {
         }
     }
 
+    /**
+     * 获取账号id
+     */
     fun getPdd_account_id(): Int? {
         return mTaskServiceData?.run {
             task?.account?.id
@@ -119,29 +152,72 @@ class TaskDataUtil private constructor() {
     }
 
     /**
+     * 获取关键字
+     */
+    fun getGoodKeyWord(): String? {
+        return mTaskServiceData?.task?.goods?.keyword
+    }
+
+    /**
      * 获取商品的关键词
      */
     fun getGoods_keyword(): String? {
         try {
-            return mTaskServiceData?.run {
-                task?.goods?.keyword?.let {
-                    if (it.contains(",")) {
-                        it.split(",")?.run {
-                            val index = (0 until size).random()
-                            get(index)
+            return mTaskServiceData?.task?.goods?.keyword?.apply {
+                L.i("关键字：$this")
+                when {
+                    this.contains("，") -> {
+                        val replaceResult = this.replace("，", ",")
+                        L.i("过滤，的关键字：$replaceResult")
+                        splitKeyWord(replaceResult.split(","))
+                    }
+                    this.contains(",") -> splitKeyWord(this.split(","))
+
+                    else -> this
+                }
+            }
+        } catch (e: Exception) {
+            L.e(e.message, e)
+        }
+        return ""
+    }
+
+    /**
+     * 获取关键字列表
+     */
+    fun getGoodKeyWordList(): List<String>? {
+        try {
+            mTaskServiceData?.task?.goods?.keyword?.apply {
+                L.i("关键字：$this")
+                when {
+                    this.contains("，") -> {
+                        val replaceResult = this.replace("，", ",")
+                        L.i("过滤，的关键字：$replaceResult")
+                        return replaceResult.split(",")
+                    }
+                    this.contains(",") -> {
+                        return this.split(",")
+                    }
+
+                    else -> {
+                        return ArrayList<String>().run {
+                            add(this@apply)
+                            this@run
                         }
-                    } else if (it.contains("，")) {
-                        it.split(",")?.run {
-                            val index = (0 until size).random()
-                            get(index)
-                        }
-                    } else {
-                        it
                     }
                 }
             }
         } catch (e: Exception) {
             L.e(e.message, e)
+        }
+        return null
+    }
+
+    private fun splitKeyWord(keywordList: List<String>): String? {
+        if (keywordList.isNotEmpty()) {
+            val index = (0 until keywordList.size).random()
+
+            return keywordList[index]
         }
         return ""
     }

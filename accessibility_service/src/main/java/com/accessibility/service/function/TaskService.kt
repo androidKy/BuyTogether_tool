@@ -116,7 +116,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
                         override fun onClicked() {
                             TaskDataUtil.instance.getTask_type()?.apply {
                                 when (this) {
-                                    23, 123, 1234 -> collectGoods()
+                                    23, 234, 123, 1234 -> collectGoods()
                                     24, 124, 324 -> buyGoods()
                                     else -> responSuccess()
                                 }

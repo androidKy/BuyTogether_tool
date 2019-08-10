@@ -12,6 +12,7 @@ import com.accessibility.service.util.TaskDataUtil
 import com.accessibility.service.util.WidgetConstant
 import com.safframework.log.L
 import com.utils.common.SPUtils
+import java.util.regex.Pattern
 
 /**
  * Description:
@@ -54,16 +55,11 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     private fun payDirectly() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("订单编号", 1, false)
+            .setNodeParams("订单编号", 1, false, 30)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    val orderNumber = myAccessibilityService.findViewByText("订单编号")?.text?.toString()
-                    L.i("订单编号: $orderNumber")
-                    val uploadOrderNumber = orderNumber?.split("编号")?.get(1)
-                    if (!uploadOrderNumber.isNullOrEmpty()) {
-                        SPUtils.getInstance(myAccessibilityService.applicationContext, Constant.SP_TASK_FILE_NAME)
-                            .put(Constant.KEY_ORDER_NUMBER, uploadOrderNumber)
-                    }
+                    saveOrderMoney()
+                    saveOrderNumber()
 
                     inputPayPsw()
                 }
@@ -75,6 +71,38 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
             })
             .create()
             .execute()
+    }
+
+    /**
+     * 保存订单金额
+     */
+    private fun saveOrderMoney() {
+        val nodeList = myAccessibilityService.findViewsByText(".")
+        L.i("找订单金额的节点size: ${nodeList.size}")
+        val regex = ".*[a-zA-Z]+.*"
+        for (i in 0 until nodeList.size) {
+            val node = nodeList[i]
+            L.i("节点text: ${node.text}")
+            val isMatch = Pattern.compile(regex).matcher(node.text).matches()   //是否包含字母
+            if (!isMatch) {
+                SPUtils.getInstance(myAccessibilityService.applicationContext, Constant.SP_TASK_FILE_NAME)
+                    .put(Constant.KEY_ORDER_MONEY, node.text.toString())
+                break
+            }
+        }
+    }
+
+    /**
+     * 保存订单编号
+     */
+    private fun saveOrderNumber() {
+        val orderNumber = myAccessibilityService.findViewByText("订单编号")?.text?.toString()
+        L.i("订单编号: $orderNumber")
+        val uploadOrderNumber = orderNumber?.split("编号")?.get(1)
+        if (!uploadOrderNumber.isNullOrEmpty()) {
+            SPUtils.getInstance(myAccessibilityService.applicationContext, Constant.SP_TASK_FILE_NAME)
+                .put(Constant.KEY_ORDER_NUMBER, uploadOrderNumber)
+        }
     }
 
     /**
@@ -137,8 +165,10 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                     Constant.KEY_SCREEN_WIDTH,
                     1080
                 ) / 3
-            val itemHeight = 140
-            val itemStartY = 1135
+            //val itemHeight = 140
+            //val itemStartY = 1135
+            val itemHeight = 150
+            val itemStartY = 1280
 
 
             val xNumberKey = SparseIntArray()
@@ -216,7 +246,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                 override fun onTaskFinished() {
                     myAccessibilityService.postDelay(Runnable {
                         inputAccount()
-                    },3)
+                    }, 3)
                 }
 
                 override fun onTaskFailed(failedText: String) {

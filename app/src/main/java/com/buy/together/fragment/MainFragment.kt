@@ -321,6 +321,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
      * 启动拼多多开始任务
      */
     private fun startPdd() {
+        //展示弹框
         mContainer?.postDelayed({
 
             val launchIntentForPackage =
@@ -332,7 +333,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
                     ToastUtils.showToast(this, "未安装拼多多")
                 }
             }
-        }, 3000)
+        }, 5000)
     }
 
 }

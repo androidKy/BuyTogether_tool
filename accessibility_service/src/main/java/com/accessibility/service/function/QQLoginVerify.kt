@@ -182,6 +182,7 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
                     .setTaskListener(object : TaskListener {
                         override fun onTaskFinished() {
                             //验证码错误
+                            L.i("验证码错误")
                             startVerify(mTaskListener!!)
                         }
 
@@ -191,7 +192,7 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
                     })
                     .create()
                     .execute()
-            }, 3)
+            }, 5)
         }
     }
 
