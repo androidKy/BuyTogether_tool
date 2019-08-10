@@ -26,6 +26,7 @@ class Constant {
         const val KEY_ALIPAY_ACCOUNT_SWITCH = "key_alipay_switch"   //支付宝账号是否切换
         const val KEY_ORDER_NUMBER = "key_order_number"         //订单编号
         const val KEY_ORDER_MONEY = "key_order_money"           //订单价格
+        const val KEY_TASK_PROGRESS = "key_task_progress"       //任务的进度，如123
 
         const val KEY_PDD_ACCOUNT = "key_pdd_account"       //拼多多登录的账号
 

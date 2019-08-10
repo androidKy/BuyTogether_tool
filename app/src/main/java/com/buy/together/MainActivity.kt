@@ -2,6 +2,8 @@ package com.buy.together
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.support.v7.app.AppCompatActivity
 import com.accessibility.service.MyAccessibilityService
@@ -83,10 +85,10 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
         }
 
-        override fun onTaskFailed(failedText: String) {
-            L.i("任务失败：重新开始任务.errorMsg:$failedText")
-            // ToastUtils.showToast(this@MainActivity, "任务失败：$failedText")
-            mMainAcViewModel?.updateTask(false, failedText)
+        override fun onTaskFailed(failedMsg: String) {
+            L.i("任务失败：重新开始任务.errorMsg:$failedMsg")
+            // ToastUtils.showToast(this@MainActivity, "任务失败：$failedMsg")
+            mMainAcViewModel?.updateTask(false, failedMsg)
         }
     }
 
@@ -97,8 +99,11 @@ class MainActivity : AppCompatActivity(), MainAcView {
     override fun onResponUpdateTask() {
         L.i("更新任务状态完成，重新开始任务")
         //PackageManagerUtils.getInstance().restartApplication(this)
-        mTaskRunning = false
-        startTask()
+        //延迟1秒，等SP的异步清理完信息
+        Handler(Looper.getMainLooper()).postDelayed({
+            mTaskRunning = false
+            startTask()
+        }, 1000)
     }
 
     /**

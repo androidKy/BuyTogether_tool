@@ -23,9 +23,68 @@ class FillAddressService private constructor(private val nodeService: MyAccessib
     }
 
     fun doOnEvent() {
-        addAddress()
+        isAddressExist()
     }
 
+    /**
+     * 校验地址是否存在
+     */
+    private fun isAddressExist() {
+        AdbScriptController.Builder()
+            .setXY(ADB_XY.PAY_NOW.add_address, 3000L)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    NodeController.Builder()
+                        .setNodeService(nodeService)
+                        .setNodeParams("收货地址", 0, false, 3)
+                        .setTaskListener(object : TaskListener {
+                            override fun onTaskFinished() {
+                                L.i("地址已存在")
+                                chooseExistAddress()
+                            }
+
+                            override fun onTaskFailed(failedMsg: String) {
+                                L.i("地址不存在,新增地址")
+                                addAddress()
+                            }
+                        })
+                        .create()
+                        .execute()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    //支付失败
+                    L.i("$failedMsg was not found.")
+                    responFailed("输入收货地址时，应用未获得root权限")
+                    //payByOther()
+                }
+            })
+            .create()
+            .execute()
+    }
+
+    /**
+     * 选择已存在的地址
+     */
+    private fun chooseExistAddress() {
+        AdbScriptController.Builder()
+            .setXY("540,310")
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    responSuccess()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    responFailed("选择地址时，应用未获得root权限")
+                }
+            })
+            .create()
+            .execute()
+    }
+
+    /**
+     * 新增地址
+     */
     private fun addAddress() {
         NodeController.Builder()
             .setNodeService(nodeService)
@@ -36,7 +95,7 @@ class FillAddressService private constructor(private val nodeService: MyAccessib
                     fillAddress()
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     L.i("收货地址是H5页面")
                 }
             })
@@ -73,7 +132,7 @@ class FillAddressService private constructor(private val nodeService: MyAccessib
                     chooseProvince()
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     //支付失败
                     responFailed("应用未获得root权限")
                 }
@@ -106,8 +165,8 @@ class FillAddressService private constructor(private val nodeService: MyAccessib
                     chooseCity(cityName!!, districtName!!)
                 }
 
-                override fun onTaskFailed(failedText: String) {
-                    L.i("$failedText was not found.")
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("$failedMsg was not found.")
                     responFailed("选择${provinceName}失败")
                 }
 
@@ -129,7 +188,7 @@ class FillAddressService private constructor(private val nodeService: MyAccessib
                         chooseDistrict(districtName)
                     }
 
-                    override fun onTaskFailed(failedText: String) {
+                    override fun onTaskFailed(failedMsg: String) {
                         responFailed("选择${cityName}失败")
                     }
                 })
@@ -144,7 +203,7 @@ class FillAddressService private constructor(private val nodeService: MyAccessib
                         chooseDistrict(districtName)
                     }
 
-                    override fun onTaskFailed(failedText: String) {
+                    override fun onTaskFailed(failedMsg: String) {
                         responFailed("选择${cityName}失败")
                     }
                 })
@@ -166,7 +225,7 @@ class FillAddressService private constructor(private val nodeService: MyAccessib
                     responSuccess()
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     responFailed("选择${districtName}失败") //选择区失败，随便选择一个区 todo
 
                 }

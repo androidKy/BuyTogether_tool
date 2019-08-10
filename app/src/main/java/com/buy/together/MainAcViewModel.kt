@@ -11,10 +11,7 @@ import com.buy.together.base.BaseViewModel
 import com.proxy.service.core.AppInfo
 import com.proxy.service.core.AppProxyManager
 import com.safframework.log.L
-import com.utils.common.DevicesUtil
-import com.utils.common.PackageManagerUtils
-import com.utils.common.PermissionUtils
-import com.utils.common.ThreadUtils
+import com.utils.common.*
 import com.utils.common.pdd_api.ApiManager
 import com.utils.common.pdd_api.DataListener
 import me.goldze.mvvmhabit.utils.SPUtils
@@ -42,7 +39,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
                         permissionsDeniedForever: MutableList<String>?,
                         permissionsDenied: MutableList<String>?
                     ) {
-                        com.utils.common.ToastUtils.showToast(context, "请授予该应用相应的权限")
+                        ToastUtils.showToast(context, "请授予该应用相应的权限")
                         PackageManagerUtils.getInstance().killApplication(context.packageName)
                     }
 
@@ -116,23 +113,22 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
     fun updateTask(isSucceed: Boolean, remark: String) {
         ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
             override fun doInBackground(): Boolean {
-                var result = false
-                PackageManagerUtils.getInstance().apply {
-                    result = killApplication(Constant.BUY_TOGETHER_PKG)
-                    result = killApplication(Constant.QQ_TIM_PKG)
-                    result = killApplication(Constant.ALI_PAY_PKG)
+                CmdListUtil.getInstance().apply {
+                    val cmdStr = "am force-stop ${Constant.ALI_PAY_PKG};" +
+                            "am force-stop ${Constant.BUY_TOGETHER_PKG};" +
+                            "am force-stop ${Constant.QQ_TIM_PKG};"
+                    execCmd(cmdStr)
+                    return true
                 }
-                //PackageManagerUtils.getInstance().killApplication(Constant.ALI_PAY_PKG)
-                return result
             }
 
             override fun onSuccess(result: Boolean?) {
                 SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
-                    remove(Constant.KEY_TASK_DATA)
                     val taskId = getInt(Constant.KEY_TASK_ID)
                     var orderMoney = getString(Constant.KEY_ORDER_MONEY)
                     var orderNumber = getString(Constant.KEY_ORDER_NUMBER)
                     val pddAccount = getString(Constant.KEY_PDD_ACCOUNT)
+                    val progress = getString(Constant.KEY_TASK_PROGRESS)
                     L.i(
                         "上报任务状态：taskId=$taskId orderNumber=$orderNumber \n" +
                                 " orderMoney=$orderMoney paddAccount=$pddAccount"
@@ -147,9 +143,11 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
                             override fun onSucceed(result: String) {
                                 UpdateSPManager(context).updateTaskStatus(1)
                                 SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).run {
+                                    remove(Constant.KEY_TASK_DATA)
                                     remove(Constant.KEY_ORDER_NUMBER)
                                     remove(Constant.KEY_ORDER_MONEY)
                                     remove(Constant.KEY_PDD_ACCOUNT)
+                                    remove(Constant.KEY_TASK_PROGRESS)
                                 }
 
                                 mainAcView.onResponUpdateTask()
@@ -164,6 +162,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
                             taskId.toString(),
                             isSucceed,
                             pddAccount,
+                            progress,
                             orderNumber,
                             orderMoney,
                             remark

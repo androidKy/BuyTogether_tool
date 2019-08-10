@@ -55,8 +55,8 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                                 verifyCode()
                             }
 
-                            override fun onTaskFailed(failedText: String) {
-                                responTaskFailed(failedText)
+                            override fun onTaskFailed(failedMsg: String) {
+                                responTaskFailed(failedMsg)
                             }
                         })
                         .setXY("540,320")   //账号输入框
@@ -69,7 +69,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                         .execute()
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     responTaskFailed("跳转不到QQ登录界面")
                 }
 
@@ -84,14 +84,14 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
     private fun verifyCode() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("输入验证码", 0, false, 20)
+            .setNodeParams("输入验证码", 0, false, 8)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("开始验证码校验")
                     QQLoginVerify(myAccessibilityService).startVerify(VerifyCodeListener())
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     L.i("不需要验证码校验")
                     checkLoginResult()
                 }
@@ -109,9 +109,9 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
             checkLoginResult()
         }
 
-        override fun onTaskFailed(failedText: String) {
-            L.i("验证登录失败：$failedText")
-            responTaskFailed("验证登录失败: $failedText")
+        override fun onTaskFailed(failedMsg: String) {
+            L.i("验证登录失败：$failedMsg")
+            responTaskFailed("验证登录失败: $failedMsg")
         }
 
     }
@@ -131,7 +131,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                     //responTaskFailed("账号登录失败")
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     authLogin()
                 }
             })
@@ -154,7 +154,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                     mTaskListener?.onTaskFinished()
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     responTaskFailed("验证码校验失败")
                 }
             })
@@ -200,8 +200,8 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                     }
                 }
 
-                override fun onTaskFailed(failedText: String) {
-                    responTaskFailed("账号涉嫌违规被冻结: $failedText was not found.")
+                override fun onTaskFailed(failedMsg: String) {
+                    responTaskFailed("账号涉嫌违规被冻结: $failedMsg was not found.")
                 }
             })
             .create()

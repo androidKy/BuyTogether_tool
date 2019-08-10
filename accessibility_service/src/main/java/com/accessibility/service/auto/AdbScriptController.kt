@@ -2,6 +2,7 @@ package com.accessibility.service.auto
 
 import com.accessibility.service.listener.TaskListener
 import com.safframework.log.L
+import com.utils.common.CmdListUtil
 
 
 /**
@@ -97,28 +98,33 @@ class AdbScriptController private constructor() {
 
     fun execute() {
         //L.i("cmdList size = ${cmdList.size}")
-        if (cmdList.size == 0)
+        if (cmdList.size == 0) {
+            taskListener?.onTaskFailed("CMD命令为空")
             return
+        }
 
         com.utils.common.ThreadUtils.executeByCached(object : com.utils.common.ThreadUtils.Task<Boolean>() {
             override fun doInBackground(): Boolean {
-                var result: Boolean = false
-
                 try {
+                    var cmdStr = ""
                     for (i in 0 until cmdList.size) {
                         //L.i("执行命令：${cmdList[i]}")
+                        cmdStr += cmdList[i] + ";"
                         Thread.sleep(delayTime[i])
-                        com.utils.common.CMDUtil().execCmd(cmdList[i])
+                        /*com.utils.common.CMDUtil().execCmd(cmdList[i])
 
                         if (i == cmdList.size - 1)
-                            result = true
+                            result = true*/
                     }
-                    //Thread.sleep(500)
+                    L.i("执行adb命令：$cmdStr")
+                    CmdListUtil.getInstance().execCmd(cmdStr)
+                    /*if (cmdResult.contains("completed"))
+                        result = true*/
                 } catch (e: Exception) {
                     L.e(e.message, e)
                 }
 
-                return result
+                return true
             }
 
             override fun onSuccess(result: Boolean?) {

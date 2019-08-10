@@ -51,7 +51,7 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
                     L.i("点击开始截图")
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     responTaskFailed("验证码截图失败")
                 }
             })
@@ -111,7 +111,7 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
                     }, 5)
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
 
                 }
             })
@@ -153,8 +153,8 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
                                 checkVerifyResult()
                             }
 
-                            override fun onTaskFailed(failedText: String) {
-                                L.i("$failedText was not found.")
+                            override fun onTaskFailed(failedMsg: String) {
+                                L.i("$failedMsg was not found.")
                                 responTaskFailed("登录验证失败")
                             }
                         })
@@ -162,7 +162,7 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
                         .execute()
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
 
                 }
             })
@@ -186,7 +186,7 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
                             startVerify(mTaskListener!!)
                         }
 
-                        override fun onTaskFailed(failedText: String) {
+                        override fun onTaskFailed(failedMsg: String) {
                             mTaskListener?.onTaskFinished()
                         }
                     })

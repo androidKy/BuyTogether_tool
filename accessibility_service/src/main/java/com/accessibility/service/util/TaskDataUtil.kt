@@ -238,13 +238,18 @@ class TaskDataUtil private constructor() {
      *  2：与卖家沟通
      *  3：刷收藏数
      *  4：刷订单数
-     *  12：刷浏览和沟通
+     *  5：评分
+     *  6：评论
+     *  12：浏览和沟通
      * }
      */
     fun getTask_type(): Int? {
-        return mTaskServiceData?.run {
-            task?.task_type ?: 1
+        var taskType = mTaskServiceData?.run { task?.task_type ?: 1 }
+        //过滤5和6的类型
+        if (taskType.toString().contains("5") || taskType.toString().contains("6")) {
+            taskType = taskType.toString().replace("5", "").replace("6", "").toInt()
         }
+        return taskType
     }
 
     /**

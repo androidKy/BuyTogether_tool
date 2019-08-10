@@ -7,5 +7,5 @@ package com.accessibility.service.listener
  **/
 interface TaskListener {
     fun onTaskFinished()
-    fun onTaskFailed(failedText: String)
+    fun onTaskFailed(failedMsg: String)
 }

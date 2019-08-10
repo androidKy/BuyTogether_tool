@@ -47,8 +47,8 @@ class AdbScrollUtils {
                             startScroll()
                         }
 
-                        override fun onTaskFailed(failedText: String) {
-                            responFailed("应用未获得root权限¬")
+                        override fun onTaskFailed(failedMsg: String) {
+                            responFailed(failedMsg)
                         }
                     })
                     .create()

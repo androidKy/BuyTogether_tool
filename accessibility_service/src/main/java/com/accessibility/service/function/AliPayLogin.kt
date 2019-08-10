@@ -5,6 +5,7 @@ import android.util.SparseIntArray
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
+import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.Constant
@@ -64,7 +65,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                     inputPayPsw()
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     responTaskFailed("支付宝登录失败")
                 }
 
@@ -117,7 +118,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                     adbInputPsw()
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     responTaskFailed("支付宝付款环节失败")
                 }
             })
@@ -138,20 +139,46 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
         }
         val delayTime = 400L
         AdbScriptController.Builder()
-            .setXY(regularPsw(payPsw!!), delayTime)
+            .setXY(regularPsw(payPsw!!))
             .setTaskListener(object : TaskListener {
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     responTaskFailed("支付密码输入错误")
                 }
 
                 override fun onTaskFinished() {
                     //支付成功
-                    responTaskSuccess()     //todo 支付成功后，根据什么条件来判断支付成功
+                    verifyPaySucceed()
                     //paySuccess()
                 }
             })
             .create()
             .execute()
+    }
+
+    /**
+     * 验证是否支付成功
+     */
+    private fun verifyPaySucceed() {
+        myAccessibilityService.performBackClick(10, object : AfterClickedListener {
+            override fun onClicked() {
+                NodeController.Builder()
+                    .setNodeService(myAccessibilityService)
+                    .setNodeParams("综合", 0, false, 5)
+                    .setTaskListener(object : TaskListener {
+                        override fun onTaskFinished() {
+                            L.i("支付成功，跳转到搜索界面")
+                            responTaskSuccess()
+                        }
+
+                        override fun onTaskFailed(failedMsg: String) {
+                            L.i("支付失败，没跳转到搜索界面")
+                            responTaskFailed("支付失败")
+                        }
+                    })
+                    .create()
+                    .execute()
+            }
+        })
     }
 
     /**
@@ -231,7 +258,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                     pressOtherLogin()
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     responTaskFailed("支付宝账号输入有误")
                 }
             })
@@ -249,7 +276,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                     }, 3)
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     responTaskFailed("支付宝账号输入有误")
                 }
             })
@@ -267,7 +294,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                     inputPsw()
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     responTaskFailed("支付宝账号输入有误")
                 }
             })
@@ -287,7 +314,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                     choosePayChannel()
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     responTaskFailed("未获得root权限")
                 }
             })
@@ -314,7 +341,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                     inputPayPsw()
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     // mTaskListener?.onTaskFailed("支付宝登录失败，请检查是否设置安全验证登录方式")
                     responTaskFailed("支付宝登录失败，请检查是否设置安全验证登录方式")
                 }

@@ -54,7 +54,8 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).run {
             val cacheTaskData = getString(Constant.KEY_TASK_DATA, "")
             if (!TextUtils.isEmpty(cacheTaskData)) {
-                L.i("从缓存获取任务")
+                //val afterUnicode = UnicodeUtils.decodeUnicode(cacheTaskData)
+                L.i("从缓存获取任务：$cacheTaskData")
                 parseStringForTask(cacheTaskData)
             } else {
                 L.i("从服务器获取任务")
@@ -173,9 +174,9 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                 mainView.onClearDataResult("Success")
             }
 
-            override fun onTaskFailed(failedText: String) {
-                L.i("清理数据失败: $failedText")
-                mainView.onClearDataResult(failedText)
+            override fun onTaskFailed(failedMsg: String) {
+                L.i("清理数据失败: $failedMsg")
+                mainView.onClearDataResult(failedMsg)
             }
         })
     }

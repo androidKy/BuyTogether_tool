@@ -101,8 +101,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 .setNodeService(this@MyAccessibilityService)
                 .setNodeParams("好的", true)
                 .setNodeParams("允许", true)
-                //.setNodeParams("个人中心", 0, 5, true)
-                //.setNodeParams("点击登录", 0, 5, true)
+                .setNodeParams("个人中心", 0, 5, true)
+                .setNodeParams("点击登录", 0, 5, true)
                 .setNodeParams("请使用其它方式登录")
                 .setNodeParams("QQ登录")
                 .setTaskListener(object : TaskListener {
@@ -111,8 +111,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
                         LoginService(this@MyAccessibilityService).login(LoginListenerImpl())
                     }
 
-                    override fun onTaskFailed(failedText: String) {
-                        L.i("$failedText was not found.")
+                    override fun onTaskFailed(failedMsg: String) {
+                        L.i("$failedMsg was not found.")
                         responTaskFailed("拼多多登录授权失败")
                     }
                 })
@@ -130,15 +130,15 @@ class MyAccessibilityService : BaseAccessibilityService() {
                         doTask()
                     }
 
-                    override fun onTaskFailed(failedText: String) {
-                        responTaskFailed(failedText)
+                    override fun onTaskFailed(failedMsg: String) {
+                        responTaskFailed(failedMsg)
                     }
                 })
                 .startService()
         }
 
-        override fun onTaskFailed(failedText: String) {
-            responTaskFailed(failedText)
+        override fun onTaskFailed(failedMsg: String) {
+            responTaskFailed(failedMsg)
         }
     }
 
@@ -156,9 +156,9 @@ class MyAccessibilityService : BaseAccessibilityService() {
                     }, 20 * 1000)
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     //mTaskListener?.onTaskFailed(failedText)
-                    responTaskFailed(failedText)
+                    responTaskFailed(failedMsg)
                 }
             })
             .doOnEvent()

@@ -2,18 +2,14 @@ package com.accessibility.service.function
 
 import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.MyAccessibilityService
-import com.accessibility.service.auto.ADB_XY
-import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseEventService
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.listener.TaskListener
-import com.accessibility.service.util.NodeUtils
-import com.accessibility.service.util.ScrollUtils
-import com.accessibility.service.util.TaskDataUtil
-import com.accessibility.service.util.WidgetConstant
+import com.accessibility.service.util.*
 import com.safframework.log.L
+import com.utils.common.SPUtils
 
 /**
  * Description:做任务
@@ -23,11 +19,9 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
 
     companion object : com.utils.common.SingletonHolder<TaskService, MyAccessibilityService>(::TaskService)
 
-    private var mIsScaningGoods: Boolean = false    //判断是否正在浏览,控制同一时刻只有一个收到一个节点事件
-    private var mAlreadyScaned: Boolean = false   //是否已浏览，控制允许是否继续收到事件
-
     private var mScreenWidth: Int = 0
     private var mScreenHeight: Int = 0
+    private var mTaskProgress: StringBuilder = StringBuilder()
 
     fun setScreenDensity(width: Int, height: Int): TaskService {
         mScreenWidth = width
@@ -37,7 +31,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
 
     override fun doOnEvent() {
         try {
-            val taskType = TaskDataUtil.instance.getTask_type()
+            var taskType = TaskDataUtil.instance.getTask_type()
             L.i("taskType = $taskType")
             when (taskType) {
                 2, 23, 24, 234 -> talkWithSaler()
@@ -88,6 +82,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
     inner class BackwardListenerImpl : ScrollUtils.ScrollListener {
         override fun onScrollFinished(nodeInfo: AccessibilityNodeInfo) {
             L.i("浏览完成  ，根据任务类型是否需要进行下一步任务")
+            mTaskProgress.append("1")
             TaskDataUtil.instance.getTask_type()?.apply {
                 when (this) {
                     12, 123, 124, 1234 -> talkWithSaler()
@@ -106,12 +101,13 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
         NodeController.Builder()
             .setNodeService(nodeService)
             .setTaskListener(object : TaskListener {
-                override fun onTaskFailed(failedText: String) {
-                    L.i("$failedText was not found.")
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("$failedMsg was not found.")
                     responFailed("与客服沟通失败")
                 }
 
                 override fun onTaskFinished() {
+                    mTaskProgress.append("2")
                     nodeService.performBackClick(2, object : AfterClickedListener {
                         override fun onClicked() {
                             TaskDataUtil.instance.getTask_type()?.apply {
@@ -140,8 +136,8 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
         NodeController.Builder()
             .setNodeService(nodeService)
             .setTaskListener(object : TaskListener {
-                override fun onTaskFailed(failedText: String) {
-                    L.i("$failedText was not found.商品已收藏")
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("$failedMsg was not found.商品已收藏")
                     TaskDataUtil.instance.getTask_type()?.apply {
                         when (this) {
                             1234, 134, 234, 34 -> buyGoods()
@@ -154,6 +150,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
 
                 override fun onTaskFinished() {
                     L.i("商品已收藏")
+                    mTaskProgress.append("3")
                     TaskDataUtil.instance.getTask_type()?.apply {
                         when (this) {
                             1234, 134, 234, 34 -> buyGoods()
@@ -174,118 +171,18 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
      */
     private fun buyGoods() {
         L.i("购买商品，并且选择商品各个参数")
-
-        NodeController.Builder()
-            .setNodeService(nodeService)
-            .setNodeParams("发起拼单")
-            .setNodeParams("确定", 0, false, 5)
+        BuyGoods(nodeService)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    chooseInfo()
+                    mTaskProgress.append("4")
+                    responSuccess()
                 }
 
-                override fun onTaskFailed(failedText: String) {
-                    chooseAddress()
-                }
-            })
-            .create()
-            .execute()
-    }
-
-    /**
-     * 选择商品参数
-     */
-    private fun chooseInfo() {
-        val choose_info = TaskDataUtil.instance.getChoose_info()
-        L.i("商品参数size：${choose_info?.size}")
-        if (choose_info == null || choose_info.isEmpty()) {
-            responFailed("商品的选择参数不则会给你缺")
-            return
-        }
-
-        NodeController.Builder()
-            .setNodeService(nodeService)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFailed(failedText: String) {
-                    L.i("$failedText was not found.")
-                    responFailed("选择商品规格失败")
-                }
-
-                override fun onTaskFinished() {
-                    L.i("商品选择完成，准备支付")
-                    //createAddress()
-                    chooseAddress()
+                override fun onTaskFailed(failedMsg: String) {
+                    responFailed(failedMsg)
                 }
             })
-            .setNodeParams(choose_info, true)
-            .setNodeParams("确定")
-            .create()
-            .execute()
-    }
-
-    /**
-     * 立即支付
-     */
-    private fun chooseAddress() {
-        AdbScriptController.Builder()
-            .setXY(ADB_XY.PAY_NOW.add_address, 3000L)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    startFillAddress()
-                }
-
-                override fun onTaskFailed(failedText: String) {
-                    //支付失败
-                    L.i("$failedText was not found.")
-                    //payByOther()
-                }
-
-            })
-            .create()
-            .execute()
-    }
-
-    private fun startFillAddress() {
-        FillAddressService.getInstance(nodeService)
-            .setTaskFinishedListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    choosePayChannel()
-                }
-
-                override fun onTaskFailed(failedText: String) {
-                    responFailed(failedText)
-                }
-            })
-            .doOnEvent()
-    }
-
-
-    /**
-     * 选择支付渠道
-     */
-    private fun choosePayChannel() {
-        L.i("新增地址完成，选择支付方式：")
-        val payXY = ADB_XY.PAY_NOW.ali_pay
-
-
-        AdbScriptController.Builder()
-            .setSwipeXY(ADB_XY.PAY_NOW.origin_swipe_up, ADB_XY.PAY_NOW.target_swipe_up)
-            .setXY(ADB_XY.PAY_NOW.more_pay_channel)
-            .setSwipeXY(ADB_XY.PAY_NOW.origin_swipe_up, ADB_XY.PAY_NOW.target_swipe_up)
-            .setXY(payXY)
-            .setXY(ADB_XY.PAY_NOW.pay_now_btn)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    payByAlipay()
-                }
-
-                override fun onTaskFailed(failedText: String) {
-                    responFailed(failedText)
-                }
-            })
-            .create()
-            .execute()
-
+            .startService()
     }
 
     /**
@@ -300,9 +197,9 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
                     responSuccess()
                 }
 
-                override fun onTaskFailed(failedText: String) {
-                    L.i("$failedText was not found.支付失败")
-                    responFailed(failedText)
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("$failedMsg was not found.支付失败")
+                    responFailed(failedMsg)
                 }
 
             })
@@ -316,19 +213,11 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
     }
 
     /**
-     * 支付宝支付
+     * 保存任务进度
      */
-    private fun payByAlipay() {
-        AliPayLogin(nodeService)
-            .login(object : TaskListener {
-                override fun onTaskFinished() {
-                    responSuccess()
-                }
-
-                override fun onTaskFailed(failedText: String) {
-                    responFailed(failedText)
-                }
-            })
+    private fun saveTaskProgress(progress: String) {
+        SPUtils.getInstance(nodeService, Constant.SP_TASK_FILE_NAME)
+            .put(Constant.KEY_TASK_PROGRESS, progress)
     }
 
 
@@ -337,6 +226,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
     }
 
     private fun responSuccess() {
+        saveTaskProgress(mTaskProgress.toString())
         mTaskFinishedListener?.onTaskFinished()
     }
 }

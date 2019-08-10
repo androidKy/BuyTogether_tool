@@ -1,16 +1,35 @@
 package com.utils.common;
 
+import com.safframework.log.L;
+
 import java.io.*;
 
 /**
- * - @Author:  kyXiao
- * - @Time:  2019/3/30 17:59
- */
-public class CMDUtil {
-    private final String TAG = "CMDUtil";
-
+ * Description:执行一连串CMD命令
+ * Created by Quinin on 2019-08-10.
+ **/
+public class CmdListUtil {
     private final String COMMAND_EXIT = "exit\n";
     private final String COMMAND_LINE_END = "\n";
+
+    private static CmdListUtil mInstance;
+    //private Process mProcess;
+
+    private CmdListUtil() {
+
+    }
+
+    public static CmdListUtil getInstance() {
+        if (mInstance == null) {
+            synchronized (CmdListUtil.class) {
+                if (mInstance == null) {
+                    mInstance = new CmdListUtil();
+                }
+            }
+        }
+
+        return mInstance;
+    }
 
     //静默安装
     public boolean installSlient(String path) {
@@ -25,19 +44,20 @@ public class CMDUtil {
 
     public String execCmd(String command) {
         if (ThreadUtils.isMainThread()) {
-            return "cmd executed can't run in mainThread.";
-            //throw new IllegalAccessException("cmd executed can't run in mainThread.");
+            //return "cmd executed can't run in mainThread.";
+            throw new IllegalStateException("cmd executed can't run in mainThread.");
         }
-        ProcessBuilder pb = new ProcessBuilder("su");
-        pb.redirectErrorStream(true);
 
-        Process process = null;
         DataOutputStream os = null;
         BufferedReader br = null;
         StringBuilder result = new StringBuilder();
-
+        Process process = null;
         try {
-            process = pb.start();
+           /* ProcessBuilder pb = new ProcessBuilder("su");
+            pb.redirectErrorStream(true);
+            java.lang.Process process = pb.start();*/
+            process = Runtime.getRuntime().exec("su");
+
             os = new DataOutputStream(process.getOutputStream());
             os.write(command.getBytes());
             os.writeBytes(COMMAND_LINE_END);
@@ -72,14 +92,14 @@ public class CMDUtil {
             }
             asyncProcessDestroy(process);
         }
-
+        L.i("Adb执行命令结果：" + result.toString());
         return result.toString();
     }
 
     public void executeCMD(String cmd) {
         try {
             // 申请获取root权限，这一步很重要，不然会没有作用
-            Process process = Runtime.getRuntime().exec("su");
+            java.lang.Process process = Runtime.getRuntime().exec("su");
             // 获取输出流
             OutputStream outputStream = process.getOutputStream();
             DataOutputStream dataOutputStream = new DataOutputStream(
@@ -180,15 +200,36 @@ public class CMDUtil {
 
     /**
      * 通过线程进行异步销毁
-     *
-     * @param process
      */
-    public void asyncProcessDestroy(final Process process) {
+    private void asyncProcessDestroy(final Process process) {
+        L.i("通过线程进行异步销毁-进行CMD命令的进程");
         processDestroy(process);
+        /*ThreadUtils.executeByCached(new ThreadUtils.Task<Boolean>() {
+            @Override
+            public Boolean doInBackground() throws Throwable {
+
+                return false;
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onFail(Throwable t) {
+
+            }
+        });*/
        /* Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                processDestroy(process);
+
             }
         });
         thread.setDaemon(true);

@@ -7,6 +7,7 @@ import com.androidnetworking.interfaces.OkHttpResponseListener
 import com.safframework.log.L
 import com.utils.common.NetworkUtils
 import com.utils.common.ThreadUtils
+import com.utils.common.UnicodeUtils
 import okhttp3.Response
 import org.json.JSONObject
 
@@ -201,8 +202,11 @@ class ApiManager {
         })
     }
 
+    /**
+     *
+     */
     fun updateTaskStatus(taskId: String, isSucceed: Boolean, remark: String) {
-        updateTaskStatus(taskId, isSucceed, "", "","", remark)
+        updateTaskStatus(taskId, isSucceed, "", "", "", "", remark)
     }
 
     /**
@@ -212,6 +216,7 @@ class ApiManager {
         taskId: String,
         isSucceed: Boolean,
         accountName: String,
+        progress: String,
         orderId: String,
         orderMoney: String,
         failedMark: String
@@ -223,6 +228,7 @@ class ApiManager {
                     put("task_id", taskId.toInt())
                     put("success", isSucceed)
                     put("nickname", accountName)
+                    put("progress", progress)
                     put("order_id", orderId)
                     put("remark", failedMark)
                     put("order_amount", orderMoney)
@@ -283,7 +289,7 @@ class ApiManager {
     private fun responseSucceed(response: Response?, log: String) {
         ThreadUtils.executeByCached(object : ThreadUtils.Task<String>() {
             override fun doInBackground(): String? {
-                return response?.body()?.string()
+                return UnicodeUtils.decodeUnicode(response?.body()?.string())
             }
 
             override fun onSuccess(result: String?) {

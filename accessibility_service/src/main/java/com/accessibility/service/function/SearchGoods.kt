@@ -17,7 +17,7 @@ import com.safframework.log.L
  * Description:
  * Created by Quinin on 2019-08-09.
  **/
-class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService() {
+class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeService) {
     private var mGoodName: String? = null    //商品名称
     private var mSearchPrice: String? = null //商品在搜索显示的价格
     private var mMallName: String? = null    //商品的店铺名称
@@ -61,8 +61,8 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService() {
                     searchingGoods()
                 }
 
-                override fun onTaskFailed(failedText: String) {
-                    L.i("找不到搜索入口：$failedText was not found.")
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("找不到搜索入口：$failedMsg was not found.")
                     searchGoodsType()
 
                 }
@@ -85,7 +85,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService() {
                     searchingGoods()
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     L.i("找不到搜索和分类的入口")
                     dealAccident()
                 }
@@ -111,7 +111,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService() {
                     })
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     NodeController.Builder()
                         .setNodeService(nodeService)
                         .setNodeParams("直接退出", 0, 5)
@@ -121,7 +121,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService() {
                                 startService()
                             }
 
-                            override fun onTaskFailed(failedText: String) {
+                            override fun onTaskFailed(failedMsg: String) {
                                 responFailed("遇到其他突发事件，找不到搜索入口")
                             }
 
@@ -146,8 +146,8 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService() {
                     inputKeyword()
                 }
 
-                override fun onTaskFailed(failedText: String) {
-                    responFailed("应用未获得root权限")
+                override fun onTaskFailed(failedMsg: String) {
+                    responFailed(failedMsg)
                 }
             })
             .create()
@@ -185,7 +185,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService() {
                     startSearchByKeyWord()
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     responFailed("没找到搜索按钮")
                 }
             })
@@ -230,7 +230,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService() {
                     inputKeyword()
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     responFailed("应用未获得root权限")
                 }
             })
@@ -252,8 +252,8 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService() {
                     verifySaler()
                 }
 
-                override fun onTaskFailed(failedText: String) {
-                    L.i("$failedText was not found.")
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("$failedMsg was not found.")
                     responFailed("校验是否同一卖家失败")
                 }
             })
@@ -275,7 +275,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService() {
                     })
                 }
 
-                override fun onTaskFailed(failedText: String) {
+                override fun onTaskFailed(failedMsg: String) {
                     L.i("不是需要做任务的卖家，退出重新查找")
                     nodeService.apply {
                         performBackClick(0, object : AfterClickedListener {
