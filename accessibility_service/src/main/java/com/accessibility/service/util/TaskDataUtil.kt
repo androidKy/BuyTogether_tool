@@ -67,6 +67,15 @@ class TaskDataUtil private constructor() {
     }
 
     /**
+     * 是评论任务还是正常任务
+     */
+    fun isCommentTask(): Boolean? {
+        return mTaskServiceData?.run {
+            task?.isCommentTask
+        }
+    }
+
+    /**
      * 获取账号名字
      */
     fun getLogin_name(): String? {

@@ -5,11 +5,13 @@ import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseAccessibilityService
+import com.accessibility.service.function.CommentTaskService
 import com.accessibility.service.function.LoginService
 import com.accessibility.service.function.SearchGoods
 import com.accessibility.service.function.TaskService
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
+import com.accessibility.service.util.TaskDataUtil
 import com.safframework.log.L
 
 /**
@@ -123,18 +125,34 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
     inner class LoginListenerImpl : TaskListener {
         override fun onTaskFinished() {
-            //登录完成后，有时候会自动跳转到见面福利的界面
-            SearchGoods(this@MyAccessibilityService)
-                .setTaskListener(object : TaskListener {
-                    override fun onTaskFinished() {
-                        doTask()
-                    }
+            //登录完成后，判断是评论任务还是正常任务
+            if (!TaskDataUtil.instance.isCommentTask()!!) {
+                L.i("开始自动执行正常任务")
+                SearchGoods(this@MyAccessibilityService)
+                    .setTaskListener(object : TaskListener {
+                        override fun onTaskFinished() {
+                            doTask()
+                        }
 
-                    override fun onTaskFailed(failedMsg: String) {
-                        responTaskFailed(failedMsg)
-                    }
-                })
-                .startService()
+                        override fun onTaskFailed(failedMsg: String) {
+                            responTaskFailed(failedMsg)
+                        }
+                    })
+                    .startService()
+            } else {
+                L.i("开始自动执行评论任务")
+                CommentTaskService(this@MyAccessibilityService)
+                    .setTaskListener(object:TaskListener{
+                        override fun onTaskFinished() {
+
+                        }
+
+                        override fun onTaskFailed(failedMsg: String) {
+
+                        }
+                    })
+                    .startService()
+            }
         }
 
         override fun onTaskFailed(failedMsg: String) {

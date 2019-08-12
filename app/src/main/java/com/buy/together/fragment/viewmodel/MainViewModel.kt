@@ -5,6 +5,7 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import android.widget.TextView
+import com.accessibility.service.data.CommentBean
 import com.accessibility.service.data.TaskBean
 import com.accessibility.service.function.ClearDataService
 import com.accessibility.service.listener.TaskListener
@@ -44,6 +45,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
 
     private val mSubscribeList = ArrayList<Disposable>()
     private var mIsCommentTask = false
+    private var mIsFromCache = false
 
     /**
      * 获取任务
@@ -58,8 +60,10 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
             if (!TextUtils.isEmpty(cacheTaskData)) {
                 //val afterUnicode = UnicodeUtils.decodeUnicode(cacheTaskData)
                 L.i("从缓存获取任务：$cacheTaskData")
-                parseStringForTask(cacheTaskData)
+                mIsFromCache = true
+                parseTaskData(cacheTaskData)
             } else {
+                mIsFromCache = false
                 L.i("从服务器获取任务")
                 startGetTask()
             }
@@ -85,34 +89,45 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     }
 
     private fun startGetTask() {
-        val imei = SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS).getString(Constant.KEY_REAL_DEVICE_IMEI)
-        L.i("真实imei：$imei")
-        ApiManager()
-            .setDataListener(object : DataListener {
-                override fun onSucceed(result: String) {
-                    parseStringForTask(result)
-                }
+        if (mIsCommentTask) {
+            L.i("获取评论任务")
+            ApiManager()
+                .setDataListener(object : DataListener {
+                    override fun onSucceed(result: String) {
+                        parseTaskData(result)
+                    }
 
-                override fun onFailed(errorMsg: String) {
-                    mainView.onFailed(errorMsg)
-                }
-            })
-            .getNormalTask(imei)
+                    override fun onFailed(errorMsg: String) {
+                        mainView.onFailed(errorMsg)
+                    }
+                })
+                .getCommentTask()
+        } else {
+            L.i("获取正常任务")
+            val imei = SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS).getString(Constant.KEY_REAL_DEVICE_IMEI)
+            L.i("真实imei：$imei")
+            ApiManager()
+                .setDataListener(object : DataListener {
+                    override fun onSucceed(result: String) {
+                        parseTaskData(result)
+                    }
+
+                    override fun onFailed(errorMsg: String) {
+                        mainView.onFailed(errorMsg)
+                    }
+                })
+                .getNormalTask(imei)
+        }
+
     }
 
-    private fun parseStringForTask(result: String) {
+    private fun parseTaskData(result: String) {
         val disposable = Observable.just(result)
             .flatMap { flatIt ->
-                val taskBean = try {
-                    Gson().fromJson(flatIt, TaskBean::class.java)
-                } catch (e: Exception) {
-                    L.e(e.message)
-                    val exceptionTask = TaskBean()
-                    exceptionTask.msg = e.message
-                    exceptionTask.code = 400
-                    exceptionTask
-                }
-
+                val taskBean =
+                    if (mIsCommentTask)
+                        parseCommentTask(flatIt)
+                    else parseNormalTask(flatIt)
                 Observable.just(taskBean)
             }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -120,6 +135,44 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                 mainView.onResponTask(resultIt)
             }
         mSubscribeList.add(disposable)
+    }
+
+    /**
+     * 解析正常任务
+     */
+    private fun parseNormalTask(result: String): TaskBean {
+        return try {
+            Gson().fromJson(result, TaskBean::class.java)
+        } catch (e: Exception) {
+            L.e(e.message)
+            val exceptionTask = TaskBean()
+            exceptionTask.msg = e.message
+            exceptionTask.code = 400
+            exceptionTask
+        }
+    }
+
+    /**
+     * 解析评论任务
+     */
+    private fun parseCommentTask(result: String): TaskBean {
+        var taskBean = TaskBean()
+        try {
+            taskBean = when {
+                !mIsFromCache -> {
+                    val commentBean = Gson().fromJson(result, CommentBean::class.java)
+                    ParseDataUtil.parseCommentBean2TaskBean(commentBean)
+                }
+                else -> parseNormalTask(result)
+            }
+
+        } catch (e: Exception) {
+            L.e(e.message, e)
+            taskBean.msg = e.message
+            taskBean.code = 400
+        }
+
+        return taskBean
     }
 
     /**
@@ -132,6 +185,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         saveDeviceParams(taskBean)
         //保存任务状态,此时任务开始，未完成
         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).put(Constant.KEY_TASK_STATUS, 0)
+        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).put(Constant.KEY_TASK_TYPE, mIsCommentTask)
     }
 
     /**
@@ -143,7 +197,9 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                 saveData(it)
 
                 val datas = try {
-                    val hashMapData = ParseDataUtil.parseTaskBean2HashMap(it)
+                    val hashMapData =
+                        if (!mIsCommentTask) ParseDataUtil.parseTaskBean2HashMap(it)
+                        else ParseDataUtil.parseCommentTask2HashMap(it)
 
                     ParseDataUtil.parseHashMap2ArrayList(hashMapData).reversed()
                 } catch (e: Exception) {
@@ -304,19 +360,34 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      */
     private fun uploadIpError(cityName: String) {
         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
-            val taskIp = getInt(Constant.KEY_TASK_ID, 0)
+            val taskId = getInt(Constant.KEY_TASK_ID, 0)
             remove(Constant.KEY_TASK_DATA)
-            ApiManager()
-                .setDataListener(object : DataListener {
-                    override fun onSucceed(result: String) {
-                        getTask(mIsCommentTask)
-                    }
 
-                    override fun onFailed(errorMsg: String) {
+            if (!mIsCommentTask)
+                ApiManager()
+                    .setDataListener(object : DataListener {
+                        override fun onSucceed(result: String) {
+                            getTask(mIsCommentTask)
+                        }
 
-                    }
-                })
-                .updateTaskStatus(taskIp.toString(), false, "$cityName 没有相应的代理IP")
+                        override fun onFailed(errorMsg: String) {
+                            mainView.onFailed(errorMsg)
+                        }
+                    })
+                    .updateTaskStatus(taskId.toString(), false, "$cityName 没有相应的代理IP")
+            else {
+                ApiManager()
+                    .setDataListener(object : DataListener {
+                        override fun onSucceed(result: String) {
+                            getTask(mIsCommentTask)
+                        }
+
+                        override fun onFailed(errorMsg: String) {
+                            mainView.onFailed(errorMsg)
+                        }
+                    })
+                    .updateCommentTaskStatus(taskId.toString(), false, "$cityName 没有相应的代理IP")
+            }
         }
     }
 

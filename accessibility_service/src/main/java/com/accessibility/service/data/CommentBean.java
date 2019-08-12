@@ -145,18 +145,18 @@ public class CommentBean {
              * choose_info : 团购价:8.8,正常价:9.8 规格:360碗型50只【不带盖】
              */
 
-            private int id;
+            private long id;
             private long goods_id;
             private String goods_name;
             private String mall_name;
             private String search_price;
             private String choose_info;
 
-            public int getId() {
+            public long getId() {
                 return id;
             }
 
-            public void setId(int id) {
+            public void setId(long id) {
                 this.id = id;
             }
 
@@ -262,7 +262,7 @@ public class CommentBean {
              * useragent : Dalvik/2.1.0 (Linux; U; Android 7.0; HUAWEI NXT-CL00 Build/HUAWEINXT-CL00)
              */
 
-            private int id;
+            private long id;
             private String bluetooth;
             private String imei;
             private String brand;
@@ -274,11 +274,11 @@ public class CommentBean {
             private String model;
             private String useragent;
 
-            public int getId() {
+            public long getId() {
                 return id;
             }
 
-            public void setId(int id) {
+            public void setId(long id) {
                 this.id = id;
             }
 

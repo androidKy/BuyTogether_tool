@@ -20,16 +20,16 @@ class ApiManager {
 
     companion object {
         private const val URL_SERVER_DOMAIN: String = "49.234.51.174:8000"
-        private const val URL_TEST_DOMAIN: String = "192.168.1.180:8080"
+        private const val URL_TEST_DOMAIN: String = "192.168.0.109:8080"
         private const val URL_HTTP: String = "http://"
         const val POST_JSON_CONTENT_TYPE: String = "application/json"
 
-        const val URL_GET_TASK: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/get/"
-        const val URL_GET_COMENT_TASK: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/comment/"
-        const val URL_UPDATE_TASK_INFO: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/inform/"
-        const val URL_GET_ACCOUNT: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/account/?id="
-        const val URL_UPDATE_ACCOUNT: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/account/"
-        const val URL_GET_ADDRESS: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/address/"
+        const val URL_GET_TASK: String = "$URL_HTTP$URL_TEST_DOMAIN/task/get/"
+        const val URL_GET_COMMENT_TASK: String = "$URL_HTTP$URL_TEST_DOMAIN/task/comment/"
+        const val URL_UPDATE_TASK_INFO: String = "$URL_HTTP$URL_TEST_DOMAIN/task/inform/"
+        const val URL_GET_ACCOUNT: String = "$URL_HTTP$URL_TEST_DOMAIN/others/account/?id="
+        const val URL_UPDATE_ACCOUNT: String = "$URL_HTTP$URL_TEST_DOMAIN/others/account/"
+        const val URL_GET_ADDRESS: String = "$URL_HTTP$URL_TEST_DOMAIN/others/address/"
 
 
         /*val instance: ApiManager by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
@@ -70,6 +70,31 @@ class ApiManager {
                 responseError("获取任务", "网络连接失败")
             }
 
+        })
+    }
+
+    /**
+     * 获取评论任务
+     */
+    fun getCommentTask() {
+        checkNetwork(object : NetworkListener {
+            override fun valid() {
+                AndroidNetworking.get(URL_GET_COMMENT_TASK)
+                    .build()
+                    .getAsOkHttpResponse(object : OkHttpResponseListener {
+                        override fun onResponse(response: Response?) {
+                            responseSucceed(response, "获取评论任务成功")
+                        }
+
+                        override fun onError(anError: ANError?) {
+                            responseError(anError, "获取评论任务失败")
+                        }
+                    })
+            }
+
+            override fun unvalid() {
+                responseError("获取评论任务", "网络连接失败")
+            }
         })
     }
 
@@ -251,6 +276,41 @@ class ApiManager {
 
             override fun unvalid() {
                 responseError("更新任务状态", "网络连接失败")
+            }
+        })
+    }
+
+    /**
+     * 更新评论任务的状态
+     */
+    fun updateCommentTaskStatus(taskId: String, isSucceed: Boolean, remark: String) {
+        checkNetwork(object : NetworkListener {
+            override fun valid() {
+                JSONObject().run {
+                    put("option", "complete_comment")
+                    put("task_id", taskId)
+                    put("success", isSucceed)
+                    put("remark", remark)
+
+                    AndroidNetworking.post(URL_UPDATE_TASK_INFO)
+                        .setContentType(POST_JSON_CONTENT_TYPE)
+                        .addJSONObjectBody(this)
+                        .build()
+                        .getAsOkHttpResponse(object : OkHttpResponseListener {
+                            override fun onResponse(response: Response?) {
+                                responseSucceed(response, "更新评论任务状态成功")
+                            }
+
+                            override fun onError(anError: ANError?) {
+                                responseError(anError, "更新评论任务状态失败")
+                            }
+
+                        })
+                }
+            }
+
+            override fun unvalid() {
+                responseError("更新评论任务状态", "网络连接失败")
             }
         })
     }

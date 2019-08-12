@@ -71,7 +71,10 @@ public class TaskBean {
         private int task_complete;
         private int task_fail;
         private String talk_msg;
+        private boolean isCommentTask;
         private String comment_content;
+        private double can_comment_time;
+        private String order_id;
         private int buy_behavior;
         private double create_time;
         private IpBean ip;
@@ -224,6 +227,30 @@ public class TaskBean {
 
         public void setPay_account(PayAccountBean pay_account) {
             this.pay_account = pay_account;
+        }
+
+        public String getOrder_id() {
+            return order_id;
+        }
+
+        public void setOrder_id(String order_id) {
+            this.order_id = order_id;
+        }
+
+        public double getCan_comment_time() {
+            return can_comment_time;
+        }
+
+        public void setCan_comment_time(double can_comment_time) {
+            this.can_comment_time = can_comment_time;
+        }
+
+        public boolean isCommentTask() {
+            return isCommentTask;
+        }
+
+        public void setCommentTask(boolean commentTask) {
+            isCommentTask = commentTask;
         }
 
         public static class IpBean {
