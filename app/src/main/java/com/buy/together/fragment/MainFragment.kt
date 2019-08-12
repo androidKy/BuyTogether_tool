@@ -35,6 +35,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     private var mViewModel: MainViewModel? = null
     private var mVpnFailedConnectCount: Int = 0 //VPN连接失败次数
     private var mIsResumed: Boolean = false  //Fragment是否被创建
+    private var mIsCommentTask: Boolean = false  //是否是评论任务
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_main
@@ -115,7 +116,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         if (mIsResumed) {
             mVpnFailedConnectCount = 0
             LocalVpnManager.getInstance().stopVpnService(activity!!)
-            mViewModel?.getTask()
+            mViewModel?.getTask(mIsCommentTask)
         } else {
             L.i("onResume()还没执行")
             mContainer?.postDelayed({
@@ -134,7 +135,8 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
             }
             taskBean.code == 201 -> //没有待领取的任务，启动一个定时器去定时获取
             {
-                mViewModel?.startTaskTimer()
+                mIsCommentTask = !mIsCommentTask
+                mViewModel?.startTaskTimer(mIsCommentTask)
                 mViewModel?.showTip(mContainer, "没有待领取的任务")
             }
             else -> {
@@ -158,7 +160,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
 
     override fun onFailed(msg: String?) {
         L.i("获取任务失败：$msg")
-        mViewModel?.startTaskTimer()
+        mViewModel?.startTaskTimer(mIsCommentTask)
         context?.run {
             if (!msg.isNullOrEmpty()) {
                 ToastUtils.showToast(this, msg)

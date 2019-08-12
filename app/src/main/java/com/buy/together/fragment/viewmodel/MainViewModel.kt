@@ -43,11 +43,13 @@ import kotlin.collections.ArrayList
 class MainViewModel(val context: Context, val mainView: MainView) : BaseViewModel<Context, BaseView>() {
 
     private val mSubscribeList = ArrayList<Disposable>()
+    private var mIsCommentTask = false
 
     /**
      * 获取任务
      */
-    fun getTask() {
+    fun getTask(isCommentTask: Boolean) {
+        mIsCommentTask = isCommentTask
         L.init(MainViewModel::class.java.simpleName)
         SPUtils.getInstance(Constant.SP_DEVICE_PARAMS).clear()
 
@@ -307,7 +309,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
             ApiManager()
                 .setDataListener(object : DataListener {
                     override fun onSucceed(result: String) {
-                        getTask()
+                        getTask(mIsCommentTask)
                     }
 
                     override fun onFailed(errorMsg: String) {
@@ -544,10 +546,10 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     /**
      * 执行一个定时器去定时获取任务
      */
-    fun startTaskTimer() {
+    fun startTaskTimer(isCommentTask: Boolean) {
         TimerUtils.instance.start(object : TimerTask() {
             override fun run() {
-                getTask()
+                getTask(isCommentTask)
             }
         }, 1 * 60 * 1000L)
     }
