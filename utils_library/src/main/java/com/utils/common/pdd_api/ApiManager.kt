@@ -283,7 +283,7 @@ class ApiManager {
     /**
      * 更新评论任务的状态
      */
-    fun updateCommentTaskStatus(taskId: String, isSucceed: Boolean, remark: String) {
+    fun updateCommentTaskStatus(taskId: Int, isSucceed: Boolean, remark: String) {
         checkNetwork(object : NetworkListener {
             override fun valid() {
                 JSONObject().run {

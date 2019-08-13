@@ -142,7 +142,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
             else -> {
                 L.i("获取数据失败：${taskBean.msg}")
                 context?.run {
-                    mViewModel?.showTip(mContainer, "任务错误码：${taskBean.code}")
+                    mViewModel?.showTip(mContainer, "获取数据失败：${taskBean.msg}")
                     ToastUtils.showToast(this, "获取数据失败：${taskBean.msg}")
                 }
             }

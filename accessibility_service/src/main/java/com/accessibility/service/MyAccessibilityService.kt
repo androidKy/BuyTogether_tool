@@ -142,13 +142,15 @@ class MyAccessibilityService : BaseAccessibilityService() {
             } else {
                 L.i("开始自动执行评论任务")
                 CommentTaskService(this@MyAccessibilityService)
-                    .setTaskListener(object:TaskListener{
+                    .setTaskListener(object : TaskListener {
                         override fun onTaskFinished() {
-
+                            mHandler.postDelayed({
+                                responTaskFinished()
+                            }, 3 * 1000)
                         }
 
                         override fun onTaskFailed(failedMsg: String) {
-
+                            responTaskFailed(failedMsg)
                         }
                     })
                     .startService()

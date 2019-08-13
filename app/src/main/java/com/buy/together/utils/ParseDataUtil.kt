@@ -149,7 +149,13 @@ class ParseDataUtil {
             task.ip = ip
 
             val delivery_address = TaskBean.TaskData.DeliveryAddressBean()
-            delivery_address.city = commentBean.task.ip.city
+            delivery_address.city = commentBean.task.delivery_address.city
+            delivery_address.name = commentBean.task.delivery_address.name
+            delivery_address.phone = commentBean.task.delivery_address.phone
+            delivery_address.province = commentBean.task.delivery_address.province
+            delivery_address.district = commentBean.task.delivery_address.district
+            delivery_address.street = commentBean.task.delivery_address.street
+
             task.delivery_address = delivery_address
 
             val account = TaskBean.TaskData.AccountBean()

@@ -126,9 +126,12 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
             .setNodeParams("登录失败", 0, false, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    //dealInputError()
-                    dealAccountError()
-                    //responTaskFailed("账号登录失败")
+                    //如果是评论任务，不重新获取账号，直接上报登录失败，正常任务就重新获取账号测试
+                    val isCommentTask = TaskDataUtil.instance.isCommentTask()
+                    if (!isCommentTask!!)
+                        dealAccountError()
+                    else
+                        responTaskFailed("评论任务：账号已失效")
                 }
 
                 override fun onTaskFailed(failedMsg: String) {

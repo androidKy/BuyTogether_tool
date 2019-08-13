@@ -76,6 +76,15 @@ class TaskDataUtil private constructor() {
     }
 
     /**
+     * 获取评论内容
+     */
+    fun getCommentContent(): String? {
+        return mTaskServiceData?.run {
+            task?.comment_content
+        }
+    }
+
+    /**
      * 获取账号名字
      */
     fun getLogin_name(): String? {

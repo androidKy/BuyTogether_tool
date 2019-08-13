@@ -15,6 +15,7 @@ import com.utils.common.*
 import com.utils.common.pdd_api.ApiManager
 import com.utils.common.pdd_api.DataListener
 import me.goldze.mvvmhabit.utils.SPUtils
+import org.json.JSONObject
 
 /**
  * Description:
@@ -123,51 +124,10 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
             }
 
             override fun onSuccess(result: Boolean?) {
-                SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
-                    val taskId = getInt(Constant.KEY_TASK_ID)
-                    var orderMoney = getString(Constant.KEY_ORDER_MONEY)
-                    var orderNumber = getString(Constant.KEY_ORDER_NUMBER)
-                    val pddAccount = getString(Constant.KEY_PDD_ACCOUNT)
-                    val progress = getString(Constant.KEY_TASK_PROGRESS)
-                    L.i(
-                        "上报任务状态：taskId=$taskId orderNumber=$orderNumber \n" +
-                                " orderMoney=$orderMoney paddAccount=$pddAccount"
-                    )
-                    if (!isSucceed) {
-                        orderNumber = ""
-                        orderMoney = ""
-                    }
-
-                    ApiManager()
-                        .setDataListener(object : DataListener {
-                            override fun onSucceed(result: String) {
-                                UpdateSPManager(context).updateTaskStatus(1)
-                                SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).run {
-                                    remove(Constant.KEY_TASK_DATA)
-                                    remove(Constant.KEY_ORDER_NUMBER)
-                                    remove(Constant.KEY_ORDER_MONEY)
-                                    remove(Constant.KEY_PDD_ACCOUNT)
-                                    remove(Constant.KEY_TASK_PROGRESS)
-                                }
-
-                                mainAcView.onResponUpdateTask()
-                            }
-
-                            override fun onFailed(errorMsg: String) {
-                                UpdateSPManager(context).updateTaskStatus(0)
-                                mainAcView.onResponUpdateTask()
-                            }
-                        })
-                        .updateTaskStatus(
-                            taskId.toString(),
-                            isSucceed,
-                            pddAccount,
-                            progress,
-                            orderNumber,
-                            orderMoney,
-                            remark
-                        )
-                }
+                val isCommentTask = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getBoolean(Constant.KEY_TASK_TYPE)
+                if (isCommentTask)
+                    updateCommentTask(isSucceed, remark)
+                else updateNormalTask(isSucceed, remark)
             }
 
             override fun onCancel() {
@@ -177,7 +137,106 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
             }
 
         })
+    }
 
+    /**
+     * 更新评论任务状态
+     */
+    private fun updateCommentTask(isSucceed: Boolean, remark: String) {
+        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
+            val taskId = getInt(Constant.KEY_TASK_ID)
+            var finalRemark = remark
+            L.i("上报评论任务状态：taskId:$taskId isSucceed:$isSucceed remark:$finalRemark")
+            if (isSucceed) {
+                finalRemark = "评论成功"
+            }
+            ApiManager()
+                .setDataListener(object : DataListener {
+                    override fun onSucceed(result: String) {
+                        try {
+                            val jsonObj = JSONObject(result)
+                            val code = jsonObj.getInt("code")
+                            if (code == 200) {
+                                SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).run {
+                                    remove(Constant.KEY_TASK_DATA)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            L.e(e.message, e)
+                        }
+                        mainAcView.onResponUpdateTask()
+                    }
+
+                    override fun onFailed(errorMsg: String) {
+                    }
+
+                })
+                .updateCommentTaskStatus(taskId, isSucceed, finalRemark)
+        }
+    }
+
+    /**
+     * 更新正常任务状态
+     */
+    private fun updateNormalTask(isSucceed: Boolean, remark: String) {
+        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
+            val taskId = getInt(Constant.KEY_TASK_ID)
+            var orderMoney = getString(Constant.KEY_ORDER_MONEY)
+            var orderNumber = getString(Constant.KEY_ORDER_NUMBER)
+            val pddAccount = getString(Constant.KEY_PDD_ACCOUNT)
+            val progress = getString(Constant.KEY_TASK_PROGRESS)
+            L.i(
+                "上报任务状态：taskId=$taskId orderNumber=$orderNumber \n" +
+                        " orderMoney=$orderMoney paddAccount=$pddAccount progress=$progress"
+            )
+            var finalRemark = remark
+            if (!isSucceed) {
+                orderNumber = ""
+                orderMoney = ""
+            } else {
+                finalRemark = "任务成功:$progress"
+            }
+
+            ApiManager()
+                .setDataListener(object : DataListener {
+                    override fun onSucceed(result: String) {
+                        try {
+                            val jsonObj = JSONObject(result)
+                            val code = jsonObj.getInt("code")
+                            if (code == 200) {
+                                UpdateSPManager(context).updateTaskStatus(1)
+                                SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).run {
+                                    remove(Constant.KEY_TASK_DATA)
+                                    remove(Constant.KEY_ORDER_NUMBER)
+                                    remove(Constant.KEY_ORDER_MONEY)
+                                    remove(Constant.KEY_PDD_ACCOUNT)
+                                    remove(Constant.KEY_TASK_PROGRESS)
+                                }
+                            } else {
+                                L.i("任务更新失败：code:$code")
+                            }
+                        } catch (e: Exception) {
+                            L.e(e.message, e)
+                        }
+
+                        mainAcView.onResponUpdateTask()
+                    }
+
+                    override fun onFailed(errorMsg: String) {
+                        UpdateSPManager(context).updateTaskStatus(0)
+                        mainAcView.onResponUpdateTask()
+                    }
+                })
+                .updateTaskStatus(
+                    taskId.toString(),
+                    isSucceed,
+                    pddAccount,
+                    progress,
+                    orderNumber,
+                    orderMoney,
+                    finalRemark
+                )
+        }
     }
 
 }

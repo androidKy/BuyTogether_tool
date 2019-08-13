@@ -142,7 +142,16 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      */
     private fun parseNormalTask(result: String): TaskBean {
         return try {
-            Gson().fromJson(result, TaskBean::class.java)
+            val code = JSONObject(result).getInt("code")
+            if (code == 200)
+                Gson().fromJson(result, TaskBean::class.java)
+            else {
+                val taskBean = TaskBean()
+                taskBean.code = code
+                taskBean.msg = JSONObject(result).getString("msg")
+
+                taskBean
+            }
         } catch (e: Exception) {
             L.e(e.message)
             val exceptionTask = TaskBean()
@@ -160,8 +169,16 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         try {
             taskBean = when {
                 !mIsFromCache -> {
-                    val commentBean = Gson().fromJson(result, CommentBean::class.java)
-                    ParseDataUtil.parseCommentBean2TaskBean(commentBean)
+                    val code = JSONObject(result).getInt("code")
+                    if (code == 200) {
+                        val commentBean = Gson().fromJson(result, CommentBean::class.java)
+                        ParseDataUtil.parseCommentBean2TaskBean(commentBean)
+                    } else {
+                        taskBean.code = code
+                        taskBean.msg = JSONObject(result).getString("msg")
+
+                        taskBean
+                    }
                 }
                 else -> parseNormalTask(result)
             }
@@ -338,7 +355,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                         mainView.onRequestPortsResult(portsCache)
                     }
                 } else {
-                    L.i("该城市没有IP，重新获取地址")
+                    L.i("$cityName 该城市没有IP，重新获取地址")
                     ToastUtils.showToast(context, "$cityName 没有相应的IP")
                     uploadIpError(cityName)
                 }
@@ -386,7 +403,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                             mainView.onFailed(errorMsg)
                         }
                     })
-                    .updateCommentTaskStatus(taskId.toString(), false, "$cityName 没有相应的代理IP")
+                    .updateCommentTaskStatus(taskId, false, "$cityName 没有相应的代理IP")
             }
         }
     }
