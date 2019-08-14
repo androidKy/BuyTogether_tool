@@ -16,10 +16,10 @@ import com.proxy.service.LocalVpnService
 import com.rmondjone.locktableview.DisplayUtil
 import com.rmondjone.locktableview.LockTableView
 import com.safframework.log.L
+import com.utils.common.SPUtils
 import com.utils.common.ThreadUtils
 import com.utils.common.ToastUtils
 import com.vilyever.socketclient.SocketClient
-import me.goldze.mvvmhabit.utils.SPUtils
 
 
 /**

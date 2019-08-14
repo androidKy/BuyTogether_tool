@@ -14,7 +14,6 @@ import com.safframework.log.L
 import com.utils.common.*
 import com.utils.common.pdd_api.ApiManager
 import com.utils.common.pdd_api.DataListener
-import me.goldze.mvvmhabit.utils.SPUtils
 import org.json.JSONObject
 
 /**
@@ -104,8 +103,13 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
             put(Constant.KEY_SCREEN_HEIGHT, height)
         }
 
-        SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS)
-            .put(Constant.KEY_REAL_DEVICE_IMEI, DevicesUtil.getIMEI(context))
+
+        SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS).apply {
+            val realImei = getString(Constant.KEY_REAL_DEVICE_IMEI)
+            if (realImei.isNullOrEmpty())
+                put(Constant.KEY_REAL_DEVICE_IMEI, DevicesUtil.getIMEI(context))
+        }
+
     }
 
     /**

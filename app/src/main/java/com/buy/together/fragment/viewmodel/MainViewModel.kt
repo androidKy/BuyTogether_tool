@@ -31,7 +31,6 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import me.goldze.mvvmhabit.utils.SPUtils
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
@@ -201,8 +200,10 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         saveUploadParams(taskBean)
         saveDeviceParams(taskBean)
         //保存任务状态,此时任务开始，未完成
-        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).put(Constant.KEY_TASK_STATUS, 0)
-        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).put(Constant.KEY_TASK_TYPE, mIsCommentTask)
+        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
+            put(Constant.KEY_TASK_STATUS, 0)
+            put(Constant.KEY_TASK_TYPE, mIsCommentTask)
+        }
     }
 
     /**
@@ -300,10 +301,12 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                         val strResult = toString()
                         L.i("threadID = ${ThreadUtils.isMainThread()} \ngetCityListFromNet result: $strResult")
                         //保存城市列表，隔一天再重新获取
-                        SPUtils.getInstance(Constant.SP_CITY_LIST).put(Constant.KEY_CITY_DATA, strResult)
-                        SPUtils.getInstance(Constant.SP_CITY_LIST).put(
-                            Constant.KEY_CITY_GET_DATE,
-                            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).run { format(Date()) })
+                        SPUtils.getInstance(Constant.SP_CITY_LIST).apply {
+                            put(Constant.KEY_CITY_DATA, strResult)
+                            put(
+                                Constant.KEY_CITY_GET_DATE,
+                                SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).run { format(Date()) })
+                        }
                         getCityCode(cityName, strResult)
                     }
                 }
@@ -441,10 +444,10 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                             uploadIpInfo(proxyIpBean)
 
                             //保存已申请的端口
-                            SPUtils.getInstance(Constant.SP_IP_PORTS).put(Constant.KEY_IP_PORTS, this)
-                            SPUtils.getInstance(Constant.SP_IP_PORTS)
-                                .put(Constant.KEY_CUR_PORT, proxyIpBean.data.port[0].toString())
-
+                            SPUtils.getInstance(Constant.SP_IP_PORTS).apply {
+                                put(Constant.KEY_IP_PORTS, this@run)
+                                put(Constant.KEY_CUR_PORT, proxyIpBean.data.port[0].toString())
+                            }
                             mainView.onRequestPortsResult(this)
                         } else {  //重新请求
                             L.i("请求数据出错：code = ${proxyIpBean?.data?.code}")
@@ -571,7 +574,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      * 保存设备参数
      */
     private fun saveDeviceParams(taskBean: TaskBean) {
-        val spUtils = SPUtils.getInstance(Constant.SP_DEVICE_PARAMS)
+        val spUtils = SPUtils.getInstance(Constant.SP_DEVICE_PARAMS, Context.MODE_WORLD_READABLE)
         taskBean.task?.device?.run {
             spUtils.apply {
                 L.i("模拟imei: $imei")

@@ -1,10 +1,9 @@
-package com.accessibility.service.auto
+package com.utils.common.accessibility.auto
 
-import com.accessibility.service.MyAccessibilityService
-import com.accessibility.service.base.BaseAccessibilityService
-import com.accessibility.service.listener.NodeFoundListener
-import com.accessibility.service.listener.TaskListener
 import com.safframework.log.L
+import com.utils.common.accessibility.base.BaseAccessibilityService
+import com.utils.common.accessibility.listener.NodeFoundListener
+import com.utils.common.accessibility.listener.TaskListener
 
 /**
  * Description:

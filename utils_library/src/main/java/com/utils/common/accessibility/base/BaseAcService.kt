@@ -1,12 +1,12 @@
-package com.accessibility.service.base
+package com.utils.common.accessibility.base
 
-import com.accessibility.service.listener.TaskListener
+import com.utils.common.accessibility.listener.TaskListener
 
 /**
  * Description:
  * Created by Quinin on 2019-08-07.
  **/
-abstract class BaseAcService(myAccessibilityService: BaseAccessibilityService){
+abstract class BaseAcService(myAccessibilityService: BaseAccessibilityService) {
     private var mTaskListener: TaskListener? = null
 
     fun setTaskListener(taskListener: TaskListener): BaseAcService {

@@ -40,6 +40,8 @@ dependencies {
     api 'com.google.code.gson:gson:2.8.5'
     //api 'com.ucweb.wpk:crashsdk-java:latest.release'
     api 'com.tencent.bugly:crashreport:3.0.1'
+    api 'io.reactivex.rxjava2:rxandroid:2.1.0'
+    api 'io.reactivex.rxjava2:rxjava:2.2.3'
 }
 repositories {
     mavenCentral()

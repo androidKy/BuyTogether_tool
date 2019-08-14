@@ -89,7 +89,7 @@ dependencies {
     implementation 'com.crossbowffs.remotepreferences:remotepreferences:0.7'
 
     //mvvm
-    implementation 'com.github.goldze:MVVMHabit:3.1.2'
+    //implementation 'com.github.goldze:MVVMHabit:3.1.2'
 
     //log
     //implementation project(':saf-log')

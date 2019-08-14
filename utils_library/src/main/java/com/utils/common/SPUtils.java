@@ -30,18 +30,26 @@ public class SPUtils {
      * @return the single {@link SPUtils} instance
      */
     public static SPUtils getInstance(Context context) {
-        return getInstance(context,"", Context.MODE_PRIVATE);
+        return getInstance(context, "", Context.MODE_PRIVATE);
+    }
+
+    public static SPUtils getInstance(String spName) {
+        return getInstance(Utils.getApp(), spName, Context.MODE_PRIVATE);
+    }
+
+    public static SPUtils getInstance(String spName, int mode) {
+        return getInstance(Utils.getApp(), spName, mode);
     }
 
     /**
      * Return the single {@link SPUtils} instance
      *
      * @param context context
-     * @param mode Operating mode.
+     * @param mode    Operating mode.
      * @return the single {@link SPUtils} instance
      */
-    public static SPUtils getInstance(final Context context,final int mode) {
-        return getInstance(context,"", mode);
+    public static SPUtils getInstance(final Context context, final int mode) {
+        return getInstance(context, "", mode);
     }
 
     /**
@@ -50,8 +58,8 @@ public class SPUtils {
      * @param spName The name of sp.
      * @return the single {@link SPUtils} instance
      */
-    public static SPUtils getInstance(Context context,String spName) {
-        return getInstance(context,spName, Context.MODE_PRIVATE);
+    public static SPUtils getInstance(Context context, String spName) {
+        return getInstance(context, spName, Context.MODE_PRIVATE);
     }
 
     /**
@@ -61,14 +69,14 @@ public class SPUtils {
      * @param mode   Operating mode.
      * @return the single {@link SPUtils} instance
      */
-    public static SPUtils getInstance(Context context,String spName, final int mode) {
+    public static SPUtils getInstance(Context context, String spName, final int mode) {
         if (isSpace(spName)) spName = "spUtils";
         SPUtils spUtils = SP_UTILS_MAP.get(spName);
         if (spUtils == null) {
             synchronized (SPUtils.class) {
                 spUtils = SP_UTILS_MAP.get(spName);
                 if (spUtils == null) {
-                    spUtils = new SPUtils(context,spName, mode);
+                    spUtils = new SPUtils(context, spName, mode);
                     SP_UTILS_MAP.put(spName, spUtils);
                 }
             }

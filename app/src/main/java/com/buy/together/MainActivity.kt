@@ -13,7 +13,7 @@ import com.accessibility.service.util.Constant
 import com.buy.together.fragment.MainFragment
 import com.proxy.service.LocalVpnService.START_VPN_SERVICE_REQUEST_CODE
 import com.safframework.log.L
-import me.goldze.mvvmhabit.utils.SPUtils
+import com.utils.common.SPUtils
 
 class MainActivity : AppCompatActivity(), MainAcView {
     private var mMainFragment: MainFragment? = null
