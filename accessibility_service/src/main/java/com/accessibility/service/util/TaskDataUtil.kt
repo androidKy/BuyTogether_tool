@@ -39,24 +39,6 @@ class TaskDataUtil private constructor() {
         }
     }
 
-    fun getBuy_price(): Int? {
-        val buy_type = getBuy_type()
-        var buy_price = 0
-        when (buy_type) {
-            0 -> {
-
-            }
-            1 -> {
-
-            }
-            2 -> {
-
-            }
-        }
-
-        return 0
-    }
-
     /**
      * 返回登录渠道
      */
@@ -157,6 +139,15 @@ class TaskDataUtil private constructor() {
     fun getGoods_name(): String? {
         return mTaskServiceData?.run {
             task?.goods?.goods_name
+        }
+    }
+
+    /**
+     * 获取商品链接
+     */
+    fun getGoodUrl(): String? {
+        return mTaskServiceData?.run {
+            task?.goods?.goods_url
         }
     }
 

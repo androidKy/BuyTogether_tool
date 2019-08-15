@@ -1,8 +1,7 @@
 package com.buy.together.hook.sp;
 
+import android.content.Context;
 import com.accessibility.service.util.Constant;
-import com.safframework.log.L;
-import com.utils.common.Constants;
 import de.robv.android.xposed.XSharedPreferences;
 
 public class SharedPref {
@@ -13,19 +12,22 @@ public class SharedPref {
             myXsharedPref.reload();
             return myXsharedPref;
         }
-        myXsharedPref = new XSharedPreferences(Constants.PKG_NAME, Constant.SP_DEVICE_PARAMS);
+        myXsharedPref = new XSharedPreferences(Constant.PKG_NAME, Constant.SP_DEVICE_PARAMS);
         myXsharedPref.makeWorldReadable();
         return myXsharedPref;
     }
 
-    public static String getXValue(String key) {
-        String value = "";
+    public static String getXValue(Context context,String key) {
+       /* String value = "";
         try {
             value = getMyXSharedPref().getString(key, "");
         } catch (Exception e) {
             L.i(e.getMessage(), e);
         }
-        return value;
+        return value;*/
+
+       return RemotePreferenceUtil.getInstance(context).getString(key,"");
+
 /*
         final String finalKey = key;
         final String[] value = {""};

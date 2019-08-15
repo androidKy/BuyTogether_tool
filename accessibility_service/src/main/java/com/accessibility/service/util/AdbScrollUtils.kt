@@ -14,7 +14,7 @@ import com.safframework.log.L
  * Description:通过ADB命令控制滑动
  * Created by Quinin on 2019-07-27.
  **/
-class AdbScrollUtils {
+class AdbScrollUtils private constructor() {
 
     companion object {
         const val MSG_ADB_SCROLL: Int = 888
@@ -109,7 +109,7 @@ class AdbScrollUtils {
      * 开始滑动
      */
     fun startScroll() {
-        if (mNodeService == null) {
+        if (mFindText.isNotEmpty() && mNodeService == null) {
             responFailed("没有设置节点服务")
             return
         }
@@ -120,6 +120,13 @@ class AdbScrollUtils {
         }
         mScrollTotalTime -= mScrollSpeed
         L.i("mScrollTotalTime: $mScrollTotalTime")
+
+        //不设置节点text的时候，表示不查找text
+        if (TextUtils.isEmpty(mFindText)) {
+            mHandler.sendEmptyMessageDelayed(MSG_ADB_SCROLL, mScrollSpeed)
+            return
+        }
+
         val resultInfo = findNode()
         if (resultInfo == null) {
             mHandler.sendEmptyMessageDelayed(MSG_ADB_SCROLL, mScrollSpeed)
@@ -129,9 +136,7 @@ class AdbScrollUtils {
     }
 
     private fun findNode(): AccessibilityNodeInfo? {
-        if (TextUtils.isEmpty(mFindText)) {
-            return null
-        }
+
         var nodeResult = mNodeService?.findViewByFullText(mFindText)
         if (nodeResult == null) {
             nodeResult = mNodeService?.findViewById(mFindText)
@@ -155,7 +160,7 @@ class AdbScrollUtils {
         mNodeFoundListener?.onNodeFound(null)
     }
 
-    private fun responSucceed(nodeInfo: AccessibilityNodeInfo) {
+    private fun responSucceed(nodeInfo: AccessibilityNodeInfo?) {
         initData()
         mNodeFoundListener?.onNodeFound(nodeInfo)
     }

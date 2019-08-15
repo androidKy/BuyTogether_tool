@@ -16,9 +16,9 @@ class VerifyCodeUtils {
     companion object {
         private const val URL_OCR_PIC = "http://pred.fateadm.com/api/capreg"
         private const val PD_ID = "115113"
-        private const val PD_KEY = "tu5iK8iWVlmLY+sDom0iTEz66Ej7VMsj"
+        private const val PD_KEY = "gRYiULcIzy6sMEhr77SMxdWeF5VllKL8"
         private const val APP_ID = "315113"
-        private const val APP_KEY = "YVqgb1hfvFozIXUOvWRwyMPdD79qS/dp"
+        private const val APP_KEY = "Db4vTYPuH1oJBRZKpsO3tDsrlP4sksc/"
         private const val PREDICT_TYPE = "20400" //4位英文字母
         /**
          * 识别图片验证码

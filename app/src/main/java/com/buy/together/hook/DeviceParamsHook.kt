@@ -1,5 +1,6 @@
 package com.buy.together.hook
 
+import android.app.AndroidAppHelper
 import android.text.TextUtils
 import com.buy.together.hook.sp.DeviceParams
 import de.robv.android.xposed.XC_MethodHook
@@ -43,13 +44,15 @@ class DeviceParamsHook : HookListener {
                 loadPkgParam,
                 HookClassName.ANDROID_OS_BUILD,
                 "BRAND",
-                HookUtil.getValueFromSP(DeviceParams.BRAND_KEY)
+                //HookUtil.getValueFromSP(AndroidAppHelper.currentApplication(), DeviceParams.BRAND_KEY)
+                getValueFromSP(DeviceParams.BRAND_KEY)
             )
             hookField(
                 loadPkgParam,
                 HookClassName.ANDROID_OS_BUILD,
                 "MODEL",
-                HookUtil.getValueFromSP(DeviceParams.MODEL_KEY)
+                //HookUtil.getValueFromSP(AndroidAppHelper.currentApplication(),DeviceParams.MODEL_KEY)
+                getValueFromSP(DeviceParams.MODEL_KEY)
             )
 
             hookMethod(
@@ -68,7 +71,8 @@ class DeviceParamsHook : HookListener {
                         param?.apply {
                             args?.run {
                                 if (this@run[0] == "http.agent") {
-                                    val value = HookUtil.getValueFromSP(DeviceParams.USER_AGENT_KEY)
+                                    //val value = HookUtil.getValueFromSP(AndroidAppHelper.currentApplication(),DeviceParams.USER_AGENT_KEY)
+                                    val value = getValueFromSP(DeviceParams.USER_AGENT_KEY)
                                     if (!TextUtils.isEmpty(value))
                                         result = value
                                 }
@@ -89,7 +93,7 @@ class DeviceParamsHook : HookListener {
 
         override fun afterHookedMethod(param: MethodHookParam?) {
             param?.run {
-                val value = HookUtil.getValueFromSP(key)
+                val value = getValueFromSP(key)
                 HookUtil().log("$pkgName 修改设备参数", "key: $key value: $value")
                 if (!TextUtils.isEmpty(value)) {
                     result = value
@@ -112,10 +116,14 @@ class DeviceParamsHook : HookListener {
         }
 
         fun setResult(key: String, param: MethodHookParam) {
-            val value = HookUtil.getValueFromSP(key)
+            val value = getValueFromSP(key)
             HookUtil().log("$pkgName 修改设备参数", "key: $key value: $value")
             if (!TextUtils.isEmpty(value))
                 param.result = value
         }
+    }
+
+    private fun getValueFromSP(key: String): String {
+        return HookUtil.getValueFromSP(AndroidAppHelper.currentApplication(), key)
     }
 }

@@ -350,6 +350,7 @@ public class TaskBean {
             private long id;
             private long goods_id;
             private int cat_id;
+            private String goods_url;
             private String goods_name;
             private String mall_name;
             private String keyword;
@@ -418,6 +419,14 @@ public class TaskBean {
 
             public void setChoose_info(String choose_info) {
                 this.choose_info = choose_info;
+            }
+
+            public String getGoods_url() {
+                return goods_url;
+            }
+
+            public void setGoods_url(String goods_url) {
+                this.goods_url = goods_url;
             }
         }
 

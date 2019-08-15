@@ -17,7 +17,8 @@ class ClearDataService {
         ThreadUtils.executeBySingle(object : ThreadUtils.Task<Boolean>() {
             override fun doInBackground(): Boolean {
                 var clearDataCmd = "pm clear ${Constant.QQ_TIM_PKG};" +
-                        "pm clear ${Constant.BUY_TOGETHER_PKG};"
+                        "pm clear ${Constant.BUY_TOGETHER_PKG};" +
+                        "pm clear ${Constant.XIAOMI_BROWSER_PKG};"
                 if (isClearAliPay)
                     clearDataCmd = clearDataCmd + "pm clear ${Constant.ALI_PAY_PKG};"
 

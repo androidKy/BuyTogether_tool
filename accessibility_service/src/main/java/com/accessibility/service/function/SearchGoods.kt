@@ -23,9 +23,12 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
     private var mMallName: String? = null    //商品的店铺名称
     private var mKeyWordList: ArrayList<String> = ArrayList()   //搜索商品的关键字列表
     private var mCurKeyWord: String? = null //当前正在查找的关键字
+    private var mIsVerifySaler: Boolean = false //是否校验过统一卖家，如果是，则先上滑动再继续查找，否则不先上滑
+    private var mStartTime: Long = 0 //搜索开始时间
 
     companion object {
-        const val XY_SEARCH_EDITTEXT = "540,245"    //搜索框的坐标
+        const val XY_SEARCH_EDITTEXT = "540,245"    //主界面的搜索框的坐标
+        const val XY_SEARCH_RESULT_EDITTEXT = "540,145" //搜索界面的搜索框的坐标
     }
 
     /**
@@ -142,7 +145,9 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
             .setXY(XY_SEARCH_EDITTEXT)      //搜索框的坐标
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    //随机选一个关键字，并记录关键字当前的index
+                    //搜索开始的时间
+                    mStartTime = System.currentTimeMillis()
+                    L.i("搜索开始的时间: $mStartTime")
                     inputKeyword()
                 }
 
@@ -166,10 +171,10 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
             keyWord = mKeyWordList[index]
 
             mKeyWordList.remove(keyWord)
-        } else {
+        } else {     //根据关键字搜索失败，搜索店铺然后搜索商品
             val keywords = TaskDataUtil.instance.getGoodKeyWord()
             L.i("搜索的关键字已用完: $keywords")
-            responFailed("根据关键字搜索商品失败：$keywords")
+            searchByMallName()
             return
         }
         mCurKeyWord = keyWord
@@ -194,9 +199,80 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
     }
 
     /**
-     * 开始根据关键字搜索
+     * 关键字搜索不到的情况下
+     */
+    private fun searchByMallName() {
+        SearchByMallName(nodeService)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    L.i("根据店铺找到商品")
+                    responSucceed()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("根据店铺找商品失败:$failedMsg")
+                    //打开浏览器，输入链接打开商品，然后跳转到拼多多
+                    searchByBrowser()
+                }
+            })
+            .startService()
+    }
+
+    /**
+     * 浏览器根据链接跳转
+     */
+    private fun searchByBrowser() {
+        SearchByBrowser(nodeService)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    L.i("浏览器根据链接跳转成功")
+                    responSucceed()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("浏览器根据链接跳转失败：$failedMsg")
+                    responFailed("浏览器根据链接跳转失败：$failedMsg")
+                }
+            })
+            .startService()
+    }
+
+    /**
+     * 先判断是否校验过卖家
      */
     private fun startSearchByKeyWord() {
+        val currentSearchTime = System.currentTimeMillis()
+        val searchIntervalTime = currentSearchTime - mStartTime
+        if (searchIntervalTime / 1000 > 60)   //搜索时间超过1分钟,每个关键字搜索时间为1分钟
+        {
+            mStartTime = currentSearchTime
+            inputKeyword()
+            return
+        }
+
+        if (mIsVerifySaler) {
+            AdbScriptController.Builder()
+                .setSwipeXY("540,1700", "540,1100")
+                .setTaskListener(object : TaskListener {
+                    override fun onTaskFinished() {
+                        mIsVerifySaler = false
+                        startSearch()
+                    }
+
+                    override fun onTaskFailed(failedMsg: String) {
+                        responFailed("搜索商品：应用未获得root权限")
+                    }
+                })
+                .create()
+                .execute()
+        } else startSearch()
+
+    }
+
+    /**
+     * 开始查找
+     */
+    private fun startSearch() {
         AdbScrollUtils.instantce
             .setNodeService(nodeService)
             .setFindText(mSearchPrice!!)
@@ -224,7 +300,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
     private fun retrySearch() {
         AdbScriptController.Builder()
             .setSwipeXY("540,1100", "540,1600")
-            .setXY("540,145")
+            .setXY(XY_SEARCH_RESULT_EDITTEXT)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     inputKeyword()
@@ -254,7 +330,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("$failedMsg was not found.")
-                    responFailed("校验是否同一卖家失败")
+                    responFailed("校验是否同一卖家失败")  //todo bug
                 }
             })
             .create()
@@ -280,8 +356,9 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                     nodeService.apply {
                         performBackClick(0, object : AfterClickedListener {
                             override fun onClicked() {
-                                performBackClick(500, object : AfterClickedListener {
+                                performBackClick(1, object : AfterClickedListener {
                                     override fun onClicked() {
+                                        mIsVerifySaler = true
                                         startSearchByKeyWord()
                                     }
                                 })

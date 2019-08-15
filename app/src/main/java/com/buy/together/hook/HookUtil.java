@@ -1,5 +1,6 @@
 package com.buy.together.hook;
 
+import android.content.Context;
 import android.text.TextUtils;
 import com.buy.together.hook.sp.SharedPref;
 import de.robv.android.xposed.XC_MethodHook;
@@ -52,12 +53,12 @@ public class HookUtil {
         XposedBridge.log(tag + ": " + msg);
     }
 
-    public static void logStatic(String tag,String msg){
+    public static void logStatic(String tag, String msg) {
         XposedBridge.log(tag + ": " + msg);
     }
 
-    public static String getValueFromSP(String key) {
-        return SharedPref.getXValue(key);
+    public static String getValueFromSP(Context context, String key) {
+        return SharedPref.getXValue(context, key);
     }
 
     public void hookMethod(XC_LoadPackage.LoadPackageParam loadPackageParam, String className, String methodName,

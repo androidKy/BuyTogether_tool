@@ -81,7 +81,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
 
     inner class BackwardListenerImpl : ScrollUtils.ScrollListener {
         override fun onScrollFinished(nodeInfo: AccessibilityNodeInfo) {
-            L.i("浏览完成  ，根据任务类型是否需要进行下一步任务")
+            L.i("浏览完成,根据任务类型是否需要进行下一步任务")
             mTaskProgress.append("1")
             TaskDataUtil.instance.getTask_type()?.apply {
                 when (this) {

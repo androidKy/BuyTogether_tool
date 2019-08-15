@@ -203,11 +203,11 @@ public class CmdListUtil {
      */
     private void asyncProcessDestroy(final Process process) {
         L.i("通过线程进行异步销毁-进行CMD命令的进程");
-        processDestroy(process);
-        /*ThreadUtils.executeByCached(new ThreadUtils.Task<Boolean>() {
+        //processDestroy(process);
+        ThreadUtils.executeByCached(new ThreadUtils.Task<Boolean>() {
             @Override
             public Boolean doInBackground() throws Throwable {
-
+                processDestroy(process);
                 return false;
             }
 
@@ -225,11 +225,11 @@ public class CmdListUtil {
             public void onFail(Throwable t) {
 
             }
-        });*/
+        });
        /* Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-
+                 processDestroy(process);
             }
         });
         thread.setDaemon(true);

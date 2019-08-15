@@ -574,7 +574,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      * 保存设备参数
      */
     private fun saveDeviceParams(taskBean: TaskBean) {
-        val spUtils = SPUtils.getInstance(Constant.SP_DEVICE_PARAMS, Context.MODE_WORLD_READABLE)
+        val spUtils = SPUtils.getInstance(Constant.SP_DEVICE_PARAMS)
         taskBean.task?.device?.run {
             spUtils.apply {
                 L.i("模拟imei: $imei")

@@ -3,6 +3,8 @@ package com.accessibility.service.util
 class Constant {
     companion object {
 
+        const val PKG_NAME: String = "com.shopping.pdd"
+        const val XIAOMI_BROWSER_PKG: String = "com.android.browser"
         const val BUY_TOGETHER_PKG: String = "com.xunmeng.pinduoduo"
         const val QQ_TIM_PKG: String = "com.tencent.tim"
         const val QQ_LIATE_PKG: String = "com.tencent.qqlite"

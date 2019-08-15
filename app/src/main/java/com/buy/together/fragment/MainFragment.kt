@@ -35,7 +35,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     private var mViewModel: MainViewModel? = null
     private var mVpnFailedConnectCount: Int = 0 //VPN连接失败次数
     private var mIsResumed: Boolean = false  //Fragment是否被创建
-    private var mIsCommentTask: Boolean = true  //是否是评论任务 todo[暂时写死为true]
+    private var mIsCommentTask: Boolean = false  //是否是评论任务
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_main
@@ -115,8 +115,10 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     fun startTask() {
         if (mIsResumed) {
             mVpnFailedConnectCount = 0
-            LocalVpnManager.getInstance().stopVpnService(activity!!)
-            mViewModel?.getTask(mIsCommentTask)
+            activity?.apply {
+                LocalVpnManager.getInstance().stopVpnService(activity)
+                mViewModel?.getTask(mIsCommentTask)
+            }
         } else {
             L.i("onResume()还没执行")
             mContainer?.postDelayed({
@@ -135,7 +137,8 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
             }
             taskBean.code == 201 -> //没有待领取的任务，启动一个定时器去定时获取
             {
-                //mIsCommentTask = !mIsCommentTask  todo test
+                mIsCommentTask = !mIsCommentTask
+                mViewModel?.stopTaskTimer()
                 mViewModel?.startTaskTimer(mIsCommentTask)
                 mViewModel?.showTip(mContainer, "没有待领取的任务")
             }

@@ -71,7 +71,9 @@
                   android:launchMode="singleTask">
 
         </activity>
-
+        <provider android:name="com.buy.together.hook.sp.PreferenceProvider"
+                  android:authorities="com.shopping.pdd"
+                  android:exported="true"/>
     </application>
 
 </manifest>

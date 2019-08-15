@@ -4,7 +4,6 @@ import android.text.TextUtils
 import com.accessibility.service.util.Constant
 import com.buy.together.hook.CloakHook
 import com.buy.together.hook.DeviceParamsHook
-import com.utils.common.Constants
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 
@@ -16,7 +15,7 @@ class MainHook : IXposedHookLoadPackage {
             return
 
         //只拦截拼多多这个应用
-        if (packageName.equals(Constants.PKG_NAME) || packageName.equals(Constant.BUY_TOGETHER_PKG)
+        if (packageName.equals(Constant.PKG_NAME) || packageName.equals(Constant.BUY_TOGETHER_PKG)
             || packageName.equals(Constant.QQ_TIM_PKG) || packageName.equals(Constant.QQ_LIATE_PKG)
             || packageName.equals(Constant.QQ_FULL_PKG)
         ) {
