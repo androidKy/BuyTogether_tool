@@ -1,0 +1,18 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.xposed.device">
+    <application>
+        <!-- Xposed -->
+        <meta-data
+                android:name="xposedmodule"
+                android:value="true"/>
+        <meta-data
+                android:name="xposedminversion"
+                android:value="54"/>
+        <meta-data
+                android:name="xposeddescription"
+                android:value="拼多多辅助插件"/>
+        <provider android:name="com.xposed.device.hook.sp.PreferenceProvider"
+                  android:authorities="com.shopping.pdd"
+                  android:exported="true"/>
+    </application>
+</manifest>
