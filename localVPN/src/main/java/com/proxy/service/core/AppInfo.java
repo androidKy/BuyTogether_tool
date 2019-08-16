@@ -19,6 +19,16 @@ public class AppInfo {
                 '}';
     }
 
+    @Override
+    public boolean equals(Object object) {
+        if (object instanceof AppInfo) {
+            AppInfo appInfo = (AppInfo) object;
+            return appInfo.pkgName.equals(pkgName);
+        }
+        return false;
+    }
+
+
     public Drawable getAppIcon() {
         return this.appIcon;
     }

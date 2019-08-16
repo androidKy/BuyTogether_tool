@@ -35,8 +35,8 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
         mUserName = TaskDataUtil.instance.getLogin_name()
         mUserPsw = TaskDataUtil.instance.getLogin_psw()
         mUserId = TaskDataUtil.instance.getPdd_account_id()
-        mUserName = "2408973767"    //todo 写死账号测试
-        mUserPsw = "lqy12021004"
+        //mUserName = "2408973767"
+        //mUserPsw = "lqy12021004"
         if (!TextUtils.isEmpty(mUserName)) {
             login(mUserName!!, mUserPsw!!)
         } else {

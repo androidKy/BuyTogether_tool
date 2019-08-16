@@ -51,10 +51,6 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
      * 添加APP到代理IP
      */
     fun addApps2Proxy() {
-        if (AppProxyManager.isLollipopOrAbove) {
-            AppProxyManager(context)
-        }
-
         val pm = context.packageManager // 获得PackageManager对象
 
         val pkgList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -73,13 +69,13 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
                 appLabel = appName
                 pkgName = packageName
 
-                AppProxyManager.Instance.mlistAppInfo.add(this)
+                //AppProxyManager.getInstance().mlistAppInfo.add(this)
 
                 if (packageName == context.packageName || packageName == Constant.BUY_TOGETHER_PKG
                     || packageName == Constant.QQ_TIM_PKG || packageName == Constant.QQ_LIATE_PKG
-                    || packageName == "com.android.chrome" || packageName == "com.android.browser"
+                    || packageName == "com.android.browser"
                 ) {
-                    AppProxyManager.Instance.addProxyApp(this)
+                    AppProxyManager.getInstance().setAppInfo(this)
                 }
             }
         }

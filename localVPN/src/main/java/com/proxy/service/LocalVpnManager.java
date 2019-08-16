@@ -21,7 +21,7 @@ public class LocalVpnManager {
     private Intent mLocalIntent;
 
     private LocalVpnManager() {
-
+        L.i(this.getClass().getSimpleName());
     }
 
     private static LocalVpnManager mInstance;
@@ -36,6 +36,7 @@ public class LocalVpnManager {
         }
         return mInstance;
     }
+
 
     private boolean mInitProxyData = false;
 
@@ -64,7 +65,6 @@ public class LocalVpnManager {
         LocalVpnService.setAcitivity(activity);
 
         //通过广播发送事件
-
         Intent intent = LocalVpnService.prepare(activity);
         if (intent == null) {
             L.i("LocalVpnService prepare result is null.");

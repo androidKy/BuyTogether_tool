@@ -87,15 +87,20 @@ public class LocalVpnService extends VpnService implements Runnable {
 
     @Override
     public void onCreate() {
-        L.i("onCreate()");
-        System.out.printf("VPNService(%s) created.\n", ID);
-        // Start a new session by creating a new thread.
         registerReceiver(mVpnStopReceiver, new IntentFilter(BROADCAST_STOP_VPN));
-        m_VPNThread = new Thread(this);
-        if (m_VPNThread.isInterrupted()) {
-            L.i("m_VPNThread was already interrupted");
+        // Start a new session by creating a new thread.
+        try {
+           /* if (m_VPNThread != null && !m_VPNThread.isInterrupted()) {
+                m_VPNThread.interrupt();
+            }*/
+            m_VPNThread = new Thread(this, "proxyThread");
+            if (m_VPNThread.isInterrupted()) {
+                L.i("m_VPNThread was already interrupted");
+            }
+            m_VPNThread.start();
+        } catch (Exception e) {
+            L.e(e.getMessage(), e);
         }
-        m_VPNThread.start();
         super.onCreate();
     }
 
@@ -408,7 +413,7 @@ public class LocalVpnService extends VpnService implements Runnable {
 
         Class<?> SystemProperties = Class.forName("android.os.SystemProperties");
         Method method = SystemProperties.getMethod("get", new Class[]{String.class});
-        ArrayList<String> servers = new ArrayList<String>();
+        ArrayList<String> servers = new ArrayList<>();
         for (String name : new String[]{"net.dns1", "net.dns2", "net.dns3", "net.dns4",}) {
             String value = (String) method.invoke(null, name);
             if (value != null && !"".equals(value) && !servers.contains(value)) {
@@ -429,11 +434,11 @@ public class LocalVpnService extends VpnService implements Runnable {
         }
 
         if (AppProxyManager.isLollipopOrAbove) {
-            writeLog("Proxy App Info:" + AppProxyManager.Instance.proxyAppInfo);
-            if (AppProxyManager.Instance.proxyAppInfo.size() == 0) {
+            writeLog("Proxy App Info:" + AppProxyManager.getInstance().getProxyAppList());
+            if (AppProxyManager.getInstance().getProxyAppList().size() == 0) {
                 writeLog("Proxy All Apps");
             }
-            for (AppInfo app : AppProxyManager.Instance.proxyAppInfo) {
+            for (AppInfo app : AppProxyManager.getInstance().getProxyAppList()) {
 //                builder.addAllowedApplication("com.vm.shadowsocks");//需要把自己加入代理，不然会无法进行网络链接
 //                builder.addAllowedApplication("com.bull.vpn");//需要把自己加入代理，不然会无法进行网络链接
                 //builder.addAllowedApplication("com.net.request");//需要把自己加入代理，不然会无法进行网络链接
@@ -511,10 +516,7 @@ public class LocalVpnService extends VpnService implements Runnable {
     public void onDestroy() {
         L.i("onDestroy()");
         try {
-            if (m_VPNThread != null) {
-                m_VPNThread.interrupt();
-                m_VPNThread = null;
-            }
+            dispose();
         } catch (Exception e) {
             e.printStackTrace();
         }

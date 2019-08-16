@@ -375,41 +375,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         })
     }
 
-    /**
-     * 上报城市没有该IP
-     */
-    private fun uploadIpError(cityName: String) {
-        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
-            val taskId = getInt(Constant.KEY_TASK_ID, 0)
-            remove(Constant.KEY_TASK_DATA)
 
-            if (!mIsCommentTask)
-                ApiManager()
-                    .setDataListener(object : DataListener {
-                        override fun onSucceed(result: String) {
-                            getTask(mIsCommentTask)
-                        }
-
-                        override fun onFailed(errorMsg: String) {
-                            mainView.onFailed(errorMsg)
-                        }
-                    })
-                    .updateTaskStatus(taskId.toString(), false, "$cityName 没有相应的代理IP")
-            else {
-                ApiManager()
-                    .setDataListener(object : DataListener {
-                        override fun onSucceed(result: String) {
-                            getTask(mIsCommentTask)
-                        }
-
-                        override fun onFailed(errorMsg: String) {
-                            mainView.onFailed(errorMsg)
-                        }
-                    })
-                    .updateCommentTaskStatus(taskId, false, "$cityName 没有相应的代理IP")
-            }
-        }
-    }
 
     /**
      * 正式开始申请端口
@@ -525,7 +491,41 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
 
         })
     }
+    /**
+     * 上报城市没有该IP
+     */
+    private fun uploadIpError(cityName: String) {
+        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
+            val taskId = getInt(Constant.KEY_TASK_ID, 0)
+            remove(Constant.KEY_TASK_DATA)
 
+            if (!mIsCommentTask)
+                ApiManager()
+                    .setDataListener(object : DataListener {
+                        override fun onSucceed(result: String) {
+                            getTask(mIsCommentTask)
+                        }
+
+                        override fun onFailed(errorMsg: String) {
+                            mainView.onFailed(errorMsg)
+                        }
+                    })
+                    .updateTaskStatus(taskId.toString(), false, "$cityName 没有相应的代理IP")
+            else {
+                ApiManager()
+                    .setDataListener(object : DataListener {
+                        override fun onSucceed(result: String) {
+                            getTask(mIsCommentTask)
+                        }
+
+                        override fun onFailed(errorMsg: String) {
+                            mainView.onFailed(errorMsg)
+                        }
+                    })
+                    .updateCommentTaskStatus(taskId, false, "$cityName 没有相应的代理IP")
+            }
+        }
+    }
     /**
      * 保存支付宝账号,确定支付宝账号是否切换
      */

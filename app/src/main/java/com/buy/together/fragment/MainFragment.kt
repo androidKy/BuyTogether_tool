@@ -177,8 +177,8 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
      */
     override fun onClearDataResult(result: String) {
         if (result == "Success") {
-            // startPdd()
-            getPort()
+            startPdd()  //不用代理
+            //getPort() //用代理
             /*  val curPort = SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_CUR_PORT)
               if (!TextUtils.isEmpty(curPort) && LocalVpnService.IsRunning) {  //如果端口不为空
                   //stopMyVpnService()

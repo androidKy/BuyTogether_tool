@@ -24,12 +24,12 @@ class ApiManager {
         private const val URL_HTTP: String = "http://"
         const val POST_JSON_CONTENT_TYPE: String = "application/json"
 
-        const val URL_GET_TASK: String = "$URL_HTTP$URL_TEST_DOMAIN/task/get/"
-        const val URL_GET_COMMENT_TASK: String = "$URL_HTTP$URL_TEST_DOMAIN/task/comment/"
-        const val URL_UPDATE_TASK_INFO: String = "$URL_HTTP$URL_TEST_DOMAIN/task/inform/"
-        const val URL_GET_ACCOUNT: String = "$URL_HTTP$URL_TEST_DOMAIN/others/account/?id="
-        const val URL_UPDATE_ACCOUNT: String = "$URL_HTTP$URL_TEST_DOMAIN/others/account/"
-        const val URL_GET_ADDRESS: String = "$URL_HTTP$URL_TEST_DOMAIN/others/address/"
+        const val URL_GET_TASK: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/get/"
+        const val URL_GET_COMMENT_TASK: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/comment/"
+        const val URL_UPDATE_TASK_INFO: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/inform/"
+        const val URL_GET_ACCOUNT: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/account/?id="
+        const val URL_UPDATE_ACCOUNT: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/account/"
+        const val URL_GET_ADDRESS: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/address/"
 
 
         /*val instance: ApiManager by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
@@ -54,6 +54,7 @@ class ApiManager {
         checkNetwork(object : NetworkListener {
             override fun valid() {
                 AndroidNetworking.get("$URL_GET_TASK?imei=$imei")
+                    .addHeaders("API-AUTH","a69caa73-f126-444d-879c-74e75d433940")
                     .build()
                     .getAsOkHttpResponse(object : OkHttpResponseListener {
                         override fun onResponse(response: Response?) {
@@ -80,6 +81,7 @@ class ApiManager {
         checkNetwork(object : NetworkListener {
             override fun valid() {
                 AndroidNetworking.get(URL_GET_COMMENT_TASK)
+                    .addHeaders("API-AUTH","a69caa73-f126-444d-879c-74e75d433940")
                     .build()
                     .getAsOkHttpResponse(object : OkHttpResponseListener {
                         override fun onResponse(response: Response?) {
@@ -106,6 +108,7 @@ class ApiManager {
         checkNetwork(object : NetworkListener {
             override fun valid() {
                 AndroidNetworking.get("$URL_GET_ACCOUNT$taskId")
+                    .addHeaders("API-AUTH","a69caa73-f126-444d-879c-74e75d433940")
                     .build()
                     .getAsOkHttpResponse(object : OkHttpResponseListener {
                         override fun onResponse(response: Response?) {
@@ -138,6 +141,7 @@ class ApiManager {
             override fun valid() {
                 AndroidNetworking.post(URL_GET_ADDRESS)
                     .setContentType(POST_JSON_CONTENT_TYPE)
+                    .addHeaders("API-AUTH","a69caa73-f126-444d-879c-74e75d433940")
                     .addBodyParameter("id", accountId)
                     .addBodyParameter("city", cityName)
                     .build()
@@ -174,6 +178,7 @@ class ApiManager {
 
                     AndroidNetworking.post(URL_UPDATE_TASK_INFO)
                         .setContentType(POST_JSON_CONTENT_TYPE)
+                        .addHeaders("API-AUTH","a69caa73-f126-444d-879c-74e75d433940")
                         .addJSONObjectBody(this)
                         .build()
                         .getAsOkHttpResponse(object : OkHttpResponseListener {
@@ -207,6 +212,7 @@ class ApiManager {
 
                     AndroidNetworking.post(URL_UPDATE_ACCOUNT)
                         .setContentType(POST_JSON_CONTENT_TYPE)
+                        .addHeaders("API-AUTH","a69caa73-f126-444d-879c-74e75d433940")
                         .addJSONObjectBody(this)
                         .build()
                         .getAsOkHttpResponse(object : OkHttpResponseListener {
@@ -260,6 +266,7 @@ class ApiManager {
 
                     AndroidNetworking.post(URL_UPDATE_TASK_INFO)
                         .setContentType(POST_JSON_CONTENT_TYPE)
+                        .addHeaders("API-AUTH","a69caa73-f126-444d-879c-74e75d433940")
                         .addJSONObjectBody(this)
                         .build()
                         .getAsOkHttpResponse(object : OkHttpResponseListener {
@@ -294,6 +301,7 @@ class ApiManager {
 
                     AndroidNetworking.post(URL_UPDATE_TASK_INFO)
                         .setContentType(POST_JSON_CONTENT_TYPE)
+                        .addHeaders("API-AUTH","a69caa73-f126-444d-879c-74e75d433940")
                         .addJSONObjectBody(this)
                         .build()
                         .getAsOkHttpResponse(object : OkHttpResponseListener {

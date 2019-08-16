@@ -53,10 +53,10 @@ public class CmdListUtil {
         StringBuilder result = new StringBuilder();
         Process process = null;
         try {
-           /* ProcessBuilder pb = new ProcessBuilder("su");
+            ProcessBuilder pb = new ProcessBuilder("su");
             pb.redirectErrorStream(true);
-            java.lang.Process process = pb.start();*/
-            process = Runtime.getRuntime().exec("su");
+            process = pb.start();
+            //process = Runtime.getRuntime().exec("su");
 
             os = new DataOutputStream(process.getOutputStream());
             os.write(command.getBytes());

@@ -103,8 +103,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 .setNodeService(this@MyAccessibilityService)
                 .setNodeParams("好的", true)
                 .setNodeParams("允许", true)
-                .setNodeParams("个人中心", 0, 5, true)
-                .setNodeParams("点击登录", 0, 5, true)
+                //.setNodeParams("个人中心", 0, 5, true)
+                //.setNodeParams("点击登录", 0, 5, true)
                 .setNodeParams("请使用其它方式登录")
                 .setNodeParams("QQ登录")
                 .setTaskListener(object : TaskListener {

@@ -330,7 +330,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("$failedMsg was not found.")
-                    responFailed("校验是否同一卖家失败")  //todo bug
+                    responFailed("校验是否同一卖家失败")
                 }
             })
             .create()
