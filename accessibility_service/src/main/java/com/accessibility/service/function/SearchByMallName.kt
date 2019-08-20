@@ -115,9 +115,11 @@ class SearchByMallName(val myAccessibilityService: MyAccessibilityService) : Bas
      * 根据商品名字查找商品
      */
     private fun findGood(goodName: String) {
+        val goodPrice = TaskDataUtil.instance.getSearchPrice()
+
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams(goodName, true)
+            .setNodeParams(goodPrice!!)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     responSucceed()

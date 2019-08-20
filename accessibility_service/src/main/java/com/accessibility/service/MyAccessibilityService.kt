@@ -101,11 +101,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
             NodeController.Builder()
                 .setNodeService(this@MyAccessibilityService)
-                .setNodeParams("好的", true)
-                .setNodeParams("允许", true)
-                //.setNodeParams("个人中心", 0, 5, true)
-                //.setNodeParams("点击登录", 0, 5, true)
-                .setNodeParams("请使用其它方式登录")
+                .setNodeParams("请使用其它方式登录",0,8)
                 .setNodeParams("QQ登录")
                 .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {
@@ -115,12 +111,37 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
                     override fun onTaskFailed(failedMsg: String) {
                         L.i("$failedMsg was not found.")
-                        responTaskFailed("拼多多登录授权失败")
+                        //responTaskFailed("拼多多登录授权失败")
+                        enterLoginFailed()
                     }
                 })
                 .create()
                 .execute()
         }
+    }
+
+    private fun enterLoginFailed() {
+        NodeController.Builder()
+            .setNodeService(this@MyAccessibilityService)
+            .setNodeParams("好的", 0, 5, true)
+            .setNodeParams("允许", 0, 5, true)
+            .setNodeParams("个人中心", 0, 5, true)
+            .setNodeParams("点击登录", 0, 5, true)
+            .setNodeParams("请使用其它方式登录")
+            .setNodeParams("QQ登录")
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    L.i("判断是跳转到主页还是登录界面")
+                    LoginService(this@MyAccessibilityService).login(LoginListenerImpl())
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("$failedMsg was not found.")
+                    responTaskFailed("拼多多登录授权失败")
+                }
+            })
+            .create()
+            .execute()
     }
 
     inner class LoginListenerImpl : TaskListener {
@@ -166,14 +187,14 @@ class MyAccessibilityService : BaseAccessibilityService() {
      * 开始做任务
      */
     private fun doTask() {
-        TaskService.getInstance(this)
+        TaskService(this)
             .setScreenDensity(mScreenWidth, mScreenHeight)
             .setTaskFinishedListener(object : TaskListener {
                 override fun onTaskFinished() {
                     //uploadOrderInfo()
                     mHandler.postDelayed({
                         responTaskFinished()
-                    }, 20 * 1000)
+                    }, 8 * 1000)
                 }
 
                 override fun onTaskFailed(failedMsg: String) {

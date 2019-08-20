@@ -15,9 +15,9 @@ import com.utils.common.SPUtils
  * Description:做任务
  * Created by Quinin on 2019-07-09.
  **/
-class TaskService private constructor(nodeService: MyAccessibilityService) : BaseEventService(nodeService) {
+class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventService(nodeService) {
 
-    companion object : com.utils.common.SingletonHolder<TaskService, MyAccessibilityService>(::TaskService)
+   // companion object : com.utils.common.SingletonHolder<TaskService, MyAccessibilityService>(::TaskService)
 
     private var mScreenWidth: Int = 0
     private var mScreenHeight: Int = 0
@@ -31,6 +31,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
 
     override fun doOnEvent() {
         try {
+            mTaskProgress.clear()
             var taskType = TaskDataUtil.instance.getTask_type()
             L.i("taskType = $taskType")
             when (taskType) {
@@ -222,6 +223,7 @@ class TaskService private constructor(nodeService: MyAccessibilityService) : Bas
 
 
     private fun responFailed(failedMsg: String) {
+        saveTaskProgress(mTaskProgress.toString())
         mTaskFinishedListener?.onTaskFailed(failedMsg)
     }
 

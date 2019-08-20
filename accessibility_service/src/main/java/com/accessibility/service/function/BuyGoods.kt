@@ -44,14 +44,48 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
      * 参团购买
      */
     private fun buyByJoin() {
+        NodeController.Builder()
+            .setNodeService(nodeService)
+            .setNodeParams("查看更多")
+            .setNodeParams("插队拼单",0,8,true)
+            .setNodeParams("去拼单",0,5,true)
+            .setNodeParams("确定", 0, false, 5)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    chooseInfo()
+                }
 
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("参团购买失败，换成发起拼单")
+                    buyWithOther()
+                }
+
+            })
+            .create()
+            .execute()
     }
 
     /**
      * 单独购买
      */
     private fun buyBySelf() {
+        NodeController.Builder()
+            .setNodeService(nodeService)
+            .setNodeParams("单独购买")
+            .setNodeParams("确定", 0, false, 5)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    chooseInfo()
+                }
 
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("参团购买失败，换成发起拼单")
+                    buyWithOther()
+                }
+
+            })
+            .create()
+            .execute()
     }
 
     /**
@@ -91,7 +125,8 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
             .setTaskListener(object : TaskListener {
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("$failedMsg was not found.")
-                    responFailed("选择商品规格失败")
+                    //responFailed("选择商品规格失败") todo
+
                 }
 
                 override fun onTaskFinished() {
@@ -106,11 +141,15 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
             .execute()
     }
 
+    private fun chooseInfoFailed(chooseInfo: List<String>) {
+
+    }
+
     /**
      * 选择收货人的地址
      */
     private fun chooseAddress() {
-        FillAddressService.getInstance(nodeService)
+        FillAddressService(nodeService)
             .setTaskFinishedListener(object : TaskListener {
                 override fun onTaskFinished() {
                     choosePayChannel()

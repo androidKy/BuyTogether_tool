@@ -40,7 +40,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
         //监测浏览器是否打开
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("快如闪电", 0, false)
+            .setNodeParams("快如闪电", 0,8,true)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("浏览器已打开")

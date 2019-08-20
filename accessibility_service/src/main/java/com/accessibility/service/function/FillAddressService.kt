@@ -4,6 +4,7 @@ import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.auto.ADB_XY
 import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
+import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.util.TaskDataUtil
 import com.safframework.log.L
@@ -12,9 +13,9 @@ import com.safframework.log.L
  * Description:
  * Created by Quinin on 2019-08-02.
  **/
-class FillAddressService private constructor(private val nodeService: MyAccessibilityService) {
-    companion object :
-        com.utils.common.SingletonHolder<FillAddressService, MyAccessibilityService>(::FillAddressService)
+class FillAddressService constructor(private val nodeService: MyAccessibilityService) {
+    /* companion object :
+         com.utils.common.SingletonHolder<FillAddressService, MyAccessibilityService>(::FillAddressService)*/
 
     var mTaskFinishedListener: TaskListener? = null
     fun setTaskFinishedListener(taskFinishedListener: TaskListener): FillAddressService {
@@ -88,22 +89,35 @@ class FillAddressService private constructor(private val nodeService: MyAccessib
     private fun addAddress() {
         NodeController.Builder()
             .setNodeService(nodeService)
-            .setNodeParams("添加收货地址", 0, false)
+            .setNodeParams("添加收货地址", 0, false, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    L.i("收货地址不是H5页面")
                     fillAddress()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    L.i("收货地址是H5页面")
+                    L.i("点击了商家回复弹出了聊天框")
+                    back2address()
                 }
             })
             .create()
             .execute()
     }
 
+    /**
+     * 从聊天界面返回输入地址的界面
+     */
+    private fun back2address() {
+        nodeService.performBackClick(2, object : AfterClickedListener {
+            override fun onClicked() {
+                isAddressExist()
+            }
+        })
+    }
 
+    /**
+     * 填入地址
+     */
     private fun fillAddress() {
         val taskDataUtil = TaskDataUtil.instance
         val buyerName = taskDataUtil.getBuyer_name()
@@ -204,12 +218,29 @@ class FillAddressService private constructor(private val nodeService: MyAccessib
                     }
 
                     override fun onTaskFailed(failedMsg: String) {
-                        responFailed("选择${cityName}失败")
+                        //responFailed("选择${cityName}失败")
+                        chooseCityFailed(cityName, districtName)
                     }
                 })
                 .create()
                 .execute()
         }
+    }
+
+    private fun chooseCityFailed(cityName: String, districtName: String) {
+        AdbScriptController.Builder()
+            .setXY("540,1005")
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    chooseDistrict(districtName)
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    responFailed("选择${cityName}失败")
+                }
+            })
+            .create()
+            .execute()
     }
 
     /**
@@ -226,8 +257,25 @@ class FillAddressService private constructor(private val nodeService: MyAccessib
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    responFailed("选择${districtName}失败") //选择区失败，随便选择一个区 todo
+                    // responFailed("选择${districtName}失败") //选择区失败，随便选择一个区
+                    chooseDistrictFailed(districtName)
 
+                }
+            })
+            .create()
+            .execute()
+    }
+
+    private fun chooseDistrictFailed(districtName: String) {
+        AdbScriptController.Builder()
+            .setXY("540,1005")
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    responSuccess()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    responFailed("选择${districtName}失败")
                 }
             })
             .create()

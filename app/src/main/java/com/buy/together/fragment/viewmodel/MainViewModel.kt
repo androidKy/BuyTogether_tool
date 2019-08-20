@@ -388,7 +388,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         }
 
         L.i(
-            "params:\nmethod: getPort\n number: 1\n area:$finalCityId\n imei:${DevicesUtil.getIMEI(context)}\n" +
+            "params:\nmethod: getPort\nnumber: 1\narea:$finalCityId\nimei:${DevicesUtil.getIMEI(context)}\n" +
                     "platformId: 2"
         )
 

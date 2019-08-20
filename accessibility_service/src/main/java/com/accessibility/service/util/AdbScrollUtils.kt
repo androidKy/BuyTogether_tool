@@ -18,8 +18,8 @@ class AdbScrollUtils private constructor() {
 
     companion object {
         const val MSG_ADB_SCROLL: Int = 888
-        const val SCROLL_TOTAL_DEFAULT_TIME: Long = 30 * 1000 //默认的滑动总时间
-        const val SCROLL_SPEED_DEFAULT_TIME: Long = 1500     //默认的滑动间隔时间,1秒
+        const val SCROLL_TOTAL_DEFAULT_TIME: Long = 18 * 1000 //默认的滑动总时间
+        const val SCROLL_SPEED_DEFAULT_TIME: Long = 1000     //默认的滑动间隔时间,1秒
         const val DEFAULT_START_XY: String = "540,1740"      //默认滑动的起点
         const val DEFAULT_STOP_XY: String = "540,1040"        //默认滑动的终点
 
@@ -137,11 +137,10 @@ class AdbScrollUtils private constructor() {
 
     private fun findNode(): AccessibilityNodeInfo? {
 
-        var nodeResult = mNodeService?.findViewByFullText(mFindText)
-        if (nodeResult == null) {
+        /* if (nodeResult == null) {
             nodeResult = mNodeService?.findViewById(mFindText)
-        }
-        return nodeResult
+        }*/
+        return mNodeService?.findViewByFullText(mFindText)
     }
 
 

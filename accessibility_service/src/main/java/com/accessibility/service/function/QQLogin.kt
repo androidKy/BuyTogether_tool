@@ -54,7 +54,8 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                     AdbScriptController.Builder()
                         .setTaskListener(object : TaskListener {
                             override fun onTaskFinished() {
-                                verifyCode()
+                                //isLoginSucceed()
+                                isUnvalid()
                             }
 
                             override fun onTaskFailed(failedMsg: String) {
@@ -75,6 +76,46 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                     responTaskFailed("跳转不到QQ登录界面")
                 }
 
+            })
+            .create()
+            .execute()
+    }
+
+    /**
+     * 是否直接登录成功
+     */
+    private fun isLoginSucceed() {
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("授权并登录", 0, 5)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    loginSucceed()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    verifyCode()
+                }
+            })
+            .create()
+            .execute()
+    }
+
+    /**
+     * 账号是否被封
+     */
+    private fun isUnvalid() {
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("确定", 0, 5)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    retryGetQQ()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    isLoginSucceed()
+                }
             })
             .create()
             .execute()
@@ -152,11 +193,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
             .setNodeService(myAccessibilityService)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    L.i("登录成功，账号ID: $mUserId 账号名: $mUserName")
-                    saveAccountName()
-                    updateAccount(1)
-                    myAccessibilityService.setIsLogined(true)
-                    mTaskListener?.onTaskFinished()
+                    loginSucceed()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -166,6 +203,14 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
             .setNodeParams("授权并登录", 0, 5)
             .create()
             .execute()
+    }
+
+    private fun loginSucceed() {
+        L.i("登录成功，账号ID: $mUserId 账号名: $mUserName")
+        saveAccountName()
+        updateAccount(1)
+        myAccessibilityService.setIsLogined(true)
+        mTaskListener?.onTaskFinished()
     }
 
     /**
@@ -191,18 +236,12 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
     private fun dealAccountError() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("1001", 1, false, 5, true)
+            //.setNodeParams("1001", 1, false, 5, true)
             //.setNodeParams("该账号涉嫌违规", 1, false, 3)
             .setNodeParams("确定", 0, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    //重新请求QQ账号
-                    updateAccount(2)
-                    if (mLoginFailedCount <= 10) {
-                        getAccount()
-                    } else {
-                        responTaskFailed("重新拉取账号超过10次")
-                    }
+                    retryGetQQ()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -211,6 +250,16 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
             })
             .create()
             .execute()
+    }
+
+    private fun retryGetQQ() {
+        //重新请求QQ账号
+        updateAccount(2)
+        if (mLoginFailedCount <= 18) {
+            getAccount()
+        } else {
+            responTaskFailed("重新拉取账号超过10次")
+        }
     }
 
     /**

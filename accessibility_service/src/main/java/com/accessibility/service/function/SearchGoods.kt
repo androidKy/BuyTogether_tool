@@ -146,8 +146,6 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     //搜索开始的时间
-                    mStartTime = System.currentTimeMillis()
-                    L.i("搜索开始的时间: $mStartTime")
                     inputKeyword()
                 }
 
@@ -187,6 +185,8 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                 override fun onTaskFinished() {
                     //confirmGoods(goodName, searchPrice, mallName)
                     L.i("正在根据关键字[$keyWord]搜索商品")
+                    mStartTime = System.currentTimeMillis()
+                    L.i("搜索开始的时间: $mStartTime")
                     startSearchByKeyWord()
                 }
 
@@ -245,7 +245,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
         val searchIntervalTime = currentSearchTime - mStartTime
         if (searchIntervalTime / 1000 > 60)   //搜索时间超过1分钟,每个关键字搜索时间为1分钟
         {
-            mStartTime = currentSearchTime
+            //mStartTime = currentSearchTime
             inputKeyword()
             return
         }

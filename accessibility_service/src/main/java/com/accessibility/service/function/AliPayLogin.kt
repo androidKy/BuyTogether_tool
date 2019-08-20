@@ -115,11 +115,35 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
             .setNodeParams("立即付款", 1)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    adbInputPsw()
+                    ignoreAlipayTip()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
                     responTaskFailed("支付宝付款环节失败")
+                }
+            })
+            .create()
+            .execute()
+    }
+
+    /**
+     * 忽略支付宝提示
+     */
+    private fun ignoreAlipayTip() {
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("仍然支付", 0, 5)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    myAccessibilityService.postDelay(Runnable {
+                        adbInputPsw()
+                    }, 3)
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    myAccessibilityService.postDelay(Runnable {
+                        adbInputPsw()
+                    }, 3)
                 }
             })
             .create()
@@ -159,11 +183,11 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
      * 验证是否支付成功
      */
     private fun verifyPaySucceed() {
-        myAccessibilityService.performBackClick(10, object : AfterClickedListener {
+        myAccessibilityService.performBackClick(5, object : AfterClickedListener {
             override fun onClicked() {
                 NodeController.Builder()
                     .setNodeService(myAccessibilityService)
-                    .setNodeParams("综合", 0, false, 5)
+                    .setNodeParams("销量", 0, false, 15)
                     .setTaskListener(object : TaskListener {
                         override fun onTaskFinished() {
                             L.i("支付成功，跳转到搜索界面")
@@ -171,12 +195,23 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                         }
 
                         override fun onTaskFailed(failedMsg: String) {
-                            L.i("支付失败，没跳转到搜索界面")
-                            responTaskFailed("支付失败")
+
                         }
                     })
                     .create()
                     .execute()
+               /* AdbScrollUtils.instantce
+                    .setScrollTotalTime(3 * 1000)
+                    .setScrollSpeed(1500)
+                    .setStartXY("540,800")
+                    .setStopXY("540,1200")
+                    .setTaskListener(object : NodeFoundListener {
+                        override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
+
+                        }
+                    })
+                    .startScroll()*/
+
             }
         })
     }

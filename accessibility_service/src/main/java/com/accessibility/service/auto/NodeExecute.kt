@@ -120,6 +120,7 @@ class NodeExecute(
         if (isScrolled) {
             AdbScrollUtils.instantce
                 .setNodeService(nodeService)
+                .setScrollTotalTime(15 * 1000)
                 .setFindText(textOrId)
                 .setTaskListener(object : NodeFoundListener {
                     override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {

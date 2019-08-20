@@ -1,6 +1,7 @@
 package com.buy.together.hook.sp;
 
 import android.content.Context;
+import android.text.TextUtils;
 import com.accessibility.service.util.Constant;
 import de.robv.android.xposed.XSharedPreferences;
 
@@ -17,7 +18,7 @@ public class SharedPref {
         return myXsharedPref;
     }
 
-    public static String getXValue(Context context,String key) {
+    public static String getXValue(Context context, String key) {
        /* String value = "";
         try {
             value = getMyXSharedPref().getString(key, "");
@@ -25,8 +26,10 @@ public class SharedPref {
             L.i(e.getMessage(), e);
         }
         return value;*/
+        if (context == null || TextUtils.isEmpty(key))
+            return "";
 
-       return RemotePreferenceUtil.getInstance(context).getString(key,"");
+        return RemotePreferenceUtil.getInstance(context).getString(key, "");
 
 /*
         final String finalKey = key;

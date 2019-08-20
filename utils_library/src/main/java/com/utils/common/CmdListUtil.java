@@ -32,7 +32,7 @@ public class CmdListUtil {
     }
 
     //静默安装
-    public boolean installSlient(String path) {
+   /* public boolean installSlient(String path) {
         String cmd = "pm install -r " + path;
         return execCmd(cmd).contains("Success");
     }
@@ -41,7 +41,7 @@ public class CmdListUtil {
         String cmd = "pm uninstall " + packageName;
         return execCmd(cmd).contains("Success");
     }
-
+*/
     public String execCmd(String command) {
         if (ThreadUtils.isMainThread()) {
             //return "cmd executed can't run in mainThread.";
