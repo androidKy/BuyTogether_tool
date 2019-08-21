@@ -68,7 +68,6 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                 override fun onTaskFailed(failedMsg: String) {
                     responTaskFailed("支付宝登录失败")
                 }
-
             })
             .create()
             .execute()
@@ -112,43 +111,23 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     private fun inputPayPsw() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
+            .setNodeParams("仍然支付", 0, 8, true)
             .setNodeParams("立即付款", 1)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    ignoreAlipayTip()
-                }
-
-                override fun onTaskFailed(failedMsg: String) {
-                    responTaskFailed("支付宝付款环节失败")
-                }
-            })
-            .create()
-            .execute()
-    }
-
-    /**
-     * 忽略支付宝提示
-     */
-    private fun ignoreAlipayTip() {
-        NodeController.Builder()
-            .setNodeService(myAccessibilityService)
-            .setNodeParams("仍然支付", 0, 5)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
                     myAccessibilityService.postDelay(Runnable {
                         adbInputPsw()
                     }, 3)
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    myAccessibilityService.postDelay(Runnable {
-                        adbInputPsw()
-                    }, 3)
+                    responTaskFailed("支付宝付款环节失败-$failedMsg")
                 }
             })
             .create()
             .execute()
     }
+
 
     /**
      * 通过ADB输入密码
@@ -161,7 +140,6 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
             responTaskFailed("支付宝的支付密码为空")
             return
         }
-        val delayTime = 400L
         AdbScriptController.Builder()
             .setXY(regularPsw(payPsw!!))
             .setTaskListener(object : TaskListener {
@@ -180,7 +158,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     }
 
     /**
-     * 验证是否支付成功
+     * 验证是否支付成功 todo 销量需要滑动才显示
      */
     private fun verifyPaySucceed() {
         myAccessibilityService.performBackClick(5, object : AfterClickedListener {
@@ -200,17 +178,17 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                     })
                     .create()
                     .execute()
-               /* AdbScrollUtils.instantce
-                    .setScrollTotalTime(3 * 1000)
-                    .setScrollSpeed(1500)
-                    .setStartXY("540,800")
-                    .setStopXY("540,1200")
-                    .setTaskListener(object : NodeFoundListener {
-                        override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
+                /* AdbScrollUtils.instantce
+                     .setScrollTotalTime(3 * 1000)
+                     .setScrollSpeed(1500)
+                     .setStartXY("540,800")
+                     .setStopXY("540,1200")
+                     .setTaskListener(object : NodeFoundListener {
+                         override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
 
-                        }
-                    })
-                    .startScroll()*/
+                         }
+                     })
+                     .startScroll()*/
 
             }
         })

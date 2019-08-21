@@ -9,6 +9,7 @@ import com.accessibility.service.function.CommentTaskService
 import com.accessibility.service.function.LoginService
 import com.accessibility.service.function.SearchGoods
 import com.accessibility.service.function.TaskService
+import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.TaskDataUtil
@@ -78,9 +79,49 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
             try {
                 chooseLogin()
+                paying()
+                checkPayResult()
             } catch (e: Exception) {
                 L.e(e.message)
             }
+        }
+    }
+
+    /**
+     * 正在支付界面时，选择支付宝方式
+     */
+    private fun paying() {
+        if (mCurPageType == PageEnum.PAYING_PAGE) {
+            L.i("正在支付")
+            val morePayChannel = findViewByText("更多支付方式")
+            if (morePayChannel != null) {
+                performViewClick(morePayChannel, 1, object : AfterClickedListener {
+                    override fun onClicked() {
+                        L.i("更多支付方式节点被点击")
+                        setCurPageType(PageEnum.PAY_SUCCEED)
+                        performViewClick(findViewByText("支付宝"), 1)
+                    }
+                })
+            }
+            val alipayNode = findViewByText("支付宝")
+            if (alipayNode != null) {
+                performViewClick(alipayNode, 1, object : AfterClickedListener {
+                    override fun onClicked() {
+                        L.i("支付宝节点被点击")
+                        setCurPageType(PageEnum.PAY_SUCCEED)
+                    }
+                })
+            }
+        }
+    }
+
+    /**
+     * 检查支付成功与否
+     */
+    private fun checkPayResult(){
+        if(mCurPageType == PageEnum.PAY_SUCCEED)
+        {
+            L.i("支付结果：")
         }
     }
 
@@ -101,7 +142,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
             NodeController.Builder()
                 .setNodeService(this@MyAccessibilityService)
-                .setNodeParams("请使用其它方式登录",0,8)
+                .setNodeParams("请使用其它方式登录", 0, 5)
                 .setNodeParams("QQ登录")
                 .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {

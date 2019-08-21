@@ -186,13 +186,15 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
             val pddAccount = getString(Constant.KEY_PDD_ACCOUNT)
             val progress = getString(Constant.KEY_TASK_PROGRESS)
             L.i(
-                "上报任务状态：taskId=$taskId orderNumber=$orderNumber \n" +
-                        " orderMoney=$orderMoney paddAccount=$pddAccount progress=$progress"
+                "上报任务状态：taskId=$taskId orderNumber=$orderNumber remark=$remark\n" +
+                        "orderMoney=$orderMoney paddAccount=$pddAccount progress=$progress"
             )
             var finalRemark = remark
             if (!isSucceed) {
                 orderNumber = ""
                 orderMoney = ""
+                //todo 不上报任务状态，只上报错误信息
+                return
             } else {
                 finalRemark = "任务成功:$progress"
             }

@@ -32,6 +32,7 @@ class Constant {
         const val KEY_TASK_PROGRESS = "key_task_progress"       //任务的进度，如123
 
         const val KEY_PDD_ACCOUNT = "key_pdd_account"       //拼多多登录的账号
+        const val KEY_CUR_SEARCH_TYPE = "key_cur_search_type"
 
         const val KEY_CITY_DATA = "key_cities"              //城市列表
         const val KEY_CITY_GET_DATE = "key_city_get_date"

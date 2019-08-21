@@ -29,7 +29,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
         }
 
         val clipboardManager = myAccessibilityService.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        clipboardManager.setText(goodUrl)
+        clipboardManager.text = goodUrl
 
         L.i("开始打开浏览器")
         myAccessibilityService.packageManager.getLaunchIntentForPackage(Constant.XIAOMI_BROWSER_PKG).apply {
@@ -38,13 +38,15 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
             else responFailed("通过链接进入商品时，未安装浏览器")
         }
         //监测浏览器是否打开
-        NodeController.Builder()
+        myAccessibilityService.postDelay(Runnable {
+            L.i("浏览器已打开")
+            skipNavigation()
+        },5)
+       /* NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("快如闪电", 0,8,true)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    L.i("浏览器已打开")
-                    skipNavigation()
+
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -53,7 +55,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
                 }
             })
             .create()
-            .execute()
+            .execute()*/
     }
 
     /**
@@ -64,7 +66,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
             .setSwipeXY("1000,950", "100,950")
             .setSwipeXY("1000,950", "100,950")
             .setSwipeXY("1000,950", "100,950")
-            .setXY("960,105")
+            .setXY("960,175")   //点击跳过
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     openGoodUrl()

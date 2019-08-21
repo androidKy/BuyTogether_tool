@@ -61,7 +61,6 @@ class MainActivity : AppCompatActivity(), MainAcView {
             startActivity(intent)
             return
         }
-        // PackageManagerUtils.getInstance().restartApplication(this)
         startTask()
     }
 

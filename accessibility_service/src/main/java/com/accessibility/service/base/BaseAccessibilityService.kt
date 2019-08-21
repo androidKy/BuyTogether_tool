@@ -113,9 +113,10 @@ abstract class BaseAccessibilityService : AccessibilityService() {
      * 查找符合条件的node集合
      */
     fun findViewsByText(text: String): List<AccessibilityNodeInfo> {
-        return rootInActiveWindow.run {
-            findAccessibilityNodeInfosByText(text)
-        }
+        val rootNode = rootInActiveWindow
+        return if (rootNode != null)
+            rootNode.findAccessibilityNodeInfosByText(text)
+        else ArrayList<AccessibilityNodeInfo>()
     }
 
 

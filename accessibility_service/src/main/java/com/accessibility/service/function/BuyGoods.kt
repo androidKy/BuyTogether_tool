@@ -1,11 +1,10 @@
 package com.accessibility.service.function
 
 import com.accessibility.service.MyAccessibilityService
-import com.accessibility.service.auto.ADB_XY
-import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseAcService
 import com.accessibility.service.listener.TaskListener
+import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.TaskDataUtil
 import com.safframework.log.L
 
@@ -46,9 +45,10 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
     private fun buyByJoin() {
         NodeController.Builder()
             .setNodeService(nodeService)
-            .setNodeParams("查看更多")
-            .setNodeParams("插队拼单",0,8,true)
-            .setNodeParams("去拼单",0,5,true)
+           // .setNodeParams("查看更多", 0, 5, true)
+            //.setNodeParams("插队拼单", 0, 5, true)
+            .setNodeParams("去拼单", 0, 5, true)
+            .setNodeParams("参与拼单", 0, 5, true)
             .setNodeParams("确定", 0, false, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
@@ -59,7 +59,6 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
                     L.i("参团购买失败，换成发起拼单")
                     buyWithOther()
                 }
-
             })
             .create()
             .execute()
@@ -82,7 +81,6 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
                     L.i("参团购买失败，换成发起拼单")
                     buyWithOther()
                 }
-
             })
             .create()
             .execute()
@@ -102,7 +100,9 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    chooseAddress()
+                    //没有规格可以选
+                    //chooseAddress()
+                    setPageStatus()
                 }
             })
             .create()
@@ -125,24 +125,36 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
             .setTaskListener(object : TaskListener {
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("$failedMsg was not found.")
-                    //responFailed("选择商品规格失败") todo
-
+                    chooseInfoFailed(choose_info)
                 }
 
                 override fun onTaskFinished() {
                     L.i("商品选择完成，准备支付")
-                    //createAddress()
-                    chooseAddress()
+                    setPageStatus()
                 }
             })
-            .setNodeParams(choose_info, true)
+            .setNodeParams(choose_info, false)
             .setNodeParams("确定")
             .create()
             .execute()
     }
 
+    /**
+     * 规格选择失败时,先横向选择 todo
+     */
     private fun chooseInfoFailed(chooseInfo: List<String>) {
 
+    }
+
+
+    /**
+     * 设置界面处于正在支付界面的状态
+     */
+    private fun setPageStatus() {
+        nodeService.setCurPageType(PageEnum.PAYING_PAGE)
+        nodeService.postDelay(Runnable {
+            chooseAddress()
+        }, 5)
     }
 
     /**
@@ -152,7 +164,8 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
         FillAddressService(nodeService)
             .setTaskFinishedListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    choosePayChannel()
+                    //开始支付
+                    payForNow()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -162,34 +175,23 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
             .doOnEvent()
     }
 
-
-    /**
-     * 选择支付渠道
-     */
-    private fun choosePayChannel() {
-        L.i("新增地址完成，选择支付方式：")
-        val payXY = ADB_XY.PAY_NOW.ali_pay
-
-        AdbScriptController.Builder()
-            .setSwipeXY(ADB_XY.PAY_NOW.origin_swipe_up, ADB_XY.PAY_NOW.target_swipe_up)
-            .setXY(ADB_XY.PAY_NOW.more_pay_channel)
-            .setSwipeXY(ADB_XY.PAY_NOW.origin_swipe_up, ADB_XY.PAY_NOW.target_swipe_up)
-            .setXY(payXY)
-            .setXY(ADB_XY.PAY_NOW.pay_now_btn)
+    private fun payForNow() {
+        NodeController.Builder()
+            .setNodeService(nodeService)
+            .setNodeParams("立即支付")
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     payByAlipay()
+                    L.i("点击立即支付")
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    responFailed(failedMsg)
+                    L.i("节点找不到：$failedMsg")
                 }
             })
             .create()
             .execute()
-
     }
-
 
     /**
      * 支付宝支付

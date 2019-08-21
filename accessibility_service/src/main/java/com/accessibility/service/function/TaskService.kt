@@ -17,7 +17,7 @@ import com.utils.common.SPUtils
  **/
 class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventService(nodeService) {
 
-   // companion object : com.utils.common.SingletonHolder<TaskService, MyAccessibilityService>(::TaskService)
+    // companion object : com.utils.common.SingletonHolder<TaskService, MyAccessibilityService>(::TaskService)
 
     private var mScreenWidth: Int = 0
     private var mScreenHeight: Int = 0
@@ -99,6 +99,12 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
      * 2:与卖家沟通
      */
     private fun talkWithSaler() {
+        var talkMsg = TaskDataUtil.instance.getTalk_msg()
+        if (talkMsg.isNullOrEmpty()) {
+            responFailed("聊天信息不能为空")
+            return
+        }
+
         NodeController.Builder()
             .setNodeService(nodeService)
             .setTaskListener(object : TaskListener {
@@ -123,7 +129,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
                 }
             })
             .setNodeParams("客服")
-            .setNodeParams(WidgetConstant.EDITTEXT, 3, false, TaskDataUtil.instance.getTalk_msg()!!)
+            .setNodeParams(WidgetConstant.EDITTEXT, 3, false, talkMsg)
             .setNodeParams("发送")
             .create()
             .execute()
@@ -139,6 +145,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
             .setTaskListener(object : TaskListener {
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("$failedMsg was not found.商品已收藏")
+                    mTaskProgress.append("3")
                     TaskDataUtil.instance.getTask_type()?.apply {
                         when (this) {
                             1234, 134, 234, 34 -> buyGoods()

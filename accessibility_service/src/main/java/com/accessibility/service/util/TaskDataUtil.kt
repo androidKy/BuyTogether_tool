@@ -342,4 +342,11 @@ class TaskDataUtil private constructor() {
             task?.delivery_address?.street
         }
     }
+
+    /**
+     * 获取一个任务下的子任务完成的数量
+     */
+    fun getTaskFinishedCount(): Int? {
+        return mTaskServiceData?.task?.task_complete
+    }
 }

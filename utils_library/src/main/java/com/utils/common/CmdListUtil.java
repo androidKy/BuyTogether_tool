@@ -1,7 +1,5 @@
 package com.utils.common;
 
-import com.safframework.log.L;
-
 import java.io.*;
 
 /**
@@ -92,7 +90,7 @@ public class CmdListUtil {
             }
             asyncProcessDestroy(process);
         }
-        L.i("Adb执行命令结果：" + result.toString());
+//        L.i("Adb执行命令结果：" + result.toString());
         return result.toString();
     }
 
@@ -202,7 +200,7 @@ public class CmdListUtil {
      * 通过线程进行异步销毁
      */
     private void asyncProcessDestroy(final Process process) {
-        L.i("通过线程进行异步销毁-进行CMD命令的进程");
+       // L.i("通过线程进行异步销毁-进行CMD命令的进程");
         //processDestroy(process);
         ThreadUtils.executeByCached(new ThreadUtils.Task<Boolean>() {
             @Override

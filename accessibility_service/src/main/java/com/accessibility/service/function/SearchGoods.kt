@@ -8,10 +8,13 @@ import com.accessibility.service.base.BaseAcService
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.listener.TaskListener
+import com.accessibility.service.page.SearchType
 import com.accessibility.service.util.AdbScrollUtils
+import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
 import com.accessibility.service.util.WidgetConstant
 import com.safframework.log.L
+import com.utils.common.SPUtils
 
 /**
  * Description:
@@ -145,8 +148,17 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
             .setXY(XY_SEARCH_EDITTEXT)      //搜索框的坐标
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    //搜索开始的时间
-                    inputKeyword()
+                    val taskFinishCount = TaskDataUtil.instance.getTaskFinishedCount()
+                    val searchType =
+                        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_CUR_SEARCH_TYPE)
+                    if (taskFinishCount != null && taskFinishCount > 0 && searchType > 0) {
+                        if (searchType == SearchType.MALLNAME) {
+                            searchByMallName()
+                        } else if (searchType == SearchType.BROWSER) {
+                            searchByBrowser()
+                        }
+                    } else
+                        inputKeyword()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -206,6 +218,8 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("根据店铺找到商品")
+                    SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                        .put(Constant.KEY_CUR_SEARCH_TYPE, SearchType.MALLNAME)
                     responSucceed()
                 }
 
@@ -226,12 +240,14 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("浏览器根据链接跳转成功")
+                    SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                        .put(Constant.KEY_CUR_SEARCH_TYPE, SearchType.BROWSER)
                     responSucceed()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("浏览器根据链接跳转失败：$failedMsg")
-                    responFailed("浏览器根据链接跳转失败：$failedMsg")
+                    responFailed(failedMsg)
                 }
             })
             .startService()
@@ -276,8 +292,8 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
         AdbScrollUtils.instantce
             .setNodeService(nodeService)
             .setFindText(mSearchPrice!!)
-            .setScrollTotalTime(60 * 1000)
-            .setScrollSpeed(1000)
+            .setScrollTotalTime(30 * 1000)
+            .setScrollSpeed(1500)
             .setStartXY("540,1700")
             .setStopXY("540,1100")
             .setTaskListener(object : NodeFoundListener {
@@ -344,8 +360,11 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("是需要做任务的卖家,返回继续做任务")
-                    nodeService.performBackClick(0, object : AfterClickedListener {
+                    nodeService.performBackClick(1, object : AfterClickedListener {
                         override fun onClicked() {
+                            //保存当前搜索的方式
+                            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                                .put(Constant.KEY_CUR_SEARCH_TYPE, SearchType.KEYWORD)
                             responSucceed()
                         }
                     })

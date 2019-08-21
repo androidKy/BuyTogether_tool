@@ -31,37 +31,53 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
      * 校验地址是否存在
      */
     private fun isAddressExist() {
-        AdbScriptController.Builder()
-            .setXY(ADB_XY.PAY_NOW.add_address, 3000L)
+        NodeController.Builder()
+            .setNodeService(nodeService)
+            .setNodeParams("手动添加收货地址", 0, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    NodeController.Builder()
-                        .setNodeService(nodeService)
-                        .setNodeParams("收货地址", 0, false, 3)
-                        .setTaskListener(object : TaskListener {
-                            override fun onTaskFinished() {
-                                L.i("地址已存在")
-                                chooseExistAddress()
-                            }
-
-                            override fun onTaskFailed(failedMsg: String) {
-                                L.i("地址不存在,新增地址")
-                                addAddress()
-                            }
-                        })
-                        .create()
-                        .execute()
+                    L.i("地址不存在,新增地址")
+                    addAddress()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    //支付失败
-                    L.i("$failedMsg was not found.")
-                    responFailed("输入收货地址时，应用未获得root权限")
-                    //payByOther()
+                    L.i("地址已存在")
+                    //chooseExistAddress()
+                    responSuccess()
                 }
             })
             .create()
             .execute()
+
+        /* AdbScriptController.Builder()
+             .setXY(ADB_XY.PAY_NOW.add_address, 3000L)
+             .setTaskListener(object : TaskListener {
+                 override fun onTaskFinished() {
+                     NodeController.Builder()
+                         .setNodeService(nodeService)
+                         .setNodeParams("收货地址", 0, false, 3)
+                         .setTaskListener(object : TaskListener {
+                             override fun onTaskFinished() {
+
+                             }
+
+                             override fun onTaskFailed(failedMsg: String) {
+
+                             }
+                         })
+                         .create()
+                         .execute()
+                 }
+
+                 override fun onTaskFailed(failedMsg: String) {
+                     //支付失败
+                     L.i("$failedMsg was not found.")
+                     responFailed("输入收货地址时，应用未获得root权限")
+                     //payByOther()
+                 }
+             })
+             .create()
+             .execute()*/
     }
 
     /**
@@ -196,7 +212,7 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
     private fun chooseCity(cityName: String, districtName: String) {
         if (cityName == "北京市" || cityName == "天津市" || cityName == "上海市" || cityName == "重庆市") {
             AdbScriptController.Builder()
-                .setXY("540,1005")
+                .setXY("540,920")
                 .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {
                         chooseDistrict(districtName)
@@ -229,7 +245,7 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
 
     private fun chooseCityFailed(cityName: String, districtName: String) {
         AdbScriptController.Builder()
-            .setXY("540,1005")
+            .setXY("540,920")
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     chooseDistrict(districtName)
@@ -259,7 +275,6 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
                 override fun onTaskFailed(failedMsg: String) {
                     // responFailed("选择${districtName}失败") //选择区失败，随便选择一个区
                     chooseDistrictFailed(districtName)
-
                 }
             })
             .create()
@@ -268,7 +283,7 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
 
     private fun chooseDistrictFailed(districtName: String) {
         AdbScriptController.Builder()
-            .setXY("540,1005")
+            .setXY("540,920")
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     responSuccess()

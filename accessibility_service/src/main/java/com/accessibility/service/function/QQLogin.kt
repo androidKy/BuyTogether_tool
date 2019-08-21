@@ -7,7 +7,6 @@ import com.accessibility.service.auto.NodeController
 import com.accessibility.service.data.AccountBean
 import com.accessibility.service.data.TaskBean
 import com.accessibility.service.listener.TaskListener
-import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
 import com.google.gson.Gson
@@ -35,41 +34,43 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
         mUserName = TaskDataUtil.instance.getLogin_name()
         mUserPsw = TaskDataUtil.instance.getLogin_psw()
         mUserId = TaskDataUtil.instance.getPdd_account_id()
-        //mUserName = "2408973767"
-        //mUserPsw = "lqy12021004"
+        // mUserName = "2408973767"
+        // mUserPsw = "lqy12021004"
         if (!TextUtils.isEmpty(mUserName)) {
-            login(mUserName!!, mUserPsw!!)
+            NodeController.Builder()
+                .setNodeService(myAccessibilityService)
+                .setNodeParams("拒绝", 1)
+                .setTaskListener(object : TaskListener {
+                    override fun onTaskFinished() {
+                        login(mUserName!!, mUserPsw!!)
+                    }
+
+                    override fun onTaskFailed(failedMsg: String) {
+                        login(mUserName!!, mUserPsw!!)
+                    }
+                })
+                .create()
+                .execute()
         } else {
             responTaskFailed("账号或者密码为空")
         }
     }
 
     fun login(userName: String, userPsw: String) {
+        isQQloginPage(userName, userPsw)
+    }
+
+    /**
+     * 是否跳转到登录界面
+     */
+    private fun isQQloginPage(userName: String, userPsw: String) {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
             .setNodeParams("TIM登录", 0, false, 30)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("已跳转到QQ登录界面")
-                    AdbScriptController.Builder()
-                        .setTaskListener(object : TaskListener {
-                            override fun onTaskFinished() {
-                                //isLoginSucceed()
-                                isUnvalid()
-                            }
-
-                            override fun onTaskFailed(failedMsg: String) {
-                                responTaskFailed(failedMsg)
-                            }
-                        })
-                        .setXY("540,320")   //账号输入框
-                        .setXY("1010,320")  //点击清除账号
-                        .setText(userName)
-                        .setXY("540,450")   //密码输入框
-                        .setText(userPsw)
-                        .setXY("540,680")  //登录按钮
-                        .create()
-                        .execute()
+                    inputAccount(userName, userPsw)
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -77,6 +78,31 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                 }
 
             })
+            .create()
+            .execute()
+    }
+
+    /**
+     * 输入账号密码
+     */
+    private fun inputAccount(userName: String, userPsw: String) {
+        AdbScriptController.Builder()
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    //isLoginSucceed()
+                    isUnvalid()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    responTaskFailed(failedMsg)
+                }
+            })
+            .setXY("540,320")   //账号输入框
+            .setXY("1010,320")  //点击清除账号
+            .setText(userName)
+            .setXY("540,450")   //密码输入框
+            .setText(userPsw)
+            .setXY("540,680")  //登录按钮
             .create()
             .execute()
     }
@@ -365,7 +391,6 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
 
     fun responTaskFailed(msg: String) {
         mLoginFailedCount = 0
-        myAccessibilityService.setCurPageType(PageEnum.START_PAGE)
         mTaskListener?.onTaskFailed(msg)
     }
 }

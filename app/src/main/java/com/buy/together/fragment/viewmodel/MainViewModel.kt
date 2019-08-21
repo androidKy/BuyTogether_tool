@@ -500,7 +500,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
             remove(Constant.KEY_TASK_DATA)
 
             if (!mIsCommentTask)
-                ApiManager()
+               /* ApiManager()
                     .setDataListener(object : DataListener {
                         override fun onSucceed(result: String) {
                             getTask(mIsCommentTask)
@@ -510,7 +510,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                             mainView.onFailed(errorMsg)
                         }
                     })
-                    .updateTaskStatus(taskId.toString(), false, "$cityName 没有相应的代理IP")
+                    .updateTaskStatus(taskId.toString(), false, "$cityName 没有相应的代理IP")*/
             else {
                 ApiManager()
                     .setDataListener(object : DataListener {
