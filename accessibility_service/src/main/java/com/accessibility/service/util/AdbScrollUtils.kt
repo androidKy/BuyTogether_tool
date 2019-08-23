@@ -99,7 +99,7 @@ class AdbScrollUtils private constructor() {
         return this
     }
 
-    fun setTaskListener(nodeFoundListener: NodeFoundListener): AdbScrollUtils {
+    fun setNodeFoundListener(nodeFoundListener: NodeFoundListener): AdbScrollUtils {
         mNodeFoundListener = nodeFoundListener
         return this
     }

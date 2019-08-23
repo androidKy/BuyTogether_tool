@@ -56,13 +56,34 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     private fun payDirectly() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("订单编号", 1, false, 30)
+            .setNodeParams("订单编号", 1, false, 18)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     saveOrderMoney()
                     saveOrderNumber()
 
                     inputPayPsw()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    //responTaskFailed("支付宝登录失败")
+                    dealOrderNumberFailed()
+                }
+            })
+            .create()
+            .execute()
+    }
+
+    /**
+     * 处理订单编号节点找不到的处理
+     */
+    private fun dealOrderNumberFailed(){
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("仍然支付",0,5)
+            .setTaskListener(object:TaskListener{
+                override fun onTaskFinished() {
+                    payDirectly()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -111,8 +132,8 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     private fun inputPayPsw() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("仍然支付", 0, 8, true)
-            .setNodeParams("立即付款", 1)
+            .setNodeParams("仍然支付", 0, 5, true)
+            .setNodeParams("立即付款", 1,5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     myAccessibilityService.postDelay(Runnable {
@@ -183,7 +204,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                      .setScrollSpeed(1500)
                      .setStartXY("540,800")
                      .setStopXY("540,1200")
-                     .setTaskListener(object : NodeFoundListener {
+                     .setNodeFoundListener(object : NodeFoundListener {
                          override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
 
                          }
@@ -250,12 +271,6 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
         return payPswXYList
     }
 
-    /**
-     * 是否支付成功
-     */
-    private fun paySuccess() {
-
-    }
 
     /**
      * 下发的支付宝账号和已登录的不一致

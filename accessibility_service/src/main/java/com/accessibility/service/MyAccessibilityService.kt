@@ -95,17 +95,21 @@ class MyAccessibilityService : BaseAccessibilityService() {
             L.i("正在支付")
             val morePayChannel = findViewByText("更多支付方式")
             if (morePayChannel != null) {
-                performViewClick(morePayChannel, 1, object : AfterClickedListener {
+                performViewClick(morePayChannel, object : AfterClickedListener {
                     override fun onClicked() {
                         L.i("更多支付方式节点被点击")
-                        setCurPageType(PageEnum.PAY_SUCCEED)
-                        performViewClick(findViewByText("支付宝"), 1)
+                        performViewClick(findViewByText("支付宝"), 0, object : AfterClickedListener {
+                            override fun onClicked() {
+                                L.i("支付宝方式被点击")
+                                setCurPageType(PageEnum.PAY_SUCCEED)
+                            }
+                        })
                     }
                 })
             }
             val alipayNode = findViewByText("支付宝")
             if (alipayNode != null) {
-                performViewClick(alipayNode, 1, object : AfterClickedListener {
+                performViewClick(alipayNode, object : AfterClickedListener {
                     override fun onClicked() {
                         L.i("支付宝节点被点击")
                         setCurPageType(PageEnum.PAY_SUCCEED)
@@ -118,9 +122,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
     /**
      * 检查支付成功与否
      */
-    private fun checkPayResult(){
-        if(mCurPageType == PageEnum.PAY_SUCCEED)
-        {
+    private fun checkPayResult() {
+        if (mCurPageType == PageEnum.PAY_SUCCEED) {
             L.i("支付结果：")
         }
     }

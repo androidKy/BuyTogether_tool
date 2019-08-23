@@ -51,12 +51,12 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
 
         /* AdbScriptController.Builder()
              .setXY(ADB_XY.PAY_NOW.add_address, 3000L)
-             .setTaskListener(object : TaskListener {
+             .setNodeFoundListener(object : TaskListener {
                  override fun onTaskFinished() {
                      NodeController.Builder()
                          .setNodeService(nodeService)
                          .setNodeParams("收货地址", 0, false, 3)
-                         .setTaskListener(object : TaskListener {
+                         .setNodeFoundListener(object : TaskListener {
                              override fun onTaskFinished() {
 
                              }

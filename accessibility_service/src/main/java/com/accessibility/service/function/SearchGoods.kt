@@ -296,7 +296,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
             .setScrollSpeed(1500)
             .setStartXY("540,1700")
             .setStopXY("540,1100")
-            .setTaskListener(object : NodeFoundListener {
+            .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                     if (nodeInfo == null) {
                         L.i("查找关键字[$mCurKeyWord]搜索失败，重新根据另一个关键字查找")

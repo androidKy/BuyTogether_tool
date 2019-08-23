@@ -121,7 +121,7 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
             .setNodeParams("看不清？换一张", 1, 5)
-            .setTaskListener(object : TaskListener {
+            .setNodeFoundListener(object : TaskListener {
                 override fun onTaskFinished() {
                     2000)
                 }

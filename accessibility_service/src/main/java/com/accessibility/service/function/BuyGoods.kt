@@ -1,10 +1,13 @@
 package com.accessibility.service.function
 
+import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseAcService
+import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
+import com.accessibility.service.util.AdbScrollUtils
 import com.accessibility.service.util.TaskDataUtil
 import com.safframework.log.L
 
@@ -20,6 +23,8 @@ import com.safframework.log.L
  * Created by Quinin on 2019-08-10.
  **/
 class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeService) {
+    private var mChoosedCount: Int = 0   //已经选择的规格数量
+    private var mChooseSize: Int = 0 //选择规格的数量
 
     override fun startService() {
         confirmBuyType()
@@ -45,11 +50,29 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
     private fun buyByJoin() {
         NodeController.Builder()
             .setNodeService(nodeService)
-           // .setNodeParams("查看更多", 0, 5, true)
+            // .setNodeParams("查看更多", 0, 5, true)
             //.setNodeParams("插队拼单", 0, 5, true)
             .setNodeParams("去拼单", 0, 5, true)
             .setNodeParams("参与拼单", 0, 5, true)
             .setNodeParams("确定", 0, false, 5)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    chooseInfo()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    buyByJoin2()
+                }
+            })
+            .create()
+            .execute()
+    }
+
+    private fun buyByJoin2() {
+        NodeController.Builder()
+            .setNodeService(nodeService)
+            .setNodeParams("查看更多", 0, 5, true)
+            .setNodeParams("插队拼单", 0, 5, true)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     chooseInfo()
@@ -78,8 +101,8 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    L.i("参团购买失败，换成发起拼单")
-                    buyWithOther()
+                    L.i("没有规格可选")
+                    setPageStatus()
                 }
             })
             .create()
@@ -101,7 +124,7 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
 
                 override fun onTaskFailed(failedMsg: String) {
                     //没有规格可以选
-                    //chooseAddress()
+                    L.i("没有规格可选")
                     setPageStatus()
                 }
             })
@@ -114,36 +137,120 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
      */
     private fun chooseInfo() {
         val choose_info = TaskDataUtil.instance.getChoose_info()
-        L.i("商品参数size：${choose_info?.size}")
+        L.i("商品规格参数size：${choose_info?.size}")
         if (choose_info == null || choose_info.isEmpty()) {
-            responFailed("商品的选择参数不则会给你缺")
+            responFailed("商品的选择参数不能为空")
             return
         }
-
-        NodeController.Builder()
-            .setNodeService(nodeService)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFailed(failedMsg: String) {
-                    L.i("$failedMsg was not found.")
-                    chooseInfoFailed(choose_info)
-                }
-
-                override fun onTaskFinished() {
-                    L.i("商品选择完成，准备支付")
-                    setPageStatus()
-                }
-            })
-            .setNodeParams(choose_info, false)
-            .setNodeParams("确定")
-            .create()
-            .execute()
+        chooseInfo(choose_info)
     }
 
     /**
-     * 规格选择失败时,先横向选择 todo
+     * 规格选择失败时,先横向选择
      */
-    private fun chooseInfoFailed(chooseInfo: List<String>) {
+    private fun chooseInfo(chooseInfo: List<String>) {
+        mChooseSize = chooseInfo.size
+        for (i in 0 until chooseInfo.size) {
+            val nodeText = chooseInfo[i]
+            L.i("正在选择规格：$nodeText")
+            NodeController.Builder()
+                .setNodeService(nodeService)
+                .setTaskListener(object : TaskListener {
+                    override fun onTaskFailed(failedMsg: String) {
+                        L.i("$failedMsg was not found.")
+                        //chooseInfoFailed(choose_info)
+                        dealChooseFailed(failedMsg)
+                    }
 
+                    override fun onTaskFinished() {
+                        L.i("商品规格选择成功：$nodeText")
+                        mChoosedCount++
+
+                        pressConfirm()
+                        // setPageStatus()
+                    }
+                })
+                .setNodeParams(nodeText, 0, 5)
+                .create()
+                .execute()
+        }
+    }
+
+    /**
+     * 规格选择完成，点击确定
+     */
+    private fun pressConfirm() {
+        L.i("已选择的规格数量：$mChoosedCount 总规格数量：$mChooseSize")
+        nodeService.postDelay(Runnable {
+            if (mChoosedCount == mChooseSize) {
+                NodeController.Builder()
+                    .setNodeService(nodeService)
+                    .setNodeParams("确定", 0, 5)
+                    .setTaskListener(object : TaskListener {
+                        override fun onTaskFinished() {
+                            setPageStatus()
+                        }
+
+                        override fun onTaskFailed(failedMsg: String) {
+                            L.i("选择规格完成，找不到节点：$failedMsg")
+                        }
+                    })
+                    .create()
+                    .execute()
+            }
+        }, 1)
+    }
+
+    /**
+     * 处理选择失败时的情况
+     */
+    private fun dealChooseFailed(chooseText: String) {
+        AdbScrollUtils.instantce
+            .setNodeService(nodeService)
+            .setFindText(chooseText)
+            .setScrollSpeed(1000)
+            .setScrollTotalTime(8 * 1000)
+            .setStartXY("1000,1000")
+            .setStopXY("200,1000")
+            .setNodeFoundListener(object : NodeFoundListener {
+                override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
+                    if (nodeInfo != null) {
+                        mChoosedCount++
+                        nodeService.performViewClick(nodeInfo)
+                        pressConfirm()
+                    } else {
+                        L.i("开始竖向滑动找节点:$chooseText")
+                        chooseByVertical(chooseText)
+                    }
+                }
+            })
+            .startScroll()
+    }
+
+    /**
+     * 竖向查找节点
+     */
+    private fun chooseByVertical(chooseText: String) {
+        AdbScrollUtils.instantce
+            .setNodeService(nodeService)
+            .setFindText(chooseText)
+            .setScrollSpeed(1000)
+            .setScrollTotalTime(8 * 1000)
+            .setStartXY("540,1500")
+            .setStopXY("540,800")
+            .setNodeFoundListener(object : NodeFoundListener {
+                override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
+                    if (nodeInfo != null) {
+                        mChoosedCount++
+                        nodeService.performViewClick(nodeInfo)
+                        pressConfirm()
+                    } else {
+                        L.i("找不到规格节点:$chooseText")
+                        responFailed("找不到规格节点:$chooseText")
+                    }
+                }
+            })
+            .startScroll()
     }
 
 

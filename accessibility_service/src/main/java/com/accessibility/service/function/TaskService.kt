@@ -104,6 +104,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
             responFailed("聊天信息不能为空")
             return
         }
+        //talkMsg = "好的"
 
         NodeController.Builder()
             .setNodeService(nodeService)

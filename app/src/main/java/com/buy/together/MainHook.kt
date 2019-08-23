@@ -14,6 +14,14 @@ class MainHook : IXposedHookLoadPackage {
         if (TextUtils.isEmpty(packageName))
             return
 
+        if(packageName.equals(Constant.ALI_PAY_PKG))
+        {
+            lpparam?.apply {
+                CloakHook().hook(this)
+            }
+            return
+        }
+
         //只拦截拼多多这个应用
         if (packageName.equals(Constant.PKG_NAME) || packageName.equals(Constant.BUY_TOGETHER_PKG)
             || packageName.equals(Constant.QQ_TIM_PKG) || packageName.equals(Constant.QQ_LIATE_PKG)

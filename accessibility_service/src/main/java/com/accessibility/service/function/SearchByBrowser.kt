@@ -44,7 +44,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
         },5)
        /* NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setTaskListener(object : TaskListener {
+            .setNodeFoundListener(object : TaskListener {
                 override fun onTaskFinished() {
 
                 }

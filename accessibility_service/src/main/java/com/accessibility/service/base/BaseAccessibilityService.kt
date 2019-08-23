@@ -295,6 +295,10 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         performViewClick(nodeInfo, delayTime, null)
     }
 
+    fun performViewClick(nodeInfo: AccessibilityNodeInfo?,clickedListener: AfterClickedListener?){
+        performViewClick(nodeInfo, 0, clickedListener)
+    }
+
     fun performViewClick(nodeInfo: AccessibilityNodeInfo?, delayTime: Long, clickedListener: AfterClickedListener?) {
         mHandler.postDelayed({
             performViewClick(nodeInfo)

@@ -122,7 +122,7 @@ class NodeExecute(
                 .setNodeService(nodeService)
                 .setScrollTotalTime(15 * 1000)
                 .setFindText(textOrId)
-                .setTaskListener(object : NodeFoundListener {
+                .setNodeFoundListener(object : NodeFoundListener {
                     override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                         L.i("Adb 滑动查找的结果：${nodeInfo?.text}")
                         if (nodeInfo == null) taskListener.onTaskFailed(textOrId)
