@@ -23,8 +23,11 @@ import com.safframework.log.L
  * Created by Quinin on 2019-08-10.
  **/
 class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeService) {
+    private var mChooseInfoList: List<String> = ArrayList<String>()
     private var mChoosedCount: Int = 0   //已经选择的规格数量
     private var mChooseSize: Int = 0 //选择规格的数量
+    private var mIsConfrimChoosed = false //是否已选择好规格并且点击确认
+    private var mCurChooseIndex: Int = 0 //当前正在选择的规格index
 
     override fun startService() {
         confirmBuyType()
@@ -75,7 +78,21 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
             .setNodeParams("插队拼单", 0, 5, true)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    chooseInfo()
+                    NodeController.Builder()
+                        .setNodeService(nodeService)
+                        .setNodeParams("确定", 0, false, 5)
+                        .setTaskListener(object : TaskListener {
+                            override fun onTaskFinished() {
+                                chooseInfo()
+                            }
+
+                            override fun onTaskFailed(failedMsg: String) {
+                                L.i("不用选择规格")
+                                setPageStatus()
+                            }
+                        })
+                        .create()
+                        .execute()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -136,44 +153,41 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
      * 选择商品参数
      */
     private fun chooseInfo() {
-        val choose_info = TaskDataUtil.instance.getChoose_info()
-        L.i("商品规格参数size：${choose_info?.size}")
-        if (choose_info == null || choose_info.isEmpty()) {
-            responFailed("商品的选择参数不能为空")
-            return
+        try {
+            mChooseInfoList = TaskDataUtil.instance.getChoose_info()!!
+            L.i("商品规格参数size：${mChooseInfoList.size}")
+            if (mChooseInfoList.isNullOrEmpty()) {
+                responFailed("商品的选择参数不能为空")
+                return
+            }
+            mChooseSize = mChooseInfoList.size
+            mCurChooseIndex = 0
+            chooseInfo(mChooseInfoList[mCurChooseIndex])
+        } catch (e: Exception) {
+            L.e(e.message, e)
         }
-        chooseInfo(choose_info)
     }
 
-    /**
-     * 规格选择失败时,先横向选择
-     */
-    private fun chooseInfo(chooseInfo: List<String>) {
-        mChooseSize = chooseInfo.size
-        for (i in 0 until chooseInfo.size) {
-            val nodeText = chooseInfo[i]
-            L.i("正在选择规格：$nodeText")
-            NodeController.Builder()
-                .setNodeService(nodeService)
-                .setTaskListener(object : TaskListener {
-                    override fun onTaskFailed(failedMsg: String) {
-                        L.i("$failedMsg was not found.")
-                        //chooseInfoFailed(choose_info)
-                        dealChooseFailed(failedMsg)
-                    }
 
-                    override fun onTaskFinished() {
-                        L.i("商品规格选择成功：$nodeText")
-                        mChoosedCount++
+    private fun chooseInfo(nodeText: String) {
+        NodeController.Builder()
+            .setNodeService(nodeService)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("$failedMsg was not found.")
+                    //chooseInfoFailed(choose_info)
+                    dealChooseFailed(failedMsg)
+                }
 
-                        pressConfirm()
-                        // setPageStatus()
-                    }
-                })
-                .setNodeParams(nodeText, 0, 5)
-                .create()
-                .execute()
-        }
+                override fun onTaskFinished() {
+                    L.i("商品规格选择成功：$nodeText")
+                    mChoosedCount++
+                    pressConfirm()
+                }
+            })
+            .setNodeParams(nodeText, 0, 5)
+            .create()
+            .execute()
     }
 
     /**
@@ -181,24 +195,26 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
      */
     private fun pressConfirm() {
         L.i("已选择的规格数量：$mChoosedCount 总规格数量：$mChooseSize")
-        nodeService.postDelay(Runnable {
-            if (mChoosedCount == mChooseSize) {
-                NodeController.Builder()
-                    .setNodeService(nodeService)
-                    .setNodeParams("确定", 0, 5)
-                    .setTaskListener(object : TaskListener {
-                        override fun onTaskFinished() {
-                            setPageStatus()
-                        }
+        if (mCurChooseIndex < mChooseSize - 1) {
+            mCurChooseIndex++
+            chooseInfo(mChooseInfoList[mCurChooseIndex])
+        }
+        if (mChoosedCount == mChooseSize) {
+            NodeController.Builder()
+                .setNodeService(nodeService)
+                .setNodeParams("确定", 0, 5)
+                .setTaskListener(object : TaskListener {
+                    override fun onTaskFinished() {
+                        setPageStatus()
+                    }
 
-                        override fun onTaskFailed(failedMsg: String) {
-                            L.i("选择规格完成，找不到节点：$failedMsg")
-                        }
-                    })
-                    .create()
-                    .execute()
-            }
-        }, 1)
+                    override fun onTaskFailed(failedMsg: String) {
+                        L.i("选择规格完成，找不到节点：$failedMsg")
+                    }
+                })
+                .create()
+                .execute()
+        }
     }
 
     /**
@@ -258,10 +274,13 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
      * 设置界面处于正在支付界面的状态
      */
     private fun setPageStatus() {
-        nodeService.setCurPageType(PageEnum.PAYING_PAGE)
-        nodeService.postDelay(Runnable {
-            chooseAddress()
-        }, 5)
+        if (!mIsConfrimChoosed) {
+            mIsConfrimChoosed = true
+            nodeService.setCurPageType(PageEnum.PAYING_PAGE)
+            nodeService.postDelay(Runnable {
+                chooseAddress()
+            }, 5)
+        }
     }
 
     /**

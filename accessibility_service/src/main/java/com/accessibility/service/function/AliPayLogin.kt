@@ -56,7 +56,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     private fun payDirectly() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("订单编号", 1, false, 18)
+            .setNodeParams("订单编号", 1, false, 30)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     saveOrderMoney()

@@ -193,7 +193,8 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
             if (!isSucceed) {
                 orderNumber = ""
                 orderMoney = ""
-                //todo 不上报任务状态，只上报错误信息
+                //todo 不上报任务状态，只上报错误信息，重新开始任务
+                mainAcView.onResponUpdateTask()
                 return
             } else {
                 finalRemark = "任务成功:$progress"

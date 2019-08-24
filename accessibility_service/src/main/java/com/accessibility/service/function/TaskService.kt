@@ -22,6 +22,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
     private var mScreenWidth: Int = 0
     private var mScreenHeight: Int = 0
     private var mTaskProgress: StringBuilder = StringBuilder()
+    private var mScanGoodTime: Int = 0
 
     fun setScreenDensity(width: Int, height: Int): TaskService {
         mScreenWidth = width
@@ -54,13 +55,14 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
      * 开始做任务
      */
     private fun scanGoods() {
+        mScanGoodTime = (10..30).random()
         NodeUtils.instance
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
                     nodeInfo?.apply {
                         L.i("recyclerView was found: ${nodeInfo.className}")
                         ScrollUtils(nodeService, nodeInfo)
-                            .setForwardTotalTime(10)
+                            .setForwardTotalTime(mScanGoodTime)
                             .setScrollListener(ForwardListenerImpl())
                             .scrollForward()
                     }
@@ -74,7 +76,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
         override fun onScrollFinished(nodeInfo: AccessibilityNodeInfo) {
             L.i("向上滑动完成，开始向下拉")
             ScrollUtils(nodeService, nodeInfo)
-                .setBackwardTime(10)
+                .setBackwardTime(mScanGoodTime)
                 .setScrollListener(BackwardListenerImpl())
                 .scrollBackward()
         }
@@ -104,7 +106,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
             responFailed("聊天信息不能为空")
             return
         }
-        //talkMsg = "好的"
+        //talkMsg = "发重复了，不好意思"
 
         NodeController.Builder()
             .setNodeService(nodeService)

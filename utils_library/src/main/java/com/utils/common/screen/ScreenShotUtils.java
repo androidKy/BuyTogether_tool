@@ -158,7 +158,7 @@ public class ScreenShotUtils {
                                 +
                                 SystemClock.currentThreadTimeMillis() + ".png";
                     }
-                    L.i("screenShot", "pic url: " + mLocalUrl);
+                    L.i("screen shot pic url: " + mLocalUrl);
                     fileImage = new File(mLocalUrl);
 
                     if (!fileImage.exists()) {

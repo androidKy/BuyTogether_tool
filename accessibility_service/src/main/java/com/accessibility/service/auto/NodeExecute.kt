@@ -69,7 +69,7 @@ class NodeExecute(
         val isScrolled = nodeScrolledList[index]
 
         // L.i("查找节点的线程名：${Thread.currentThread().name} 节点：$textOrId")
-        L.i("node index = $index")
+//        L.i("node index = $index")
         L.i(
             "开始查找节点：textOrId: $textOrId; isFoundById: $nodeFlag; isClicked: $isClicked; " +
                     "editInputText: $editInputText; timeout: $timeout; isScrolled: $isScrolled"

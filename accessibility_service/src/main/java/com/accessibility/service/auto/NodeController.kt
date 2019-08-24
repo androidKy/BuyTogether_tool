@@ -1,6 +1,5 @@
 package com.accessibility.service.auto
 
-import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.listener.TaskListener
@@ -227,7 +226,7 @@ class NodeController {
         if (nodeService == null) {
             throw IllegalArgumentException("nodeService can not be null")
         }
-        L.i("execute : nodeSize = ${nodeTextList.size}")
+        //L.i("execute : nodeSize = ${nodeTextList.size}")
         nodeService?.apply {
             mLocked = true
             try {
