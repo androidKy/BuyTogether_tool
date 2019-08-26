@@ -85,7 +85,8 @@ public class LocalVpnManager {
                 public void run() {
                     activity.stopService(mLocalIntent);
                 }
-            }, 500);
+            }, 0);
+            // todo 关闭Service延迟0秒。。。
 
         }
     }

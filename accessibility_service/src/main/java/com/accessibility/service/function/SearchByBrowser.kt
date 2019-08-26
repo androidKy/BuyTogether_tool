@@ -10,6 +10,7 @@ import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
 import com.safframework.log.L
+import com.utils.common.ThreadUtils
 
 /**
  * Description:
@@ -97,8 +98,47 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("跳转商品链接失败:$failedMsg")
-                    responFailed("跳转商品链接失败:$failedMsg")
+                    //responFailed("跳转商品链接失败:$failedMsg")
+                    // todo 点击搜索框，输入SP
+                    clickSearchBox()
                 }
+            })
+            .create()
+            .execute()
+    }
+
+    private fun clickSearchBox() {
+        AdbScriptController.Builder()
+            .setXY("550,380")
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+                    L.i("clickSearchBox()。。。即将输入商品 URL")
+                    inputGoodUrl()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("clickSearchBox()。。。点击搜索框失败")
+                }
+
+            })
+            .create()
+            .execute()
+    }
+
+    private fun inputGoodUrl() {
+        val goodUrl = TaskDataUtil.instance.getGoodUrl()
+        AdbScriptController.Builder()
+            .setText(goodUrl!!)
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+                    //
+                    L.i("inputGoodUrl()")
+                    click2pdd()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                }
+
             })
             .create()
             .execute()

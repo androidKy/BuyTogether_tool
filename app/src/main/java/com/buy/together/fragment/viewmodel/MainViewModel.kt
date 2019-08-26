@@ -104,7 +104,11 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                 .getCommentTask()
         } else {
             L.i("获取正常任务")
-            val imei = SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS).getString(Constant.KEY_REAL_DEVICE_IMEI)
+            // todo 测试替换IMEI
+//            val imei = SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS).getString(Constant.KEY_REAL_DEVICE_IMEI)
+            val imei = "865372021527426"
+
+
             L.i("真实imei：$imei")
             ApiManager()
                 .setDataListener(object : DataListener {
@@ -196,6 +200,10 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      * 保存数据到SP
      */
     private fun saveData(taskBean: TaskBean) {
+       /* taskBean.task.account.id = 3234
+        taskBean.task.account.user = "210289767"
+        taskBean.task.account.pwd="gx95k1g8ra"*/
+
         saveAlipayAccountSwitch(taskBean)
         saveTaskData2SP(Gson().toJson(taskBean))
         saveUploadParams(taskBean)

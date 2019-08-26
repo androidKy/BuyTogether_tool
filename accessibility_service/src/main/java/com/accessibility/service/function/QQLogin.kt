@@ -6,11 +6,13 @@ import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.data.AccountBean
 import com.accessibility.service.data.TaskBean
+import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
 import com.google.gson.Gson
 import com.safframework.log.L
+import com.utils.common.CMDUtil
 import com.utils.common.SPUtils
 import com.utils.common.ThreadUtils
 import com.utils.common.pdd_api.ApiManager
@@ -116,6 +118,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
             .setNodeParams("授权并登录", 0, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
+                    L.i("授权登录，是否这里卡住.")
                     loginSucceed()
                 }
 
@@ -247,11 +250,109 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("登录成功，账号ID: $mUserId 账号名: $mUserName")
+
+                    isNeedAddAccount()
+
+                   /* saveAccountName()
+                    updateAccount(1)
+                    myAccessibilityService.setIsLogined(true)
+                    mTaskListener?.onTaskFinished()*/
+                }
+            })
+            .create()
+            .execute()
+
+    }
+
+    /**
+     * textList:根据text来查找
+     * nodeFlag:根据这个字段来判断是哪种方式查找，0：根据view text全查找，1：根据view text半查找，2：根据ID查找，3：根据className查找
+     * isClicked:判断是否点击查找的节点
+     * editInputText:是否是EditText节点输入内容
+     * foundNodeTimeOut：节点查找超时时间 单位秒
+     * findNextFlag:当前节点查找失败后，是否继续查找下一个节点，默认是false，不继续查找，true为继续查找
+     * nodeListener:节点查找的结果监听
+     *
+     */
+
+    private fun isNeedAddAccount() {
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("TIM登录",0,false,5)
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+                    L.i("isNeedAddAccount()...：成功找到‘TIM登录’")
+                    // 点击返回
+                    myAccessibilityService.performBackClick(2,object :AfterClickedListener{
+                        override fun onClicked() {
+                            // 再次点击返回
+                            myAccessibilityService.performBackClick(2,object :AfterClickedListener{
+                                override fun onClicked() {
+                                    // 回到登录界面，再次拉取账号测试。
+                                    // 上报错误账号，清理 QQ轻聊版，TIM数据，再重新登录
+                                    updateAccount(2)
+                                    clearQQAndTimData()
+//                                    continueLoginQQ()
+                                }
+                            })
+                        }
+                    })
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("isNeedAddAccount()...：没有找到‘TIM登录’")
                     saveAccountName()
                     updateAccount(1)
                     myAccessibilityService.setIsLogined(true)
                     mTaskListener?.onTaskFinished()
                 }
+
+            })
+            .create()
+            .execute()
+    }
+
+    private fun clearQQAndTimData() {
+        ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
+            override fun doInBackground(): Boolean {
+
+                var clearDataCmd = "pm clear ${Constant.QQ_TIM_PKG};"+
+                        "pm clear ${Constant.QQ_LIATE_PKG};"
+                CMDUtil().execCmd(clearDataCmd)
+
+                return true
+            }
+
+            override fun onSuccess(result: Boolean?) {
+                continueLoginQQ()
+            }
+
+            override fun onCancel() {
+            }
+
+            override fun onFail(t: Throwable?) {
+                L.i("clearQQAndTimData()。。。清理数据失败")
+            }
+
+        })
+    }
+
+    private fun continueLoginQQ() {
+
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("请使用其它方式登录")
+            .setNodeParams("QQ登录")
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+                    L.i("continueLoginQQ，准备重新拉取账号测试")
+                    getAccount()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("continueLginQQ()执行失败")
+                }
+
             })
             .create()
             .execute()

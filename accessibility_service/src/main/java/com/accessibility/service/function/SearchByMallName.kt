@@ -119,7 +119,7 @@ class SearchByMallName(val myAccessibilityService: MyAccessibilityService) : Bas
 
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams(goodPrice!!)
+            .setNodeParams(goodPrice!!,1)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     responSucceed()

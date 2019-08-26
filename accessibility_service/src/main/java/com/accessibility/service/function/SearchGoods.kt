@@ -73,7 +73,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
 
                 }
             })
-            .setNodeParams("搜索", 0, 30)
+            .setNodeParams("搜索", 0, 15)
             .create()
             .execute()
     }

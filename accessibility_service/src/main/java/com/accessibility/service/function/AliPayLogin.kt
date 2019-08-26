@@ -66,8 +66,8 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    //responTaskFailed("支付宝登录失败")
-                    dealOrderNumberFailed()
+                    responTaskFailed("支付宝登录失败")
+                    //dealOrderNumberFailed()
                 }
             })
             .create()
@@ -132,7 +132,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     private fun inputPayPsw() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("仍然支付", 0, 5, true)
+            //.setNodeParams("仍然支付", 0, 5, true)
             .setNodeParams("立即付款", 1,5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
