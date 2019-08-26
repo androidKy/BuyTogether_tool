@@ -45,7 +45,7 @@ class ParseDataUtil {
             hashMap[task_amount] = taskData.task_amount.toString()
             hashMap[task_completed] = taskData.task_complete.toString()
             hashMap[task_failed] = taskData.task_fail.toString()
-            hashMap[talk_msg] = taskData.talk_msg
+          //  hashMap[talk_msg] = taskData.talk_msg
             hashMap[comment_content] = taskData.comment_content.toString()
 
             hashMap[ip_address] = taskData.ip.content

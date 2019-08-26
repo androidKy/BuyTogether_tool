@@ -116,6 +116,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         if (mIsResumed) {
             mVpnFailedConnectCount = 0
             activity?.apply {
+                mIsCommentTask = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getBoolean(Constant.KEY_TASK_TYPE)
                 LocalVpnManager.getInstance().stopVpnService(activity)
                 mViewModel?.getTask(mIsCommentTask)
             }
@@ -163,6 +164,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
 
     override fun onFailed(msg: String?) {
         L.i("获取任务失败：$msg")
+        mViewModel?.stopTaskTimer()
         mViewModel?.startTaskTimer(mIsCommentTask)
         context?.run {
             if (!msg.isNullOrEmpty()) {
@@ -227,6 +229,8 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
 
     override fun onResponPortsFailed(errorMsg: String) {
         ToastUtils.showToast(context!!, errorMsg)
+        L.i("请求代理数据出错：$errorMsg")
+        startTask()
     }
 
     /**

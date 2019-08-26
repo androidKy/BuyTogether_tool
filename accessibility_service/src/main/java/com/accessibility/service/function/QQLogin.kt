@@ -231,12 +231,31 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
             .execute()
     }
 
+    /**
+     * 登录成功
+     */
     private fun loginSucceed() {
-        L.i("登录成功，账号ID: $mUserId 账号名: $mUserName")
-        saveAccountName()
-        updateAccount(1)
-        myAccessibilityService.setIsLogined(true)
-        mTaskListener?.onTaskFinished()
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("登录",0,false,5)
+            .setTaskListener(object:TaskListener{
+                override fun onTaskFinished() {
+                    L.i("登录失败")
+                    updateAccount(2)
+                    responTaskFailed("账号登录失败：$mUserName")
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("登录成功，账号ID: $mUserId 账号名: $mUserName")
+                    saveAccountName()
+                    updateAccount(1)
+                    myAccessibilityService.setIsLogined(true)
+                    mTaskListener?.onTaskFinished()
+                }
+            })
+            .create()
+            .execute()
+
     }
 
     /**
@@ -279,8 +298,13 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
     }
 
     private fun retryGetQQ() {
-        //重新请求QQ账号
         updateAccount(2)
+        //判断是否是评论任务，如果是，不请求任务;否则重新请求QQ账号
+        val isCommentTask = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getBoolean(Constant.KEY_TASK_TYPE)
+        if (isCommentTask) {
+            responTaskFailed("${mUserName}账号失效，评论任务失败")
+            return
+        }
         if (mLoginFailedCount <= 18) {
             getAccount()
         } else {

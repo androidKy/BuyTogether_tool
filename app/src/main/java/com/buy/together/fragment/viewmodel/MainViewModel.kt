@@ -32,6 +32,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.json.JSONObject
+import java.lang.StringBuilder
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -334,13 +335,12 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
 //                            L.i("cityName: ${city.name} cityCode: ${city.cityid}")
                             if (cityName == city.name) {
                                 result = city.cityid
-                                L.i("target cityName: $cityName cityID: $result")
+                                L.i("target cityName: $cityName serverCityName: ${city.name} cityID: $result")
                                 break
                             }
                         }
                     }
                 }
-
                 return result
             }
 
@@ -360,7 +360,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                 } else {
                     L.i("$cityName 该城市没有IP，重新获取地址")
                     ToastUtils.showToast(context, "$cityName 没有相应的IP")
-                    uploadIpError(cityName)
+                    //uploadIpError(cityName)
                 }
             }
 
@@ -374,7 +374,6 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
 
         })
     }
-
 
 
     /**
@@ -416,7 +415,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                             }
                             mainView.onRequestPortsResult(this)
                         } else {  //重新请求
-                            L.i("请求数据出错：code = ${proxyIpBean?.data?.code}")
+                            L.i("请求代理数据出错：code = ${proxyIpBean?.data?.code}")
                             mainView.onResponPortsFailed("请求端口数据出错：code = ${proxyIpBean?.data?.code}")
                         }
                     }
@@ -491,6 +490,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
 
         })
     }
+
     /**
      * 上报城市没有该IP
      */
@@ -500,17 +500,17 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
             remove(Constant.KEY_TASK_DATA)
 
             if (!mIsCommentTask)
-               /* ApiManager()
-                    .setDataListener(object : DataListener {
-                        override fun onSucceed(result: String) {
-                            getTask(mIsCommentTask)
-                        }
+            /* ApiManager()
+                 .setDataListener(object : DataListener {
+                     override fun onSucceed(result: String) {
+                         getTask(mIsCommentTask)
+                     }
 
-                        override fun onFailed(errorMsg: String) {
-                            mainView.onFailed(errorMsg)
-                        }
-                    })
-                    .updateTaskStatus(taskId.toString(), false, "$cityName 没有相应的代理IP")*/
+                     override fun onFailed(errorMsg: String) {
+                         mainView.onFailed(errorMsg)
+                     }
+                 })
+                 .updateTaskStatus(taskId.toString(), false, "$cityName 没有相应的代理IP")*/
             else {
                 ApiManager()
                     .setDataListener(object : DataListener {
@@ -526,6 +526,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
             }
         }
     }
+
     /**
      * 保存支付宝账号,确定支付宝账号是否切换
      */

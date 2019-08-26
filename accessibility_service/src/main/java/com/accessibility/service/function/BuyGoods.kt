@@ -313,6 +313,7 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("节点找不到：$failedMsg")
+                    responFailed("支付页面跳转失败")
                 }
             })
             .create()
