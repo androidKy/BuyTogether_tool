@@ -194,7 +194,8 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                         }
 
                         override fun onTaskFailed(failedMsg: String) {
-
+                            // 找不到 “销量”
+                            isFindSearch()
                         }
                     })
                     .create()
@@ -213,6 +214,25 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
 
             }
         })
+    }
+
+    private fun isFindSearch() {
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("搜索",1,false,5,false)
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+                    L.i("支付成功，跳转到搜索界面")
+                    responTaskSuccess()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("支付失败，isFindSearch()...")
+                }
+
+            })
+            .create()
+            .execute()
     }
 
     /**

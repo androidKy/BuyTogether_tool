@@ -78,13 +78,17 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) : B
         var commentContent = TaskDataUtil.instance.getCommentContent()
         if (commentContent.isNullOrEmpty()) {
             commentContent = "良心价，商品很好，物流也很快，下次再来"
+
         }
-        val xScore = "680"
+        // todo 编辑评论内容。。。
+//        val xScore = "680"
+        val xScore="750"
         AdbScriptController.Builder()
             .setXY("$xScore,465")
             .setXY("$xScore,565")
             .setXY("$xScore,665")
             .setXY("540,850")      //评价输入框的XY
+
             .setText(commentContent)
             // .setXY("540,1500")      //提交评价
             .setTaskListener(object : TaskListener {

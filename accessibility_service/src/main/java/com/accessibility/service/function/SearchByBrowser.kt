@@ -89,7 +89,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
             .setNodeParams("同意并使用")
-            .setNodeParams("确定")
+            .setNodeParams("确定",0,5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("已跳转到商品详情页面")
@@ -109,7 +109,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
 
     private fun clickSearchBox() {
         AdbScriptController.Builder()
-            .setXY("550,380")
+            .setXY("550,300")
             .setTaskListener(object :TaskListener{
                 override fun onTaskFinished() {
                     L.i("clickSearchBox()。。。即将输入商品 URL")
@@ -129,6 +129,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
         val goodUrl = TaskDataUtil.instance.getGoodUrl()
         AdbScriptController.Builder()
             .setText(goodUrl!!)
+            .setXY("980,160")
             .setTaskListener(object :TaskListener{
                 override fun onTaskFinished() {
                     //
@@ -150,6 +151,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
     private fun click2pdd() {
         AdbScriptController.Builder()
             .setXY("960,300", 5000)
+
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     auth2pdd()

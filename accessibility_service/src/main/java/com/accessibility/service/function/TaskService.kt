@@ -37,6 +37,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
             L.i("taskType = $taskType")
             when (taskType) {
                 2, 23, 24, 234 -> talkWithSaler()
+//                2,23,24,234,1234 -> talkWithSaler()
                 3, 32, 34 -> collectGoods()
                 4 -> buyGoods()
                 else -> {
@@ -59,6 +60,13 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
         NodeUtils.instance
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
+
+                    if(nodeInfo == null){
+                        L.i("scanGoods()... nodeInfo为空")
+                        scanGoods()
+                        return
+                    }
+
                     nodeInfo?.apply {
                         L.i("recyclerView was found: ${nodeInfo.className}")
                         ScrollUtils(nodeService, nodeInfo)

@@ -173,7 +173,9 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         try {
             taskBean = when {
                 !mIsFromCache -> {
+
                     val code = JSONObject(result).getInt("code")
+//                    L.i("评论任务返回的 code = $code")
                     if (code == 200) {
                         val commentBean = Gson().fromJson(result, CommentBean::class.java)
                         ParseDataUtil.parseCommentBean2TaskBean(commentBean)
@@ -354,6 +356,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
 
             override fun onSuccess(result: String?) {
                 //城市ID获取完成，开始打开端口
+
                 if (!TextUtils.isEmpty(result)) {
                     //判断是否有缓存
                     val portsCache = SPUtils.getInstance(Constant.SP_IP_PORTS).getString(
@@ -368,6 +371,8 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                 } else {
                     L.i("$cityName 该城市没有IP，重新获取地址")
                     ToastUtils.showToast(context, "$cityName 没有相应的IP")
+                    // 如果找不到 IP，默认广州IP
+                    requestPorts("440100")
                     //uploadIpError(cityName)
                 }
             }
@@ -645,13 +650,14 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
 
     /**
      * 执行一个定时器去定时获取任务
+     * todo 修改定时器时间
      */
     fun startTaskTimer(isCommentTask: Boolean) {
         TimerUtils.instance.start(object : TimerTask() {
             override fun run() {
                 getTask(isCommentTask)
             }
-        }, 1 * 60 * 1000L)
+        }, 1 * 2 * 1000L)
     }
 
     fun stopTaskTimer() {
