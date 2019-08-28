@@ -11,11 +11,15 @@ import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.util.Constant
 import com.buy.together.fragment.MainFragment
+import com.orhanobut.logger.DiskLogAdapter
+import com.orhanobut.logger.Logger
 import com.proxy.service.LocalVpnService.START_VPN_SERVICE_REQUEST_CODE
 import com.safframework.log.L
 import com.utils.common.SPUtils
 
 class MainActivity : AppCompatActivity(), MainAcView {
+
+
     private var mMainFragment: MainFragment? = null
     private var mTaskRunning: Boolean = false
     private var mMainAcViewModel: MainAcViewModel? = null
@@ -61,6 +65,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
             startActivity(intent)
             return
         }
+        Logger.addLogAdapter(DiskLogAdapter())
         startTask()
     }
 
@@ -75,6 +80,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
                 MyAccessibilityService.setTaskListener(TaskListenerImpl())
             }
         }
+
     }
 
     inner class TaskListenerImpl : TaskListener {

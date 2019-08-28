@@ -1,12 +1,16 @@
 package com.safframework.log
 
 import android.util.Log
+import com.orhanobut.logger.AndroidLogAdapter
+import com.orhanobut.logger.Logger
 import com.safframework.log.handler.*
 
 /**
  * Created by Tony Shen on 2017/1/2.
  */
 object L {
+
+//    Logger.addLogAdapter( AndroidLogAdapter());
 
     enum class LogLevel {
         ERROR {
@@ -120,7 +124,7 @@ object L {
 
     @JvmStatic
     fun e(msg: String?) {
-        if (LogLevel.ERROR.value <= logLevel.value) {
+        /*if (LogLevel.ERROR.value <= logLevel.value) {
 
             if (msg != null && msg.isNotEmpty()) {
 
@@ -132,6 +136,11 @@ object L {
                     Log.e(TAG, String.format(s, msg))
                 }
             }
+        }*/
+
+        Logger.addLogAdapter(AndroidLogAdapter())
+        msg?.apply {
+            Logger.e(this)
         }
     }
 
@@ -142,7 +151,7 @@ object L {
      */
     @JvmStatic
     fun e(tag: String?, msg: String?) {
-        if (LogLevel.ERROR.value <= logLevel.value) {
+        /*if (LogLevel.ERROR.value <= logLevel.value) {
 
             if (tag != null && tag.isNotEmpty() && msg != null && msg.isNotEmpty()) {
 
@@ -154,34 +163,53 @@ object L {
                     Log.e(tag, String.format(s, msg))
                 }
             }
+        }*/
+        Logger.addLogAdapter(AndroidLogAdapter())
+        tag?.apply {
+            Logger.e(this)
+        }
+        msg?.apply {
+            Logger.e(this)
         }
     }
 
     @JvmStatic
     fun e(msg: String?, tr: Throwable) {
-        if (msg != null && msg.isNotEmpty()) {
+       /* if (msg != null && msg.isNotEmpty()) {
             Log.e(TAG, msg, tr)
-        }
+        }*/
         /*  if (LogLevel.ERROR.value <= logLevel.value) {
 
           }*/
+        Logger.addLogAdapter(AndroidLogAdapter())
+
+        tr?.apply {
+            msg?.apply {
+                Logger.e(tr,this,null)
+            }
+        }
     }
 
     @JvmStatic
     fun w(msg: String?) {
-        if (LogLevel.WARN.value <= logLevel.value) {
-
-            if (msg != null && msg.isNotEmpty()) {
-
-                val s = getMethodNames()
-
-                if (msg.contains("\n")) {
-                    Log.w(TAG, String.format(s, msg.replace("\n".toRegex(), "\n║ ")))
-                } else {
-                    Log.w(TAG, String.format(s, msg))
-                }
-            }
+//        if (LogLevel.WARN.value <= logLevel.value) {
+//
+//            if (msg != null && msg.isNotEmpty()) {
+//
+//                val s = getMethodNames()
+//
+//                if (msg.contains("\n")) {
+//                    Log.w(TAG, String.format(s, msg.replace("\n".toRegex(), "\n║ ")))
+//                } else {
+//                    Log.w(TAG, String.format(s, msg))
+//                }
+//            }
+//        }
+        Logger.addLogAdapter(AndroidLogAdapter())
+        msg?.apply {
+            Logger.w(this)
         }
+
     }
 
     /**
@@ -191,7 +219,7 @@ object L {
      */
     @JvmStatic
     fun w(tag: String?, msg: String?) {
-        if (LogLevel.WARN.value <= logLevel.value) {
+        /*if (LogLevel.WARN.value <= logLevel.value) {
 
             if (tag != null && tag.isNotEmpty() && msg != null && msg.isNotEmpty()) {
 
@@ -203,22 +231,32 @@ object L {
                     Log.w(tag, String.format(s, msg))
                 }
             }
+        }*/
+        Logger.addLogAdapter(AndroidLogAdapter())
+        tag?.apply {
+            Logger.t(this)
+        }
+        msg?.apply {
+            Logger.w(this
+                )
         }
     }
 
     @JvmStatic
     fun w(msg: String?, tr: Throwable) {
-        if (LogLevel.WARN.value <= logLevel.value) {
+        /*if (LogLevel.WARN.value <= logLevel.value) {
 
             if (msg != null && msg.isNotEmpty()) {
                 Log.w(TAG, msg, tr)
             }
-        }
+        }*/
+        Logger.addLogAdapter(AndroidLogAdapter())
     }
 
     @JvmStatic
     fun i(msg: String?) {
-        if (LogLevel.INFO.value <= logLevel.value) {
+        //TODO 替换成第三方日志
+       /* if (LogLevel.INFO.value <= logLevel.value) {
 
             if (msg != null && msg.isNotEmpty()) {
 
@@ -231,7 +269,12 @@ object L {
                 }
             }
 
+        }*/
+        Logger.addLogAdapter(AndroidLogAdapter())
+        msg?.apply {
+            Logger.i(this);
         }
+
     }
 
     /**
@@ -241,7 +284,14 @@ object L {
      */
     @JvmStatic
     fun i(tag: String?, msg: String?) {
-        if (LogLevel.INFO.value <= logLevel.value) {
+        Logger.addLogAdapter(AndroidLogAdapter())
+        tag?.apply {
+            Logger.t(this)
+        }
+        msg?.apply {
+            Logger.i(this)
+        }
+       /* if (LogLevel.INFO.value <= logLevel.value) {
 
             if (tag != null && tag.isNotEmpty() && msg != null && msg.isNotEmpty()) {
 
@@ -253,22 +303,24 @@ object L {
                     Log.i(tag, String.format(s, msg))
                 }
             }
-        }
+        }*/
+
     }
 
     @JvmStatic
     fun i(msg: String?, tr: Throwable) {
-        if (LogLevel.INFO.value <= logLevel.value) {
+        /*if (LogLevel.INFO.value <= logLevel.value) {
 
             if (msg != null && msg.isNotEmpty()) {
                 Log.i(TAG, msg, tr)
             }
-        }
+        }*/
+
     }
 
     @JvmStatic
     fun d(msg: String?) {
-        if (LogLevel.DEBUG.value <= logLevel.value) {
+        /*if (LogLevel.DEBUG.value <= logLevel.value) {
 
             if (msg != null && msg.isNotEmpty()) {
 
@@ -280,6 +332,10 @@ object L {
                     Log.d(TAG, String.format(s, msg))
                 }
             }
+        }*/
+        Logger.addLogAdapter(AndroidLogAdapter())
+        msg?.apply {
+            Logger.d(this)
         }
     }
 
@@ -290,7 +346,7 @@ object L {
      */
     @JvmStatic
     fun d(tag: String?, msg: String?) {
-        if (LogLevel.DEBUG.value <= logLevel.value) {
+        /*if (LogLevel.DEBUG.value <= logLevel.value) {
 
             if (tag != null && tag.isNotEmpty() && msg != null && msg.isNotEmpty()) {
 
@@ -302,17 +358,24 @@ object L {
                     Log.d(tag, String.format(s, msg))
                 }
             }
+        }*/
+        Logger.addLogAdapter(AndroidLogAdapter())
+        tag?.apply {
+            Logger.t(this)
+        }
+        msg?.apply {
+            Logger.d(this)
         }
     }
 
     @JvmStatic
     fun d(msg: String?, tr: Throwable) {
-        if (LogLevel.DEBUG.value <= logLevel.value) {
+       /* if (LogLevel.DEBUG.value <= logLevel.value) {
 
             if (msg != null && msg.isNotEmpty()) {
                 Log.d(TAG, msg, tr)
             }
-        }
+        }*/
     }
 
     /**

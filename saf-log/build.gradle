@@ -41,6 +41,13 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.alibaba:fastjson:1.1.68.android'
+
+    // log
+
+   api ('com.orhanobut:logger:2.2.0',{
+       exclude group: 'com.android.support', module: 'support-annotations'
+   })
+//    implementation 'com.orhanobut:logger:2.2.0'
 }
 
 repositories {
@@ -50,6 +57,10 @@ repositories {
 allprojects {
     repositories {
         jcenter()
+//        maven{
+//            url "https://maven.google.com"
+//        }
+//        google()
     }
 
 }

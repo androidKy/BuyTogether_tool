@@ -657,7 +657,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
             override fun run() {
                 getTask(isCommentTask)
             }
-        }, 1 * 2 * 1000L)
+        }, 10 * 1 * 1000L)
     }
 
     fun stopTaskTimer() {
