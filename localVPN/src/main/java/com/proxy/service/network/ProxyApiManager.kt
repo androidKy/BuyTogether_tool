@@ -234,7 +234,7 @@ class ProxyApiManager {
         }
 
         L.i(
-            "params:\nmethod: getPort\n number: 1\n area:$finalCityId\n imei:$mImei\n" +
+            "params:\nmethod:getPort\nnumber:1\narea:$finalCityId\nimei:$mImei\n" +
                     "platformId: 2"
         )
 

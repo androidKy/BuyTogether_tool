@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.support.v7.app.AppCompatActivity
+import android.text.TextUtils
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.listener.TaskListener
@@ -61,7 +62,14 @@ class MainActivity : AppCompatActivity(), MainAcView {
             startActivity(intent)
             return
         }
-        startTask()
+        val orderNumber = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getString(Constant.KEY_ORDER_NUMBER)
+        if(TextUtils.isEmpty(orderNumber))
+        {
+            startTask()
+        }else{
+            mMainAcViewModel?.updateTask(true, "success")
+        }
+
     }
 
     /**

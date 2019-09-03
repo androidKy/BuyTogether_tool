@@ -73,6 +73,10 @@ class DeviceParamsHook : HookListener {
                                 if (this@run[0] == "http.agent") {
                                     //val value = HookUtil.getValueFromSP(AndroidAppHelper.currentApplication(),DeviceParams.USER_AGENT_KEY)
                                     val value = getValueFromSP(DeviceParams.USER_AGENT_KEY)
+                                    HookUtil().log(
+                                        "${loadPkgParam.packageName} 修改设备参数",
+                                        "key: ${DeviceParams.USER_AGENT_KEY} value: $value"
+                                    )
                                     if (!TextUtils.isEmpty(value))
                                         result = value
                                 }
