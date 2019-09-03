@@ -13,7 +13,6 @@
             <option value="$PROJECT_DIR$/localVPN" />
             <option value="$PROJECT_DIR$/saf-log" />
             <option value="$PROJECT_DIR$/utils_library" />
-            <option value="$PROJECT_DIR$/xposed_library" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
