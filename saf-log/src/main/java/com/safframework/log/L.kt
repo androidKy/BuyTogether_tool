@@ -138,7 +138,6 @@ object L {
             }
         }*/
 
-        Logger.addLogAdapter(AndroidLogAdapter())
         msg?.apply {
             Logger.e(this)
         }
@@ -164,7 +163,6 @@ object L {
                 }
             }
         }*/
-        Logger.addLogAdapter(AndroidLogAdapter())
         tag?.apply {
             Logger.e(this)
         }
@@ -181,7 +179,6 @@ object L {
         /*  if (LogLevel.ERROR.value <= logLevel.value) {
 
           }*/
-        Logger.addLogAdapter(AndroidLogAdapter())
 
         tr?.apply {
             msg?.apply {
@@ -205,7 +202,6 @@ object L {
 //                }
 //            }
 //        }
-        Logger.addLogAdapter(AndroidLogAdapter())
         msg?.apply {
             Logger.w(this)
         }
@@ -232,7 +228,6 @@ object L {
                 }
             }
         }*/
-        Logger.addLogAdapter(AndroidLogAdapter())
         tag?.apply {
             Logger.t(this)
         }
@@ -250,12 +245,14 @@ object L {
                 Log.w(TAG, msg, tr)
             }
         }*/
-        Logger.addLogAdapter(AndroidLogAdapter())
+        msg?.apply {
+            Logger.w(this,tr)
+        }
+
     }
 
     @JvmStatic
     fun i(msg: String?) {
-        //TODO 替换成第三方日志
        /* if (LogLevel.INFO.value <= logLevel.value) {
 
             if (msg != null && msg.isNotEmpty()) {
@@ -270,7 +267,6 @@ object L {
             }
 
         }*/
-        Logger.addLogAdapter(AndroidLogAdapter())
         msg?.apply {
             Logger.i(this);
         }
@@ -284,7 +280,6 @@ object L {
      */
     @JvmStatic
     fun i(tag: String?, msg: String?) {
-        Logger.addLogAdapter(AndroidLogAdapter())
         tag?.apply {
             Logger.t(this)
         }
@@ -315,6 +310,9 @@ object L {
                 Log.i(TAG, msg, tr)
             }
         }*/
+        msg?.apply {
+            Logger.i(this,tr)
+        }
 
     }
 
@@ -333,7 +331,6 @@ object L {
                 }
             }
         }*/
-        Logger.addLogAdapter(AndroidLogAdapter())
         msg?.apply {
             Logger.d(this)
         }
@@ -359,7 +356,6 @@ object L {
                 }
             }
         }*/
-        Logger.addLogAdapter(AndroidLogAdapter())
         tag?.apply {
             Logger.t(this)
         }
@@ -376,6 +372,9 @@ object L {
                 Log.d(TAG, msg, tr)
             }
         }*/
+        msg?.apply {
+            Logger.d(this,tr)
+        }
     }
 
     /**

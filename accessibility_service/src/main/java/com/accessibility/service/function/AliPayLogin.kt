@@ -46,8 +46,31 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
         if (isSwitchAccount)
             login()
         else {
-            payDirectly()
+            // todo 试试能否查找更多支付方式
+            findPayMoreWay()
+
         }
+    }
+
+    private fun findPayMoreWay() {
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("更多支付方式",1,true,10)
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+                    L.i("能找到更多支付方式")
+                    payDirectly()
+
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("找不到更多支付方式")
+                    payDirectly()
+                }
+
+            })
+            .create()
+            .execute()
     }
 
     /**
@@ -179,14 +202,14 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     }
 
     /**
-     * 验证是否支付成功 todo 销量需要滑动才显示
+     * 验证是否支付成功
      */
     private fun verifyPaySucceed() {
         myAccessibilityService.performBackClick(5, object : AfterClickedListener {
             override fun onClicked() {
                 NodeController.Builder()
                     .setNodeService(myAccessibilityService)
-                    .setNodeParams("销量", 0, false, 15)
+                    .setNodeParams("销量", 0, false, 5)
                     .setTaskListener(object : TaskListener {
                         override fun onTaskFinished() {
                             L.i("支付成功，跳转到搜索界面")
@@ -219,7 +242,9 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     private fun isFindSearch() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("搜索",1,false,5,false)
+            .setNodeParams("搜索",1,false,5,true)
+//            .setNodeParams("继续逛逛",0,false,5)   这节点找不到
+            .setNodeParams("查看订单",1,false,5)
             .setTaskListener(object :TaskListener{
                 override fun onTaskFinished() {
                     L.i("支付成功，跳转到搜索界面")
@@ -228,6 +253,9 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("支付失败，isFindSearch()...")
+                    // TODO 暂时写死，后面要改回来
+                    responTaskSuccess()
+
                 }
 
             })

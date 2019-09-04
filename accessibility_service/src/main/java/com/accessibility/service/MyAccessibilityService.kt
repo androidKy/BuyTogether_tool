@@ -145,8 +145,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
             NodeController.Builder()
                 .setNodeService(this@MyAccessibilityService)
-                .setNodeParams("请使用其它方式登录", 0, 5)
-                .setNodeParams("QQ登录")
+                .setNodeParams("请使用其它方式登录", 0, 2)
+                .setNodeParams("QQ登录",0,2)
                 .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {
                         L.i("判断是跳转到主页还是登录界面")
@@ -169,8 +169,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
             .setNodeService(this@MyAccessibilityService)
             .setNodeParams("好的", 0, 5, true)
             .setNodeParams("允许", 0, 5, true)
-            .setNodeParams("个人中心", 0, 5, true)
-            .setNodeParams("点击登录", 0, 5, true)
+            .setNodeParams("个人中心", 0, 3, true)
+            .setNodeParams("点击登录", 0, 2, true)
             .setNodeParams("请使用其它方式登录")
             .setNodeParams("QQ登录")
             .setTaskListener(object : TaskListener {

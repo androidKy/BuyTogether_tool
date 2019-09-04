@@ -149,8 +149,11 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     val taskFinishCount = TaskDataUtil.instance.getTaskFinishedCount()
-                    val searchType =
+                    var searchType =
                         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_CUR_SEARCH_TYPE)
+                    // todo 做任务，暂时写死做任务类型为1
+                    searchType = 0
+
                     if (taskFinishCount != null && taskFinishCount > 0 && searchType > 0) {
                         if (searchType == SearchType.MALLNAME) {
                             searchByMallName()

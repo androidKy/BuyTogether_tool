@@ -80,7 +80,6 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) : B
             commentContent = "良心价，商品很好，物流也很快，下次再来"
 
         }
-        // todo 编辑评论内容。。。
 //        val xScore = "680"
         val xScore="750"
         AdbScriptController.Builder()

@@ -104,9 +104,8 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                 .getCommentTask()
         } else {
             L.i("获取正常任务")
-            // todo 测试替换IMEI
-//            val imei = SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS).getString(Constant.KEY_REAL_DEVICE_IMEI)
-            val imei = "865372021527426"
+            val imei = SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS).getString(Constant.KEY_REAL_DEVICE_IMEI)
+//            val imei = "865372021527426"
 
 
             L.i("真实imei：$imei")

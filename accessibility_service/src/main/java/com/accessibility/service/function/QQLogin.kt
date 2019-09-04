@@ -30,12 +30,18 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
     private var mUserId: Int? = null
     private var mNickName: String? = null //账号昵称
 
-    fun login(taskListener: TaskListener) {
-        mLoginFailedCount = 0
-        mTaskListener = taskListener
+    fun initLoginInfo(){
         mUserName = TaskDataUtil.instance.getLogin_name()
         mUserPsw = TaskDataUtil.instance.getLogin_psw()
         mUserId = TaskDataUtil.instance.getPdd_account_id()
+    }
+
+    fun login(taskListener: TaskListener) {
+
+        initLoginInfo()
+        mLoginFailedCount = 0
+        mTaskListener = taskListener
+
         // mUserName = "2408973767"
         // mUserPsw = "lqy12021004"
         if (!TextUtils.isEmpty(mUserName)) {
@@ -91,8 +97,10 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
         AdbScriptController.Builder()
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    //isLoginSucceed()
-                    isUnvalid()
+//                    isLoginSucceed()
+//                    isUnvalid()
+                    // 输入账号密码后，一般是 验证码校验
+                    verifyCode()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -161,6 +169,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                 override fun onTaskFinished() {
                     L.i("开始验证码校验")
                     QQLoginVerify(myAccessibilityService).startVerify(VerifyCodeListener())
+
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -172,13 +181,30 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
             .execute()
     }
 
+
+
+
+
+
     /**
      * 验证码结果监听
      */
     inner class VerifyCodeListener : TaskListener {
         override fun onTaskFinished() {
-            L.i("验证码登录完成,检查登录结果")
-            checkLoginResult()
+//            L.i("验证码登录完成,检查登录结果")
+            L.i("验证码检验并授权登录成功")
+                loginSucceed()
+
+            // 断线情况账号、密码等数据丢失。
+//            initLoginInfo()
+//            mUserName?.apply {
+//                mUserPsw?.apply {
+//                    inputAccount(this@apply,this)
+//                }
+//            }
+//            checkLoginResult()
+
+
         }
 
         override fun onTaskFailed(failedMsg: String) {
@@ -196,6 +222,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
             .setNodeParams("登录失败", 0, false, 5)
+//            .setNodeParams()
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     //如果是评论任务，不重新获取账号，直接上报登录失败，正常任务就重新获取账号测试
@@ -220,6 +247,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
     private fun authLogin() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
+            .setNodeParams("授权并登录", 0, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     loginSucceed()
@@ -229,7 +257,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                     responTaskFailed("验证码校验失败")
                 }
             })
-            .setNodeParams("授权并登录", 0, 5)
+
             .create()
             .execute()
     }
@@ -240,24 +268,35 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
     private fun loginSucceed() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("登录",0,false,5)
+//            .setNodeParams("登录",0,false,5)
+            .setNodeParams("个人中心",0,false,5)
             .setTaskListener(object:TaskListener{
+
                 override fun onTaskFinished() {
-                    L.i("登录失败")
-                    updateAccount(2)
-                    responTaskFailed("账号登录失败：$mUserName")
+//                    L.i("登录失败")
+//                    updateAccount(2)
+//                    responTaskFailed("账号登录失败：$mUserName")
+
+                    //找到个人中心，
+                    saveAccountName()
+                    updateAccount(1)
+                    myAccessibilityService.setIsLogined(true)
+                    mTaskListener?.onTaskFinished()
                 }
 
+
                 override fun onTaskFailed(failedMsg: String) {
-                    L.i("登录成功，账号ID: $mUserId 账号名: $mUserName")
-
-                    isNeedAddAccount()
-
+//                    L.i("登录成功，账号ID: $mUserId 账号名: $mUserName")
+//                    isNeedAddAccount()
                    /* saveAccountName()
                     updateAccount(1)
                     myAccessibilityService.setIsLogined(true)
                     mTaskListener?.onTaskFinished()*/
+
+                    L.i("找不到个人中心。。。")
                 }
+
+
             })
             .create()
             .execute()
@@ -503,6 +542,8 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
             }
         })
     }
+
+
 
     /**
      * 更新账号状态

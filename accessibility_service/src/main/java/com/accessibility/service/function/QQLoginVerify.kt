@@ -148,9 +148,23 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
                         .setNodeService(myAccessibilityService)
                         // .setNodeParams(WidgetConstant.EDITTEXT, 3, false, false, verifyCode)
                         .setNodeParams("完成", 0, 10)
+                        .setNodeParams("授权并登录",0,5)
+
                         .setTaskListener(object : TaskListener {
                             override fun onTaskFinished() {
-                                checkVerifyResult()
+//                                checkVerifyResult()
+                                LoginFailed(myAccessibilityService)
+                                    .setTaskListener(object :TaskListener{
+                                        override fun onTaskFinished() {
+                                            mTaskListener?.onTaskFinished()
+                                        }
+
+                                        override fun onTaskFailed(failedMsg: String) {
+                                            checkVerifyResult()
+                                        }
+
+                                    })
+                                    .startService()
                             }
 
                             override fun onTaskFailed(failedMsg: String) {

@@ -274,11 +274,33 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
 
                 override fun onTaskFailed(failedMsg: String) {
                     // responFailed("选择${districtName}失败") //选择区失败，随便选择一个区
-                    chooseDistrictFailed(districtName)
+//                    chooseDistrictFailed(districtName)
+                    // todo 随便选择一个区后，并没有点击保存
+                      chooseOtherDistrict()
                 }
             })
             .create()
             .execute()
+    }
+
+    private fun chooseOtherDistrict() {
+        NodeController.Builder()
+            .setNodeService(nodeService)
+            .setNodeParams("其他区",0,true,true,3,true)
+            .setNodeParams("保存")
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+                    responSuccess()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    responFailed("填写地址出错")
+                }
+
+            })
+            .create()
+            .execute()
+
     }
 
     private fun chooseDistrictFailed(districtName: String) {

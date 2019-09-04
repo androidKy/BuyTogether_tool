@@ -16,6 +16,14 @@ import com.orhanobut.logger.Logger
 import com.proxy.service.LocalVpnService.START_VPN_SERVICE_REQUEST_CODE
 import com.safframework.log.L
 import com.utils.common.SPUtils
+import com.orhanobut.logger.AndroidLogAdapter
+import com.orhanobut.logger.PrettyFormatStrategy
+import com.orhanobut.logger.FormatStrategy
+import com.orhanobut.logger.CsvFormatStrategy
+
+
+
+
 
 class MainActivity : AppCompatActivity(), MainAcView {
 
@@ -27,6 +35,12 @@ class MainActivity : AppCompatActivity(), MainAcView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val formatStrategy = CsvFormatStrategy.newBuilder()
+            .tag("Pdd_Log")
+            .build()
+
+        Logger.addLogAdapter(DiskLogAdapter(formatStrategy))
 
         /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(Intent(this, KeepLiveService::class.java))
@@ -65,8 +79,10 @@ class MainActivity : AppCompatActivity(), MainAcView {
             startActivity(intent)
             return
         }
-        Logger.addLogAdapter(DiskLogAdapter())
         startTask()
+
+        // 支付成功，上报失败时调用。
+//        mMainAcViewModel?.updateTask(true, "success")
     }
 
     /**
