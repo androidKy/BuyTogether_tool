@@ -206,9 +206,12 @@ class ProxyApiManager {
                 if (!TextUtils.isEmpty(result)) {
                     requestPorts(result)
                 } else {
+
                     L.i("$mCityName 该城市没有IP，重新获取地址")
                     //responProxyData(null)
-                    responFailed("$mCityName 该城市没有IP")
+//                    var result = "10010"
+                    requestPorts("10010")
+//             P       responFailed("$mCityName 该城市没有IP")
                 }
             }
 

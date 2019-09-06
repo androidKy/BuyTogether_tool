@@ -226,8 +226,9 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
                     }
 
                     override fun onFailed(errorMsg: String) {
-                        UpdateSPManager(context).updateTaskStatus(0)
-                        mainAcView.onResponUpdateTask()
+                        updateNormalTask(isSucceed,remark)
+                       /* UpdateSPManager(context).updateTaskStatus(0)
+                        mainAcView.onResponUpdateTask()*/
                     }
                 })
                 .updateTaskStatus(

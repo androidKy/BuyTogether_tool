@@ -151,17 +151,24 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                     val taskFinishCount = TaskDataUtil.instance.getTaskFinishedCount()
                     var searchType =
                         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_CUR_SEARCH_TYPE)
-                    // todo 做任务，暂时写死做任务类型为1
-                    searchType = 0
+                    // todo 做任务，暂时写死做任务类型为2
+                    searchType = 1
 
-                    if (taskFinishCount != null && taskFinishCount > 0 && searchType > 0) {
-                        if (searchType == SearchType.MALLNAME) {
-                            searchByMallName()
-                        } else if (searchType == SearchType.BROWSER) {
-                            searchByBrowser()
-                        }
-                    } else
-                        inputKeyword()
+                    inputKeyword()
+
+//                    searchByBrowser()
+
+//                    if (taskFinishCount != null && taskFinishCount > 0 && searchType > 0) {
+//                    if (taskFinishCount != null && taskFinishCount > 0 && searchType > 0) {
+//                        if (searchType == SearchType.MALLNAME) {
+//                            searchByMallName()
+//                        } else if (searchType == SearchType.BROWSER) {
+//                            searchByBrowser()
+//                        }
+//                    } else {
+//                        inputKeyword()
+//                    }
+
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -340,6 +347,8 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
         NodeController.Builder()
             .setNodeService(nodeService)
             .setNodeParams(mSearchPrice!!, 0, 5)
+            // todo 需要再添加一层判断，是否同一个商品，09-05（商家店铺，价格，关键词完全一致。搜索出错。）
+
             .setNodeParams("客服", 0, 8)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
@@ -365,16 +374,20 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                     L.i("是需要做任务的卖家,返回继续做任务")
                     nodeService.performBackClick(1, object : AfterClickedListener {
                         override fun onClicked() {
+                            // todo 确认是同一商铺后，还需确认 商品名称完全一致
                             //保存当前搜索的方式
-                            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
-                                .put(Constant.KEY_CUR_SEARCH_TYPE, SearchType.KEYWORD)
-                            responSucceed()
+                            verifyGoodName()
+
+//                            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+//                                .put(Constant.KEY_CUR_SEARCH_TYPE, SearchType.KEYWORD)
+//                            responSucceed()
                         }
                     })
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("不是需要做任务的卖家，退出重新查找")
+
                     nodeService.apply {
                         performBackClick(0, object : AfterClickedListener {
                             override fun onClicked() {
@@ -388,6 +401,35 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                         })
                     }
                 }
+            })
+            .create()
+            .execute()
+
+    }
+
+    private fun verifyGoodName() {
+        NodeController.Builder()
+            .setNodeService(nodeService)
+            .setNodeParams(mGoodName!!, 1, false, 10)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                        .put(Constant.KEY_CUR_SEARCH_TYPE, SearchType.KEYWORD)
+                    responSucceed()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    nodeService.apply {
+                        performBackClick(1,object :AfterClickedListener{
+                            override fun onClicked() {
+                                mIsVerifySaler = true
+                                startSearchByKeyWord()
+                            }
+
+                        })
+                    }
+                }
+
             })
             .create()
             .execute()

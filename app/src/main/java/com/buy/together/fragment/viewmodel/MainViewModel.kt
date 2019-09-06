@@ -435,6 +435,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
 
                 override fun onError(anError: ANError?) {
                     L.i("申请端口失败：${anError?.errorDetail}")
+                    requestPorts("440100")
                     mainView.onResponPortsFailed("申请端口失败：${anError?.errorDetail}")
                 }
             })

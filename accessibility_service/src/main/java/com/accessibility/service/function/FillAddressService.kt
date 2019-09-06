@@ -16,6 +16,11 @@ import com.safframework.log.L
 class FillAddressService constructor(private val nodeService: MyAccessibilityService) {
     /* companion object :
          com.utils.common.SingletonHolder<FillAddressService, MyAccessibilityService>(::FillAddressService)*/
+    val taskDataUtil = TaskDataUtil.instance
+    var buyerName = taskDataUtil.getBuyer_name()
+    val buyerPhone = taskDataUtil.getBuyer_phone()
+    var streetName = taskDataUtil.getStreet()
+
 
     var mTaskFinishedListener: TaskListener? = null
     fun setTaskFinishedListener(taskFinishedListener: TaskListener): FillAddressService {
@@ -43,7 +48,13 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("地址已存在")
                     //chooseExistAddress()
-                    responSuccess()
+//                    responSuccess()
+                    // todo 地址已存在，先判断是否在配送范围，再验证是否 相同收件人
+
+                    if(buyerName!=null){
+                        verifySameAddressee()
+                    }
+
                 }
             })
             .create()
@@ -78,6 +89,77 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
              })
              .create()
              .execute()*/
+    }
+
+    /**
+     *  检验与服务器传入的收件人 是否一致。
+     */
+    private fun verifySameAddressee() {
+
+
+
+        NodeController.Builder()
+            .setNodeService(nodeService)
+            .setNodeParams(buyerName!!,1,false,5)
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+                    L.i("收件人与服务器一致，直接进行下一步支付")
+                    // 再判断是否再配送范围，不支持则充填
+                    verifyAvailableArea()
+
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("收件人不一致，需要重新填写。")
+                    // 可以不需要用 ADB命令查找，利用半查找。
+                        reFillAddress()
+                }
+
+            })
+            .create()
+            .execute()
+    }
+
+    /**
+     *  检测地址是否再配送范围，不在则
+     */
+    private fun verifyAvailableArea() {
+        NodeController.Builder()
+            .setNodeService(nodeService)
+            .setNodeParams("不支持",1,true,5)
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+
+                    fillAddress()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    responSuccess()
+                }
+
+            })
+            .create()
+            .execute()
+    }
+
+    private fun reFillAddress() {
+        NodeController.Builder()
+            .setNodeService(nodeService)
+            .setNodeParams("市",1,true,10,true)
+            .setNodeParams("添加收货地址",0,true,10)
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+                    L.i("准备更换收货地址")
+                    fillAddress()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    responFailed("更换地址失效")
+                }
+
+            })
+            .create()
+            .execute()
     }
 
     /**
@@ -135,28 +217,28 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
      * 填入地址
      */
     private fun fillAddress() {
-        val taskDataUtil = TaskDataUtil.instance
-        val buyerName = taskDataUtil.getBuyer_name()
-        val buyerPhone = taskDataUtil.getBuyer_phone()
-        var streetName = taskDataUtil.getStreet()
-
 
         if (buyerName.isNullOrEmpty() || streetName.isNullOrEmpty()) {
             responFailed("收货信息为空")
             return
         }
+        if(buyerName!=null) {
+            buyerName = buyerName!!.substring(0, buyerName!!.length - 1) + "*"
+        }
 
+
+        L.i("收货人：$buyerName 电话：$buyerPhone streetName:$streetName")
         /*if (streetName.contains("市")) {
             streetName = streetName.split("市")[1]
         }*/
 
         AdbScriptController.Builder()
             .setXY(ADB_XY.PAY_NOW.name)
-            .setText(buyerName)
+            .setText(buyerName!!)
             .setXY(ADB_XY.PAY_NOW.phone)
             .setText(buyerPhone!!)
             .setXY(ADB_XY.PAY_NOW.detailed)
-            .setText(streetName)
+            .setText(streetName!!)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     chooseProvince()
@@ -171,6 +253,11 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
             .create()
             .execute()
     }
+
+    /**
+     *  初始化填入地址 需要的信息。
+     */
+
 
     /**
      * 选择省
@@ -275,8 +362,7 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
                 override fun onTaskFailed(failedMsg: String) {
                     // responFailed("选择${districtName}失败") //选择区失败，随便选择一个区
 //                    chooseDistrictFailed(districtName)
-                    // todo 随便选择一个区后，并没有点击保存
-                      chooseOtherDistrict()
+                    chooseOtherDistrict()
                 }
             })
             .create()
@@ -286,9 +372,9 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
     private fun chooseOtherDistrict() {
         NodeController.Builder()
             .setNodeService(nodeService)
-            .setNodeParams("其他区",0,true,true,3,true)
+            .setNodeParams("其他区", 0, true, true, 3, true)
             .setNodeParams("保存")
-            .setTaskListener(object :TaskListener{
+            .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     responSuccess()
                 }

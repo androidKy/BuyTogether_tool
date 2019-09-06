@@ -8,15 +8,19 @@ import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.AdbScrollUtils
+import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
 import com.safframework.log.L
+import com.utils.common.CMDUtil
+import com.utils.common.ThreadUtils
+import com.utils.common.Utils
 
 /**
  * Description:下订单服务
  * Notice:
  * 1、下订单的方式：
  *      参团购买:0
- *      拼单购买:1
+ *      发起拼单:1
  *      单独购买:2
  * 2、选择规格：竖着方向找不到，需要横着找
  * 3、需要
@@ -57,6 +61,7 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
             //.setNodeParams("插队拼单", 0, 5, true)
             .setNodeParams("去拼单", 0, 5, true)
             .setNodeParams("参与拼单", 0, 5, true)
+            .setNodeParams("抢先拼单",0,5,true)
             .setNodeParams("确定", 0, false, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
@@ -291,7 +296,9 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
             .setTaskFinishedListener(object : TaskListener {
                 override fun onTaskFinished() {
                     //开始支付
-                    payForNow()
+//                    payForNow()
+                    // todo 应该先查找有无 “更多支付方式”
+                    hasPayMoreWay()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -299,6 +306,27 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
                 }
             })
             .doOnEvent()
+    }
+
+    private fun  hasPayMoreWay() {
+        NodeController.Builder()
+            .setNodeService(nodeService)
+            .setNodeParams("更多支付方式",1,true,5,true)
+            .setNodeParams("支付宝",1,true,5,true)
+            .setNodeParams("立即支付",0,true,5)
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+                    payByAlipay()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    // todo
+                    L.i("支付环节有BUG，待修复")
+                }
+
+            })
+            .create()
+            .execute()
     }
 
     private fun payForNow() {
@@ -328,12 +356,40 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
             .login(object : TaskListener {
                 override fun onTaskFinished() {
                     responSucceed()
+                    closeAliPay()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
                     responFailed(failedMsg)
                 }
             })
+    }
+
+    /**
+     *  关闭支付宝
+     */
+    private fun closeAliPay() {
+        ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
+            override fun doInBackground(): Boolean {
+                var closeAlipayCMD = "am force-stop ${Constant.QQ_TIM_PKG};"
+                CMDUtil().execCmd(closeAlipayCMD)
+
+                return true
+            }
+
+            override fun onSuccess(result: Boolean?) {
+                L.i("支付成功后，成功关闭支付宝")
+            }
+
+            override fun onCancel() {
+                L.i("关闭支付宝中断")
+            }
+
+            override fun onFail(t: Throwable?) {
+                L.i("没有关闭支付宝")
+            }
+
+        })
     }
 
 }

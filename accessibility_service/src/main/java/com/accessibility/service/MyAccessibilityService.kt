@@ -12,8 +12,11 @@ import com.accessibility.service.function.TaskService
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
+import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
 import com.safframework.log.L
+import com.utils.common.CMDUtil
+import com.utils.common.ThreadUtils
 
 /**
  * Description:无障碍服务最上层
@@ -23,6 +26,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
     private var mScreenWidth: Int = 1080
     private var mScreenHeight: Int = 1920
+
+    private var testFlag :Boolean = false
 
 
     companion object {
@@ -79,13 +84,33 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
             try {
                 chooseLogin()
-                paying()
-                checkPayResult()
+//                paying()
+//                checkPayResult()
+//                test()
             } catch (e: Exception) {
                 L.e(e.message)
             }
         }
     }
+
+//    private fun test() {
+//        NodeController.Builder()
+//            .setNodeService(this)
+//            .setNodeParams("不支持",1,false,10,true)
+//            .setTaskListener(object :TaskListener{
+//                override fun onTaskFinished() {
+//                    L.i("成功找到")
+//                }
+//
+//                override fun onTaskFailed(failedMsg: String) {
+//                    L.i("成功找不到")
+//                }
+//
+//            })
+//            .create()
+//            .execute()
+//
+//    }
 
     /**
      * 正在支付界面时，选择支付宝方式
@@ -167,8 +192,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
     private fun enterLoginFailed() {
         NodeController.Builder()
             .setNodeService(this@MyAccessibilityService)
-            .setNodeParams("好的", 0, 5, true)
-            .setNodeParams("允许", 0, 5, true)
+            .setNodeParams("好的", 0, 15, true)
+            .setNodeParams("允许", 0, 3, true)
             .setNodeParams("个人中心", 0, 3, true)
             .setNodeParams("点击登录", 0, 2, true)
             .setNodeParams("请使用其它方式登录")

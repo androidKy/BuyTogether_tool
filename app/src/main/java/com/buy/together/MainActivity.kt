@@ -20,9 +20,8 @@ import com.orhanobut.logger.AndroidLogAdapter
 import com.orhanobut.logger.PrettyFormatStrategy
 import com.orhanobut.logger.FormatStrategy
 import com.orhanobut.logger.CsvFormatStrategy
-
-
-
+import com.proxy.service.core.ProxyConfig
+import com.utils.common.ToastUtils
 
 
 class MainActivity : AppCompatActivity(), MainAcView {
@@ -39,9 +38,9 @@ class MainActivity : AppCompatActivity(), MainAcView {
         val formatStrategy = CsvFormatStrategy.newBuilder()
             .tag("Pdd_Log")
             .build()
-
         Logger.addLogAdapter(DiskLogAdapter(formatStrategy))
 
+        ProxyConfig.Instance.globalMode = true
         /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(Intent(this, KeepLiveService::class.java))
         } else {
@@ -80,6 +79,9 @@ class MainActivity : AppCompatActivity(), MainAcView {
             return
         }
         startTask()
+
+        // 测试直接打开 PDD
+//        startPdd()
 
         // 支付成功，上报失败时调用。
 //        mMainAcViewModel?.updateTask(true, "success")
@@ -162,5 +164,20 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
     override fun onDestroy() {
         super.onDestroy()
+    }
+
+
+    private fun startPdd() {
+        //展示弹框
+
+            val launchIntentForPackage =
+                this?.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
+            if (launchIntentForPackage != null) {
+                startActivity(launchIntentForPackage)
+            } else {
+                this?.run {
+                    ToastUtils.showToast(this, "未安装拼多多")
+                }
+            }
     }
 }

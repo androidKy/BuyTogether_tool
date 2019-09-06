@@ -148,19 +148,6 @@ abstract class BaseAccessibilityService : AccessibilityService() {
 
         val nodeList = accessibilityNodeInfo.findAccessibilityNodeInfosByText(text)
 
-        //选择地址时，省和市的名字相同会出错
-        /* if (text == "北京市" || text == "重庆市" || text == "上海市" || text == "天津市") {
-             if (nodeList.size > 1) {
-                 L.i("四大直辖市 size: ${nodeList.size}")
-                 for (i in 0 until nodeList.size) {
-                     L.i("节点:${nodeList[i].text} isClickable: ${nodeList[i].isClickable}")
-                     if (!nodeList[i].isClickable)
-                         return nodeList[i]
-                 }
-             }
-         }*/
-
-//        L.i("nodeList size = ${nodeList.size}")
         if (nodeList.size > 0) {
             for (node in nodeList) {
                 // L.i("nodeList textList = ${node.text} className = ${node.className}")

@@ -46,8 +46,8 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
         if (isSwitchAccount)
             login()
         else {
-            // todo 试试能否查找更多支付方式
-            findPayMoreWay()
+//            findPayMoreWay()
+            payDirectly()
 
         }
     }
@@ -55,7 +55,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     private fun findPayMoreWay() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("更多支付方式",1,true,10)
+            .setNodeParams("更多支付方式",1,true,5)
             .setTaskListener(object :TaskListener{
                 override fun onTaskFinished() {
                     L.i("能找到更多支付方式")
@@ -90,7 +90,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
 
                 override fun onTaskFailed(failedMsg: String) {
                     responTaskFailed("支付宝登录失败")
-                    //dealOrderNumberFailed()
+                    dealOrderNumberFailed()
                 }
             })
             .create()
@@ -193,7 +193,13 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
 
                 override fun onTaskFinished() {
                     //支付成功
-                    verifyPaySucceed()
+                    myAccessibilityService.performBackClick(3,object:AfterClickedListener{
+                        override fun onClicked() {
+                            verifyPaySucceed()
+                        }
+
+                    })
+//                    verifyPaySucceed()
                     //paySuccess()
                 }
             })
@@ -217,8 +223,8 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                         }
 
                         override fun onTaskFailed(failedMsg: String) {
-                            // 找不到 “销量”
-                            isFindSearch()
+                            // 找不到 “销量”，有时会进入 “继续逛逛”，这情况找不到节点。
+                                backClick()
                         }
                     })
                     .create()
@@ -239,12 +245,23 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
         })
     }
 
+    /**
+     *   单纯的点击后退动作。
+     */
+    private fun backClick() {
+        myAccessibilityService.performBackClick(3,object :AfterClickedListener{
+            override fun onClicked() {
+                isFindSearch()
+            }
+        })
+
+    }
+
     private fun isFindSearch() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
             .setNodeParams("搜索",1,false,5,true)
 //            .setNodeParams("继续逛逛",0,false,5)   这节点找不到
-            .setNodeParams("查看订单",1,false,5)
             .setTaskListener(object :TaskListener{
                 override fun onTaskFinished() {
                     L.i("支付成功，跳转到搜索界面")
@@ -254,7 +271,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("支付失败，isFindSearch()...")
                     // TODO 暂时写死，后面要改回来
-                    responTaskSuccess()
+                    backClick()
 
                 }
 

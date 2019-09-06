@@ -8,6 +8,7 @@ import com.accessibility.service.data.AccountBean
 import com.accessibility.service.data.TaskBean
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
+import com.accessibility.service.page.LoginFailedType
 import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
 import com.google.gson.Gson
@@ -101,6 +102,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
 //                    isUnvalid()
                     // 输入账号密码后，一般是 验证码校验
                     verifyCode()
+//                    retryGetQQ()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -277,8 +279,9 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
 //                    updateAccount(2)
 //                    responTaskFailed("账号登录失败：$mUserName")
 
-                    //找到个人中心，
+                    //找到个人中心，上报账号，顺便执行 ADB命令强制关闭 QQ和TIM
                     saveAccountName()
+                    closeQQ_TIM()
                     updateAccount(1)
                     myAccessibilityService.setIsLogined(true)
                     mTaskListener?.onTaskFinished()
@@ -294,6 +297,32 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                     mTaskListener?.onTaskFinished()*/
 
                     L.i("找不到个人中心。。。")
+                    // todo 掉线情况处理
+                    LoginFailed(myAccessibilityService)
+                        .setTypeListener(object: LoginFailed.TypeListener {
+                            override fun onResponType(failedType: Int) {
+                                L.i("LoginFailed = $failedType")
+                                when(failedType){
+
+                                    LoginFailedType.DROP_LINE-> dealDropLine()
+                                    LoginFailedType.UNVAILD-> isUnvalid()
+                                }
+                            }
+                        })
+                        /*.setTaskListener(object :TaskListener{
+                            override fun onTaskFinished() {
+                                val loginFailedType = this.getLoginFailedType()
+                                when(loginFailedType){
+                                    LoginFailedType.DROP_LINE-> dealDropLine()
+                                    LoginFailedType.UNVAILD-> isUnvalid()
+                                }
+                            }
+
+                            override fun onTaskFailed(failedMsg: String) {
+                            }
+
+                        })*/
+                        .startService()
                 }
 
 
@@ -301,6 +330,43 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
             .create()
             .execute()
 
+    }
+
+    private fun closeQQ_TIM() {
+        ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
+            override fun doInBackground(): Boolean {
+
+                var closeQQ= "am fore-stop ${Constant.QQ_TIM_PKG};" +
+                        "am fore-stop ${Constant.QQ_LIATE_PKG};"
+                CMDUtil().execCmd(closeQQ)
+
+                return true
+            }
+
+            override fun onSuccess(result: Boolean?) {
+                L.i("成功关闭 QQ和浏览器")
+            }
+
+            override fun onCancel() {
+            }
+
+            override fun onFail(t: Throwable?) {
+                L.i("关闭QQ和TIM失败")
+            }
+
+        })
+    }
+
+    /**
+     *  掉线情况，重新输入账号密码。
+     */
+    private fun dealDropLine() {
+        initLoginInfo()
+        mUserName?.apply {
+            mUserPsw?.apply {
+                inputAccount(this@apply,this)
+            }
+        }
     }
 
     /**

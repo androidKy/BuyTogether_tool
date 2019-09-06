@@ -56,7 +56,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
      * 开始做任务
      */
     private fun scanGoods() {
-        mScanGoodTime = (10..20).random()
+        mScanGoodTime = (10..15).random()
         NodeUtils.instance
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {

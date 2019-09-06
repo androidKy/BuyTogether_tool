@@ -45,18 +45,38 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
 
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("立即开始", 0, 5)
+            .setNodeParams("立即开始", 1, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("点击开始截图")
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    responTaskFailed("验证码截图失败")
+//                    responTaskFailed("验证码截图失败")
+                    // 3986号码不能识别 “立即开始”，强制点ADB命令
+
+                    clickStartByADB()
                 }
             })
             .create()
             .execute()
+    }
+
+    private fun clickStartByADB() {
+        AdbScriptController.Builder()
+            .setXY("800，1800")
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                }
+
+            })
+            .create()
+            .execute()
+
     }
 
     inner class ScreenShotListenerImpl : ScreenShotActivity.ScreenShotListener {
@@ -147,29 +167,21 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
                     NodeController.Builder()
                         .setNodeService(myAccessibilityService)
                         // .setNodeParams(WidgetConstant.EDITTEXT, 3, false, false, verifyCode)
-                        .setNodeParams("完成", 0, 10)
-                        .setNodeParams("授权并登录",0,5)
-
+                        .setNodeParams("完成", 0, 3)
+                        .setNodeParams("授权并登录", 0, 5)
                         .setTaskListener(object : TaskListener {
                             override fun onTaskFinished() {
 //                                checkVerifyResult()
-                                LoginFailed(myAccessibilityService)
-                                    .setTaskListener(object :TaskListener{
-                                        override fun onTaskFinished() {
-                                            mTaskListener?.onTaskFinished()
-                                        }
+                                //
+                                mTaskListener?.onTaskFinished()
 
-                                        override fun onTaskFailed(failedMsg: String) {
-                                            checkVerifyResult()
-                                        }
-
-                                    })
-                                    .startService()
                             }
 
                             override fun onTaskFailed(failedMsg: String) {
                                 L.i("$failedMsg was not found.")
-                                responTaskFailed("登录验证失败")
+//                                responTaskFailed("登录验证失败")
+                                checkVerifyResult()
+
                             }
                         })
                         .create()
@@ -188,26 +200,25 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
      * 检查校验结果，如果页面没发生跳转，验证码错误，重新请求验证码
      */
     private fun checkVerifyResult() {
-        myAccessibilityService.apply {
-            postDelay(Runnable {
-                NodeController.Builder()
-                    .setNodeService(this)
-                    .setNodeParams("输入验证码", 0, 3)
-                    .setTaskListener(object : TaskListener {
-                        override fun onTaskFinished() {
-                            //验证码错误
-                            L.i("验证码错误")
-                            startVerify(mTaskListener!!)
-                        }
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("输入验证码", 0, 3)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    //验证码错误
+                    L.i("验证码错误")
+                    startVerify(mTaskListener!!)
+                }
 
-                        override fun onTaskFailed(failedMsg: String) {
-                            mTaskListener?.onTaskFinished()
-                        }
-                    })
-                    .create()
-                    .execute()
-            }, 5)
-        }
+                override fun onTaskFailed(failedMsg: String) {
+                    mTaskListener?.onTaskFinished()
+                    // 可能掉线情况
+                    L.i("暂时注释，LoginFailed")
+
+                }
+            })
+            .create()
+            .execute()
     }
 
 
