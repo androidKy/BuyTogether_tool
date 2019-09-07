@@ -9,6 +9,7 @@ import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.util.*
 import com.safframework.log.L
+import com.utils.common.PackageManagerUtils
 import com.utils.common.SPUtils
 
 /**
@@ -57,26 +58,32 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
      */
     private fun scanGoods() {
         mScanGoodTime = (10..15).random()
-        NodeUtils.instance
-            .setNodeFoundListener(object : NodeFoundListener {
-                override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
 
-                    if(nodeInfo == null){
-                        L.i("scanGoods()... nodeInfo为空")
-                        scanGoods()
-                        return
-                    }
+        try {
+            NodeUtils.instance
+                .setNodeFoundListener(object : NodeFoundListener {
+                    override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
+                        if (nodeInfo == null) {
+                            L.i("scanGoods()... nodeInfo为空")
+                            scanGoods()
+                            return
+                        }
 
-                    nodeInfo?.apply {
-                        L.i("recyclerView was found: ${nodeInfo.className}")
-                        ScrollUtils(nodeService, nodeInfo)
-                            .setForwardTotalTime(mScanGoodTime)
-                            .setScrollListener(ForwardListenerImpl())
-                            .scrollForward()
+                        nodeInfo?.apply {
+                            L.i("recyclerView was found: ${nodeInfo.className}")
+                            ScrollUtils(nodeService, nodeInfo)
+                                .setForwardTotalTime(mScanGoodTime)
+                                .setScrollListener(ForwardListenerImpl())
+                                .scrollForward()
+                        }
                     }
-                }
-            })
-            .getSingleNodeByClassName(nodeService, WidgetConstant.RECYCLERVIEW)
+                })
+                .getSingleNodeByClassName(nodeService, WidgetConstant.RECYCLERVIEW)
+        } catch (e: Exception) {
+            L.i("无障碍服务崩溃：${e.message}")
+            PackageManagerUtils.getInstance()
+                .restartApplication(Constant.PKG_NAME, "com.buy.together.MainActivity")
+        }
     }
 
     inner class ForwardListenerImpl : ScrollUtils.ScrollListener {
@@ -109,34 +116,46 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
      * 2:与卖家沟通
      */
     private fun talkWithSaler() {
-        var talkMsg = TaskDataUtil.instance.getTalk_msg()
+        val talkMsg = TaskDataUtil.instance.getTalk_msg()
         if (talkMsg.isNullOrEmpty()) {
             responFailed("聊天信息不能为空")
             return
         }
-        //talkMsg = "发重复了，不好意思"
 
+        val isTalked =
+            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getBoolean(Constant.KEY_ALREADY_TALKED)
+        if (isTalked) {
+            L.i("已聊过天")
+            //continueTask()
+            mTaskProgress.append("2")
+            TaskDataUtil.instance.getTask_type()?.apply {
+                when (this) {
+                    23, 234, 123, 1234 -> collectGoods()
+                    24, 124, 324 -> buyGoods()
+                    else -> responSuccess()
+                }
+            }
+        } else {
+            L.i("没有聊过天")
+            startTalk(talkMsg)
+        }
+    }
+
+    /**
+     * 正式开始聊天
+     */
+    private fun startTalk(talkMsg: String) {
         NodeController.Builder()
             .setNodeService(nodeService)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFailed(failedMsg: String) {
-                    L.i("$failedMsg was not found.")
                     responFailed("与客服沟通失败")
                 }
 
                 override fun onTaskFinished() {
-                    mTaskProgress.append("2")
-                    nodeService.performBackClick(2, object : AfterClickedListener {
-                        override fun onClicked() {
-                            TaskDataUtil.instance.getTask_type()?.apply {
-                                when (this) {
-                                    23, 234, 123, 1234 -> collectGoods()
-                                    24, 124, 324 -> buyGoods()
-                                    else -> responSuccess()
-                                }
-                            }
-                        }
-                    })
+                    SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                        .put(Constant.KEY_ALREADY_TALKED, true)
+                    continueTask()
                 }
             })
             .setNodeParams("客服")
@@ -144,7 +163,24 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
             .setNodeParams("发送")
             .create()
             .execute()
+    }
 
+    /**
+     * 继续下一步
+     */
+    private fun continueTask() {
+        mTaskProgress.append("2")
+        nodeService.performBackClick(2, object : AfterClickedListener {
+            override fun onClicked() {
+                TaskDataUtil.instance.getTask_type()?.apply {
+                    when (this) {
+                        23, 234, 123, 1234 -> collectGoods()
+                        24, 124, 324 -> buyGoods()
+                        else -> responSuccess()
+                    }
+                }
+            }
+        })
     }
 
     /**

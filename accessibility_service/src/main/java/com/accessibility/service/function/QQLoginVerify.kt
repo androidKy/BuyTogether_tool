@@ -28,6 +28,7 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
             responTaskFailed("验证码校验失败次数达到限制：$mVerifyCount")
             return
         }
+        myAccessibilityService.setCurPageType(PageEnum.VERIFY_CODE)
         screenShot()
     }
 
@@ -45,38 +46,21 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
 
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("立即开始", 1, 5)
+            .setNodeParams("立即开始", 0, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("点击开始截图")
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-//                    responTaskFailed("验证码截图失败")
+                    responTaskFailed("验证码截图失败")
                     // 3986号码不能识别 “立即开始”，强制点ADB命令
 
-                    clickStartByADB()
+                    //clickStartByADB()
                 }
             })
             .create()
             .execute()
-    }
-
-    private fun clickStartByADB() {
-        AdbScriptController.Builder()
-            .setXY("800，1800")
-            .setTaskListener(object :TaskListener{
-                override fun onTaskFinished() {
-
-                }
-
-                override fun onTaskFailed(failedMsg: String) {
-                }
-
-            })
-            .create()
-            .execute()
-
     }
 
     inner class ScreenShotListenerImpl : ScreenShotActivity.ScreenShotListener {

@@ -30,6 +30,8 @@ class Constant {
         const val KEY_ORDER_NUMBER = "key_order_number"         //订单编号
         const val KEY_ORDER_MONEY = "key_order_money"           //订单价格
         const val KEY_TASK_PROGRESS = "key_task_progress"       //任务的进度，如123
+        const val KEY_ALREADY_TALKED = "key_already_talked"     //是否已经聊过天
+        const val KEY_IS_LOGINED = "key_is_logined"         //是否已经登录过
 
         const val KEY_PDD_ACCOUNT = "key_pdd_account"       //拼多多登录的账号
         const val KEY_CUR_SEARCH_TYPE = "key_cur_search_type"

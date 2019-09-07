@@ -13,7 +13,6 @@ import com.accessibility.service.util.TaskDataUtil
 import com.safframework.log.L
 import com.utils.common.CMDUtil
 import com.utils.common.ThreadUtils
-import com.utils.common.Utils
 
 /**
  * Description:下订单服务
@@ -52,7 +51,8 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
     }
 
     /**
-     * 参团购买
+     * 参团购买:
+     * 立即拼单
      */
     private fun buyByJoin() {
         NodeController.Builder()
@@ -60,9 +60,10 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
             // .setNodeParams("查看更多", 0, 5, true)
             //.setNodeParams("插队拼单", 0, 5, true)
             .setNodeParams("去拼单", 0, 5, true)
-            .setNodeParams("参与拼单", 0, 5, true)
-            .setNodeParams("抢先拼单",0,5,true)
-            .setNodeParams("确定", 0, false, 5)
+            .setNodeParams("参与拼单", 0, 3, true)
+            .setNodeParams("参与拼单", 0, 2, true)
+            .setNodeParams("抢先拼单",0,2,true)
+            .setNodeParams("确定", 0, false, 2)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     chooseInfo()
@@ -355,8 +356,8 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
         AliPayLogin(nodeService)
             .login(object : TaskListener {
                 override fun onTaskFinished() {
-                    responSucceed()
                     closeAliPay()
+                    responSucceed()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -371,7 +372,7 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
     private fun closeAliPay() {
         ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
             override fun doInBackground(): Boolean {
-                var closeAlipayCMD = "am force-stop ${Constant.QQ_TIM_PKG};"
+                val closeAlipayCMD = "am force-stop ${Constant.ALI_PAY_PKG};"
                 CMDUtil().execCmd(closeAlipayCMD)
 
                 return true

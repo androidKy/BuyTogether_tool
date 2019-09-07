@@ -32,7 +32,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.json.JSONObject
-import java.lang.StringBuilder
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -510,7 +509,6 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     private fun uploadIpError(cityName: String) {
         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
             val taskId = getInt(Constant.KEY_TASK_ID, 0)
-            remove(Constant.KEY_TASK_DATA)
 
             if (!mIsCommentTask)
             /* ApiManager()

@@ -1,22 +1,22 @@
 package com.accessibility.service
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseAccessibilityService
-import com.accessibility.service.function.CommentTaskService
-import com.accessibility.service.function.LoginService
-import com.accessibility.service.function.SearchGoods
-import com.accessibility.service.function.TaskService
+import com.accessibility.service.function.*
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
 import com.safframework.log.L
-import com.utils.common.CMDUtil
-import com.utils.common.ThreadUtils
+import com.utils.common.PackageManagerUtils
+import com.utils.common.SPUtils
 
 /**
  * Description:无障碍服务最上层
@@ -27,12 +27,17 @@ class MyAccessibilityService : BaseAccessibilityService() {
     private var mScreenWidth: Int = 1080
     private var mScreenHeight: Int = 1920
 
-    private var testFlag :Boolean = false
+    private var testFlag: Boolean = false
+    private var mTaskStatusReceiver: BroadcastReceiver? = null
 
 
     companion object {
         const val PKG_PINDUODUO = "com.xunmeng.pinduoduo"
         const val PKG_QQ = "com.tencent.mobileqq"
+        const val ACTION_TASK_STATUS: String = "com.task.status"
+        const val ACTION_CONTINUE_TASK: String = "com.task.continue"
+        const val ACTION_DEAD_SERVICE: String = "com.service.dead"
+
         var mTaskListener: TaskListener? = null
 
         fun setTaskListener(taskListener: TaskListener) {
@@ -45,16 +50,42 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
     }
 
+    inner class TaskStatusReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            intent?.apply {
+                if (action == ACTION_TASK_STATUS) {
+                    initParams()
+                } else if (action == ACTION_CONTINUE_TASK) {
+                    afterLoginSucceed()
+                } else if (action == ACTION_DEAD_SERVICE) {
+                    doTask()
+                }
+            }
+        }
+    }
+
+
     override fun onCreate() {
         super.onCreate()
         L.i("MyAccessibilityService onCreate()")
-        mScreenWidth = getSharedPreferences("spUtils", Context.MODE_PRIVATE).getInt("key_screen_width", 0)
-        mScreenHeight = getSharedPreferences("spUtils", Context.MODE_PRIVATE).getInt("key_screen_height", 0)
+        mScreenWidth =
+            getSharedPreferences("spUtils", Context.MODE_PRIVATE).getInt("key_screen_width", 0)
+        mScreenHeight =
+            getSharedPreferences("spUtils", Context.MODE_PRIVATE).getInt("key_screen_height", 0)
+
+
+        mTaskStatusReceiver = TaskStatusReceiver()
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(ACTION_TASK_STATUS)
+        registerReceiver(mTaskStatusReceiver, intentFilter)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         L.i("MyAccessibilityService onDestroy()")
+        mTaskStatusReceiver?.apply {
+            unregisterReceiver(this)
+        }
     }
 
     /**
@@ -81,46 +112,32 @@ class MyAccessibilityService : BaseAccessibilityService() {
         if (eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ||
             eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED
         ) {
-
             try {
                 chooseLogin()
-//                paying()
-//                checkPayResult()
-//                test()
+                confirmPayResult()
             } catch (e: Exception) {
                 L.e(e.message)
             }
         }
     }
 
-//    private fun test() {
-//        if(!testFlag) {
-//            testFlag = true
-//            NodeController.Builder()
-//                .setNodeService(this)
-//                .setNodeParams("市", 1, true, 10)
-//                .setNodeParams("浙江省", 0, true, true, 10, true)
-//                .setNodeParams("杭州市", 0, true, true, 10, true)
-//                .setNodeParams("西湖区", 0, true, true, 10, true)
-//                .setNodeParams("保存", 0, true, 10)
-//                .setTaskListener(object : TaskListener {
-//                    override fun onTaskFinished() {
-//                        performBackClick(5, object : AfterClickedListener {
-//                            override fun onClicked() {
-//                                L.i("已经点击。")
-//                            }
-//
-//                        })
-//                    }
-//
-//                    override fun onTaskFailed(failedMsg: String) {
-//                    }
-//                })
-//                .create()
-//                .execute()
-//        }
-//
-//    }
+    private fun confirmPayResult() {
+        if (mCurPageType == PageEnum.PAY_CONFIRM_PAGE) {
+            setCurPageType(PageEnum.PAY_SUCCEED)
+            ConfirmPayResult(this)
+                .setTaskListener(object : TaskListener {
+                    override fun onTaskFinished() {
+                        responTaskFinished()
+                    }
+
+                    override fun onTaskFailed(failedMsg: String) {
+                        responTaskFailed(failedMsg)
+                    }
+
+                })
+                .startService()
+        }
+    }
 
     /**
      * 正在支付界面时，选择支付宝方式
@@ -154,14 +171,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
         }
     }
 
-    /**
-     * 检查支付成功与否
-     */
-    private fun checkPayResult() {
-        if (mCurPageType == PageEnum.PAY_SUCCEED) {
-            L.i("支付结果：")
-        }
-    }
 
     /**
      * 选择登录
@@ -177,11 +186,20 @@ class MyAccessibilityService : BaseAccessibilityService() {
                )
                return
    */
+            val isLogined =
+                SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getBoolean(Constant.KEY_IS_LOGINED)
+            if (isLogined)   //已经登录成功
+            {
+                afterLoginSucceed()     //任务失败，重新进来，不再重新登录
+                return
+            }
 
             NodeController.Builder()
                 .setNodeService(this@MyAccessibilityService)
+                .setNodeParams("好的", 0, 3, true)
+                .setNodeParams("允许", 0, 3, true)
                 .setNodeParams("请使用其它方式登录", 0, 2)
-                .setNodeParams("QQ登录",0,2)
+                .setNodeParams("QQ登录", 0, 2)
                 .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {
                         L.i("判断是跳转到主页还是登录界面")
@@ -202,10 +220,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
     private fun enterLoginFailed() {
         NodeController.Builder()
             .setNodeService(this@MyAccessibilityService)
-            .setNodeParams("好的", 0, 15, true)
-            .setNodeParams("允许", 0, 3, true)
             .setNodeParams("个人中心", 0, 3, true)
-            .setNodeParams("点击登录", 0, 2, true)
+            .setNodeParams("点击登录", 0, 3, true)
             .setNodeParams("请使用其它方式登录")
             .setNodeParams("QQ登录")
             .setTaskListener(object : TaskListener {
@@ -226,39 +242,49 @@ class MyAccessibilityService : BaseAccessibilityService() {
     inner class LoginListenerImpl : TaskListener {
         override fun onTaskFinished() {
             //登录完成后，判断是评论任务还是正常任务
-            if (!TaskDataUtil.instance.isCommentTask()!!) {
-                L.i("开始自动执行正常任务")
-                SearchGoods(this@MyAccessibilityService)
-                    .setTaskListener(object : TaskListener {
-                        override fun onTaskFinished() {
-                            doTask()
-                        }
-
-                        override fun onTaskFailed(failedMsg: String) {
-                            responTaskFailed(failedMsg)
-                        }
-                    })
-                    .startService()
-            } else {
-                L.i("开始自动执行评论任务")
-                CommentTaskService(this@MyAccessibilityService)
-                    .setTaskListener(object : TaskListener {
-                        override fun onTaskFinished() {
-                            mHandler.postDelayed({
-                                responTaskFinished()
-                            }, 3 * 1000)
-                        }
-
-                        override fun onTaskFailed(failedMsg: String) {
-                            responTaskFailed(failedMsg)
-                        }
-                    })
-                    .startService()
-            }
+            afterLoginSucceed()
         }
 
         override fun onTaskFailed(failedMsg: String) {
             responTaskFailed(failedMsg)
+        }
+    }
+
+    private fun afterLoginSucceed() {
+        NodeController.Builder()
+            .setNodeService(this)
+            .setNodeParams("拒绝", 1, 8)
+            .create()
+            .execute()
+
+        if (!TaskDataUtil.instance.isCommentTask()!!) {
+            L.i("开始自动执行正常任务")
+            SearchGoods(this@MyAccessibilityService)
+                .setTaskListener(object : TaskListener {
+                    override fun onTaskFinished() {
+                        doTask()
+                    }
+
+                    override fun onTaskFailed(failedMsg: String) {
+                        responTaskFailed(failedMsg)
+                    }
+                })
+                .startService()
+        } else {
+            L.i("开始自动执行评论任务")
+            CommentTaskService(this@MyAccessibilityService)
+                .setTaskListener(object : TaskListener {
+                    override fun onTaskFinished() {
+                        mHandler.postDelayed({
+                            responTaskFinished()
+                        }, 3 * 1000)
+                    }
+
+                    override fun onTaskFailed(failedMsg: String) {
+                        responTaskFailed(failedMsg)
+                    }
+                })
+                .startService()
         }
     }
 
@@ -271,9 +297,10 @@ class MyAccessibilityService : BaseAccessibilityService() {
             .setTaskFinishedListener(object : TaskListener {
                 override fun onTaskFinished() {
                     //uploadOrderInfo()
-                    mHandler.postDelayed({
-                        responTaskFinished()
-                    }, 8 * 1000)
+                    /* mHandler.postDelayed({
+                         responTaskFinished()
+                     }, 8 * 1000)*/
+                    verifyPaySucceed()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -284,15 +311,28 @@ class MyAccessibilityService : BaseAccessibilityService() {
             .doOnEvent()
     }
 
+    /**
+     * 验证是否支付成功
+     */
+    private fun verifyPaySucceed() {
+        L.i("验证是否支付成功")
+        setCurPageType(PageEnum.PAY_CONFIRM_PAGE)
+        PackageManagerUtils.getInstance()
+            .restartApplication(
+                PKG_PINDUODUO,
+                "${PKG_PINDUODUO}.ui.activity.MainFrameActivity"
+            )
+    }
+
 
     private fun responTaskFinished() {
         L.i("任务完成，重新开始下一轮任务")
-        initParams()
+        //initParams()
         mTaskListener?.onTaskFinished()
     }
 
     private fun responTaskFailed(msg: String) {
-        initParams()
+        //initParams()
         mTaskListener?.onTaskFailed(msg)
     }
 
@@ -303,6 +343,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
         setCurPageType(PageEnum.START_PAGE)
         mIsInited = false
         mIsLogined = false
+        TaskDataUtil.instance.clearData()
     }
 
 }

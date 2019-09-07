@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
 //        startPdd()
 
         // 支付成功，上报失败时调用。
-//        mMainAcViewModel?.updateTask(true, "success")
+        // mMainAcViewModel?.updateTask(true, "success")
     }
 
     /**
@@ -126,7 +126,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
         Handler(Looper.getMainLooper()).postDelayed({
             mTaskRunning = false
             startTask()
-        }, 1000)
+        }, 2000)
     }
 
     /**

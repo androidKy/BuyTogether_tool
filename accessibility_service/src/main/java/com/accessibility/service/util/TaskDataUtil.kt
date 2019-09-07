@@ -19,6 +19,10 @@ class TaskDataUtil private constructor() {
         }
     }
 
+    fun clearData(){
+        mTaskServiceData = null
+    }
+
     fun initData(taskServiceData: TaskBean) {
         mTaskServiceData = taskServiceData
     }

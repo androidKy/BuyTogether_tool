@@ -6,6 +6,7 @@ package com.accessibility.service.page
  **/
 enum class PageEnum(pageDesc: String) {
     START_PAGE("启动界面"),CHOOSING_LOGIN_PAGE("正处于选择登录界面"),QQ_LOGINING_PAGE("正处于QQ登录界面"),
+    VERIFY_CODE("验证码截图"),
     INDEX_PAGE("首页"), PERSONAL_PAGE("个人中心"),SERARCHING_PAGE("正处于搜索状态"),
     CHOOSE_LOGIN_PAGE("选择登录方式"), QQ_LOGIN_PAGE("QQ登录"), WX_LOGIN_PAGE("微信登录"),
     PHONE_LOGIN_PAGE("手机登录"), AUTH_LOGIN_PAGE("授权登录"), SEARCH_PAGE("搜索界面"),

@@ -2,6 +2,7 @@ package com.accessibility.service.base
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Context
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -15,6 +16,7 @@ import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
 import com.google.gson.Gson
 import com.safframework.log.L
+import com.utils.common.PackageManagerUtils
 import com.utils.common.SPUtils
 
 /**
@@ -94,12 +96,10 @@ abstract class BaseAccessibilityService : AccessibilityService() {
      */
     fun initTaskData() {
         try {
-            if (mIsInited) return
             SPUtils.getInstance(this, Constant.SP_TASK_FILE_NAME).getString(Constant.KEY_TASK_DATA)
                 .let {
                     L.i("无障碍服务初始化数据: $it")
                     if (!TextUtils.isEmpty(it)) {
-                        mIsInited = true
                         val taskServiceData = Gson().fromJson(it, TaskBean::class.java)
                         TaskDataUtil.instance.initData(taskServiceData)
                     }
@@ -124,17 +124,45 @@ abstract class BaseAccessibilityService : AccessibilityService() {
      * 根据text获取节点
      */
     fun findViewByText(text: String): AccessibilityNodeInfo? {
-        val accessibilityNodeInfo = rootInActiveWindow ?: return null
-
-        val nodeList = accessibilityNodeInfo.findAccessibilityNodeInfosByText(text)
-        // L.i("nodeList size = ${nodeList.size} textList = $text ")
-        if (nodeList.size > 0) {
-            for (node in nodeList) {
-                //  L.i("nodeList textList = ${node.text} className = ${node.className}")
-                if (node.text == text)
-                    return node
+        try {
+            if (rootInActiveWindow == null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    val nodeWindowList = windows
+                    //L.i("window size:${nodeWindowList.size}")
+                    (0 until nodeWindowList.size)
+                        .forEach { i ->
+                            //L.i("window id: ${nodeWindowList[i].id}")
+                            val nodeInfo = nodeWindowList[i].root
+                            if (nodeInfo != null) {
+                                val nodeList = nodeInfo.findAccessibilityNodeInfosByText(text)
+                                // L.i("nodeList size = ${nodeList.size} textList = $text ")
+                                if (nodeList.size > 0) {
+                                    for (node in nodeList) {
+                                        //  L.i("nodeList textList = ${node.text} className = ${node.className}")
+                                        if (node.text == text)
+                                            return node
+                                    }
+                                    return nodeList[0]
+                                }
+                            }
+                        }
+                }
+            } else {
+                val nodeList = rootInActiveWindow.findAccessibilityNodeInfosByText(text)
+                // L.i("nodeList size = ${nodeList.size} textList = $text ")
+                if (nodeList.size > 0) {
+                    for (node in nodeList) {
+                        //  L.i("nodeList textList = ${node.text} className = ${node.className}")
+                        if (node.text == text)
+                            return node
+                    }
+                    return nodeList[0]
+                }
             }
-            return nodeList[0]
+        } catch (e: Exception) {
+            L.i("半查找节点无障碍服务崩溃：${e.message}")
+            PackageManagerUtils.getInstance()
+                .restartApplication(Constant.PKG_NAME, "com.buy.together.MainActivity")
         }
         //L.i("$text not found")
         return null
@@ -144,17 +172,47 @@ abstract class BaseAccessibilityService : AccessibilityService() {
      * 查找与text完全相同的节点
      */
     fun findViewByFullText(text: String): AccessibilityNodeInfo? {
-        val accessibilityNodeInfo = rootInActiveWindow ?: return null
+        try {
+            if (rootInActiveWindow == null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    val nodeWindowList = windows
+                   // L.i("window size:${nodeWindowList.size}")
+                    (0 until nodeWindowList.size)
+                        .forEach { i ->
+                            //L.i("window id: ${nodeWindowList[i].id}")
+                            val nodeInfo = nodeWindowList[i].root
+                            if (nodeInfo != null) {
+                                val nodeList = nodeInfo.findAccessibilityNodeInfosByText(text)
+                                // L.i("nodeList size = ${nodeList.size} textList = $text ")
+                                if (nodeList.size > 0) {
+                                    for (node in nodeList) {
+                                        //  L.i("nodeList textList = ${node.text} className = ${node.className}")
+                                        if (node.text == text)
+                                            return node
+                                    }
+                                }
+                            }
+                        }
+                }
+            } else {
+                val accessibilityNodeInfo = rootInActiveWindow ?: return null
 
-        val nodeList = accessibilityNodeInfo.findAccessibilityNodeInfosByText(text)
+                val nodeList = accessibilityNodeInfo.findAccessibilityNodeInfosByText(text)
 
-        if (nodeList.size > 0) {
-            for (node in nodeList) {
-                // L.i("nodeList textList = ${node.text} className = ${node.className}")
-                if (node.text == text)
-                    return node
+                if (nodeList.size > 0) {
+                    for (node in nodeList) {
+                        // L.i("nodeList textList = ${node.text} className = ${node.className}")
+                        if (node.text == text)
+                            return node
+                    }
+                }
             }
+        } catch (e: Exception) {
+            L.i("全查找节点无障碍服务崩溃：${e.message}")
+            PackageManagerUtils.getInstance()
+                .restartApplication(Constant.PKG_NAME, "com.buy.together.MainActivity")
         }
+
         //L.i("$text not found")
         return null
     }
@@ -183,7 +241,11 @@ abstract class BaseAccessibilityService : AccessibilityService() {
     /**
      * 根据view className获取节点
      */
-    fun findViewByClassName(nodeInfo: AccessibilityNodeInfo, className: String, nodeFoundListener: NodeFoundListener) {
+    fun findViewByClassName(
+        nodeInfo: AccessibilityNodeInfo,
+        className: String,
+        nodeFoundListener: NodeFoundListener
+    ) {
         if (nodeInfo.className != null && nodeInfo.className == className) {
             nodeFoundListener.onNodeFound(nodeInfo)
             return
@@ -282,11 +344,15 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         performViewClick(nodeInfo, delayTime, null)
     }
 
-    fun performViewClick(nodeInfo: AccessibilityNodeInfo?,clickedListener: AfterClickedListener?){
+    fun performViewClick(nodeInfo: AccessibilityNodeInfo?, clickedListener: AfterClickedListener?) {
         performViewClick(nodeInfo, 0, clickedListener)
     }
 
-    fun performViewClick(nodeInfo: AccessibilityNodeInfo?, delayTime: Long, clickedListener: AfterClickedListener?) {
+    fun performViewClick(
+        nodeInfo: AccessibilityNodeInfo?,
+        delayTime: Long,
+        clickedListener: AfterClickedListener?
+    ) {
         mHandler.postDelayed({
             performViewClick(nodeInfo)
             clickedListener?.onClicked()

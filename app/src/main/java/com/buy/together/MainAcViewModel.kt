@@ -3,8 +3,10 @@ package com.buy.together
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.util.Constant
 import com.accessibility.service.util.UpdateSPManager
 import com.buy.together.base.BaseViewModel
@@ -20,7 +22,8 @@ import org.json.JSONObject
  * Description:
  * Created by Quinin on 2019-07-29.
  **/
-class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseViewModel<Context, MainAcView>() {
+class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
+    BaseViewModel<Context, MainAcView>() {
 
     fun requestPermission() {
         val permissionArray = arrayListOf(
@@ -124,7 +127,8 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
             }
 
             override fun onSuccess(result: Boolean?) {
-                val isCommentTask = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getBoolean(Constant.KEY_TASK_TYPE)
+                val isCommentTask = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                    .getBoolean(Constant.KEY_TASK_TYPE)
                 if (isCommentTask)
                     updateCommentTask(isSucceed, remark)
                 else updateNormalTask(isSucceed, remark)
@@ -157,17 +161,17 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
                             val jsonObj = JSONObject(result)
                             val code = jsonObj.getInt("code")
                             if (code == 200) {
-                                SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).run {
-                                    remove(Constant.KEY_TASK_DATA)
-                                }
+                                SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).clear()
                             }
                         } catch (e: Exception) {
                             L.e(e.message, e)
                         }
+                        sendTaskStatusReceiver()
                         mainAcView.onResponUpdateTask()
                     }
 
                     override fun onFailed(errorMsg: String) {
+                        updateCommentTask(isSucceed, remark)
                     }
 
                 })
@@ -194,6 +198,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
                 orderNumber = ""
                 orderMoney = ""
                 //todo 不上报任务状态，只上报错误信息，重新开始任务
+                sendTaskStatusReceiver()
                 mainAcView.onResponUpdateTask()
                 return
             } else {
@@ -208,27 +213,21 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
                             val code = jsonObj.getInt("code")
                             if (code == 200) {
                                 UpdateSPManager(context).updateTaskStatus(1)
-                                SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).run {
-                                    remove(Constant.KEY_TASK_DATA)
-                                    remove(Constant.KEY_ORDER_NUMBER)
-                                    remove(Constant.KEY_ORDER_MONEY)
-                                    remove(Constant.KEY_PDD_ACCOUNT)
-                                    remove(Constant.KEY_TASK_PROGRESS)
-                                }
+                                SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).clear()
                             } else {
                                 L.i("任务更新失败：code:$code")
                             }
                         } catch (e: Exception) {
                             L.e(e.message, e)
                         }
-
+                        sendTaskStatusReceiver()
                         mainAcView.onResponUpdateTask()
                     }
 
                     override fun onFailed(errorMsg: String) {
-                        updateNormalTask(isSucceed,remark)
-                       /* UpdateSPManager(context).updateTaskStatus(0)
-                        mainAcView.onResponUpdateTask()*/
+                        updateNormalTask(isSucceed, remark)
+                        /* UpdateSPManager(context).updateTaskStatus(0)
+                         mainAcView.onResponUpdateTask()*/
                     }
                 })
                 .updateTaskStatus(
@@ -243,4 +242,10 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) : BaseV
         }
     }
 
+    /**
+     * 发送广播到无障碍服务更新任务状态
+     */
+    private fun sendTaskStatusReceiver() {
+        context.sendBroadcast(Intent(MyAccessibilityService.ACTION_TASK_STATUS))
+    }
 }

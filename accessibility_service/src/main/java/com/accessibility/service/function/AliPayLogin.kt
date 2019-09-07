@@ -5,9 +5,7 @@ import android.util.SparseIntArray
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
-import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
-import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
 import com.accessibility.service.util.WidgetConstant
@@ -39,7 +37,10 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
         mUserName = account
         mUserPsw = psw
 
-        var isSwitchAccount = SPUtils.getInstance(myAccessibilityService.applicationContext, Constant.SP_TASK_FILE_NAME)
+        var isSwitchAccount = SPUtils.getInstance(
+            myAccessibilityService.applicationContext,
+            Constant.SP_TASK_FILE_NAME
+        )
             .getBoolean(Constant.KEY_ALIPAY_ACCOUNT_SWITCH)
         isSwitchAccount = false //todo 手动设置不需要切换账号登录
         L.i("是否需要切换支付宝账号：$isSwitchAccount")
@@ -55,8 +56,8 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     private fun findPayMoreWay() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("更多支付方式",1,true,5)
-            .setTaskListener(object :TaskListener{
+            .setNodeParams("更多支付方式", 1, true, 5)
+            .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("能找到更多支付方式")
                     payDirectly()
@@ -100,11 +101,11 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     /**
      * 处理订单编号节点找不到的处理
      */
-    private fun dealOrderNumberFailed(){
+    private fun dealOrderNumberFailed() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("仍然支付",0,5)
-            .setTaskListener(object:TaskListener{
+            .setNodeParams("仍然支付", 0, 5)
+            .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     payDirectly()
                 }
@@ -129,7 +130,10 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
             L.i("节点text: ${node.text}")
             val isMatch = Pattern.compile(regex).matcher(node.text).matches()   //是否包含字母
             if (!isMatch) {
-                SPUtils.getInstance(myAccessibilityService.applicationContext, Constant.SP_TASK_FILE_NAME)
+                SPUtils.getInstance(
+                    myAccessibilityService.applicationContext,
+                    Constant.SP_TASK_FILE_NAME
+                )
                     .put(Constant.KEY_ORDER_MONEY, node.text.toString())
                 break
             }
@@ -144,7 +148,10 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
         L.i("订单编号: $orderNumber")
         val uploadOrderNumber = orderNumber?.split("编号")?.get(1)
         if (!uploadOrderNumber.isNullOrEmpty()) {
-            SPUtils.getInstance(myAccessibilityService.applicationContext, Constant.SP_TASK_FILE_NAME)
+            SPUtils.getInstance(
+                myAccessibilityService.applicationContext,
+                Constant.SP_TASK_FILE_NAME
+            )
                 .put(Constant.KEY_ORDER_NUMBER, uploadOrderNumber)
         }
     }
@@ -156,7 +163,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
             //.setNodeParams("仍然支付", 0, 5, true)
-            .setNodeParams("立即付款", 1,5)
+            .setNodeParams("立即付款", 1, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     myAccessibilityService.postDelay(Runnable {
@@ -193,63 +200,21 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
 
                 override fun onTaskFinished() {
                     //支付成功
-                    myAccessibilityService.performBackClick(3,object:AfterClickedListener{
-                        override fun onClicked() {
-                            verifyPaySucceed()
-                        }
-
-                    })
-//                    verifyPaySucceed()
-                    //paySuccess()
+                    myAccessibilityService.postDelay(Runnable {
+                        responTaskSuccess()
+                    }, 5)
                 }
             })
             .create()
             .execute()
     }
 
-    /**
-     * 验证是否支付成功
-     */
-    private fun verifyPaySucceed() {
-        myAccessibilityService.performBackClick(5, object : AfterClickedListener {
-            override fun onClicked() {
-                NodeController.Builder()
-                    .setNodeService(myAccessibilityService)
-                    .setNodeParams("销量", 0, false, 5)
-                    .setTaskListener(object : TaskListener {
-                        override fun onTaskFinished() {
-                            L.i("支付成功，跳转到搜索界面")
-                            responTaskSuccess()
-                        }
-
-                        override fun onTaskFailed(failedMsg: String) {
-                            // 找不到 “销量”，有时会进入 “继续逛逛”，这情况找不到节点。
-                                backClick()
-                        }
-                    })
-                    .create()
-                    .execute()
-                /* AdbScrollUtils.instantce
-                     .setScrollTotalTime(3 * 1000)
-                     .setScrollSpeed(1500)
-                     .setStartXY("540,800")
-                     .setStopXY("540,1200")
-                     .setNodeFoundListener(object : NodeFoundListener {
-                         override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
-
-                         }
-                     })
-                     .startScroll()*/
-
-            }
-        })
-    }
 
     /**
      *   单纯的点击后退动作。
      */
-    private fun backClick() {
-        myAccessibilityService.performBackClick(3,object :AfterClickedListener{
+   /* private fun backClick() {
+        myAccessibilityService.performBackClick(3, object : AfterClickedListener {
             override fun onClicked() {
                 isFindSearch()
             }
@@ -260,9 +225,9 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     private fun isFindSearch() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("搜索",1,false,5,true)
+            .setNodeParams("搜索", 1, false, 5, true)
 //            .setNodeParams("继续逛逛",0,false,5)   这节点找不到
-            .setTaskListener(object :TaskListener{
+            .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("支付成功，跳转到搜索界面")
                     responTaskSuccess()
@@ -270,7 +235,6 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("支付失败，isFindSearch()...")
-                    // TODO 暂时写死，后面要改回来
                     backClick()
 
                 }
@@ -278,7 +242,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
             })
             .create()
             .execute()
-    }
+    }*/
 
     /**
      * 根据密码找到对应的xy坐标
@@ -450,7 +414,6 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
 
     fun responTaskFailed(msg: String) {
         mLoginFailedCount = 0
-        myAccessibilityService.setCurPageType(PageEnum.START_PAGE)
         mTaskListener?.onTaskFailed(msg)
     }
 }

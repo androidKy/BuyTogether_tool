@@ -4,6 +4,7 @@ import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.util.Constant
 import com.safframework.log.L
 import com.utils.common.CMDUtil
+import com.utils.common.SPUtils
 import com.utils.common.ThreadUtils
 
 /**
@@ -17,10 +18,14 @@ class ClearDataService {
         ThreadUtils.executeBySingle(object : ThreadUtils.Task<Boolean>() {
             override fun doInBackground(): Boolean {
                 var clearDataCmd = "pm clear ${Constant.QQ_TIM_PKG};" +
-                        "pm clear ${Constant.BUY_TOGETHER_PKG};" +
+                        //"pm clear ${Constant.BUY_TOGETHER_PKG};" +
+                        "am force-stop ${Constant.BUY_TOGETHER_PKG};" +
                         "pm clear ${Constant.XIAOMI_BROWSER_PKG};"
-                if (isClearAliPay)
-                    clearDataCmd = clearDataCmd + "pm clear ${Constant.ALI_PAY_PKG};"
+                val isLogined =
+                    SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                        .getBoolean(Constant.KEY_IS_LOGINED)
+                if (!isLogined)
+                    clearDataCmd += "pm clear ${Constant.BUY_TOGETHER_PKG};"
 
                 val cmdResult = CMDUtil().execCmd(
                     clearDataCmd

@@ -37,14 +37,41 @@ public class PackageManagerUtils {
         return result.contains("Success");
     }
 
-    public void restartApplication(Context context) {
+    public void startApplication(final String pkgName) {
+        ThreadUtils.executeByCached(new ThreadUtils.Task<Boolean>() {
+            @Override
+            public Boolean doInBackground() throws Throwable {
+                CMDUtil cmdUtil = new CMDUtil();
+                //cmdUtil.execCmd("settings put secure accessibility_enabled 1");
+                cmdUtil.execCmd("am start -n " + pkgName + "/" + pkgName + ".guide.GuideActivity");
+                return false;
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onFail(Throwable t) {
+
+            }
+        });
+    }
+
+    public void restartApplication(final String pkgName, final String activityName) {
         // 关闭辅助点击
         ThreadUtils.executeByCached(new ThreadUtils.Task<Boolean>() {
             @Override
             public Boolean doInBackground() throws Throwable {
                 CMDUtil cmdUtil = new CMDUtil();
-                cmdUtil.execCmd("settings put secure accessibility_enabled 1");
-                cmdUtil.execCmd("am force-stop com.shopping.pdd;am start -n com.shopping.pdd/com.buy.together.MainActivity");
+                //cmdUtil.execCmd("settings put secure accessibility_enabled 1");
+                cmdUtil.execCmd("am force-stop " + pkgName + ";am start -n " + pkgName + "/" + activityName);
                 return false;
             }
 

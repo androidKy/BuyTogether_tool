@@ -2,11 +2,12 @@
 <accessibility-service
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:accessibilityEventTypes="typeAllMask"
-        android:accessibilityFeedbackType="feedbackGeneric"
+        android:accessibilityFeedbackType="feedbackAllMask"
         android:accessibilityFlags="flagReportViewIds|flagDefault|flagRetrieveInteractiveWindows|flagIncludeNotImportantViews"
         android:canRequestFilterKeyEvents="true"
         android:canRetrieveWindowContent="true"
         android:canRequestEnhancedWebAccessibility="true"
-        android:notificationTimeout="1000"
-        android:packageNames="com.xunmeng.pinduoduo,com.eg.android.AlipayGphone,com.android.browser,com.tencent.tim"
+        android:notificationTimeout="100"
+        android:packageNames="com.xunmeng.pinduoduo,com.eg.android.AlipayGphone,com.android.browser,
+        com.tencent.tim"
         android:description="@string/app_name"/>

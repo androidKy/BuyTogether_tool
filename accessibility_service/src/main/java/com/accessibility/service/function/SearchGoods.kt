@@ -60,6 +60,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
         }
         L.i("查找搜索入口")
         NodeController.Builder()
+            .setNodeParams("搜索", 0, 15)
             .setNodeService(nodeService)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
@@ -73,7 +74,6 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
 
                 }
             })
-            .setNodeParams("搜索", 0, 15)
             .create()
             .execute()
     }
@@ -104,40 +104,41 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
      * 处理找不到搜索入口的突发事件，例如登录后跳转到红包界面
      */
     private fun dealAccident() {
-        NodeController.Builder()
-            .setNodeService(nodeService)
-            .setNodeParams("见面福利", 0, false, 5)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    nodeService.performBackClick(0, object : AfterClickedListener {
-                        override fun onClicked() {
-                            L.i("跳转到见面福利界面，返回主页")
-                            startService()
-                        }
-                    })
-                }
+        nodeService.performBackClick(2, object : AfterClickedListener {
+            override fun onClicked() {
+                L.i("跳转到见面福利界面，返回主页")
+                startService()
+            }
+        })
+        /* NodeController.Builder()
+             .setNodeService(nodeService)
+             .setNodeParams("见面福利", 0, false, 5)
+             .setTaskListener(object : TaskListener {
+                 override fun onTaskFinished() {
 
-                override fun onTaskFailed(failedMsg: String) {
-                    NodeController.Builder()
-                        .setNodeService(nodeService)
-                        .setNodeParams("直接退出", 0, 5)
-                        .setTaskListener(object : TaskListener {
-                            override fun onTaskFinished() {
-                                L.i("跳转到见面福利界面，弹框提示，返回主页")
-                                startService()
-                            }
+                 }
 
-                            override fun onTaskFailed(failedMsg: String) {
-                                responFailed("遇到其他突发事件，找不到搜索入口")
-                            }
+                 override fun onTaskFailed(failedMsg: String) {
+                     NodeController.Builder()
+                         .setNodeService(nodeService)
+                         .setNodeParams("直接退出", 0, 5)
+                         .setTaskListener(object : TaskListener {
+                             override fun onTaskFinished() {
+                                 L.i("跳转到见面福利界面，弹框提示，返回主页")
+                                 startService()
+                             }
 
-                        })
-                        .create()
-                        .execute()
-                }
-            })
-            .create()
-            .execute()
+                             override fun onTaskFailed(failedMsg: String) {
+                                 responFailed("遇到其他突发事件，找不到搜索入口")
+                             }
+
+                         })
+                         .create()
+                         .execute()
+                 }
+             })
+             .create()
+             .execute()*/
     }
 
     /**
@@ -150,7 +151,8 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                 override fun onTaskFinished() {
                     val taskFinishCount = TaskDataUtil.instance.getTaskFinishedCount()
                     var searchType =
-                        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_CUR_SEARCH_TYPE)
+                        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                            .getInt(Constant.KEY_CUR_SEARCH_TYPE)
                     // todo 做任务，暂时写死做任务类型为2
                     searchType = 1
 
@@ -202,18 +204,40 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
         NodeController.Builder()
             .setNodeService(nodeService)
             .setNodeParams(WidgetConstant.EDITTEXT, 3, false, keyWord)
-            .setNodeParams("搜索")
+            .setNodeParams("搜索", 0, 3)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     //confirmGoods(goodName, searchPrice, mallName)
                     L.i("正在根据关键字[$keyWord]搜索商品")
-                    mStartTime = System.currentTimeMillis()
-                    L.i("搜索开始的时间: $mStartTime")
-                    startSearchByKeyWord()
+                    dealSecureCheck()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
                     responFailed("没找到搜索按钮")
+                }
+            })
+            .create()
+            .execute()
+    }
+
+    /**
+     * todo 验证节点有时候找不到
+     */
+    private fun dealSecureCheck() {
+        NodeController.Builder()
+            .setNodeService(nodeService)
+            .setNodeParams("验证", 1, false, 8, true)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    L.i("搜索有安全验证,直接跳浏览器")
+                    //PackageManagerUtils.getInstance().startApplication()
+                    searchByBrowser()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    mStartTime = System.currentTimeMillis()
+                    L.i("搜索开始的时间: $mStartTime")
+                    startSearchByKeyWord()
                 }
             })
             .create()
@@ -347,8 +371,6 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
         NodeController.Builder()
             .setNodeService(nodeService)
             .setNodeParams(mSearchPrice!!, 0, 5)
-            // todo 需要再添加一层判断，是否同一个商品，09-05（商家店铺，价格，关键词完全一致。搜索出错。）
-
             .setNodeParams("客服", 0, 8)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
@@ -368,16 +390,14 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
     private fun verifySaler() {
         NodeController.Builder()
             .setNodeService(nodeService)
-            .setNodeParams(mMallName!!, 0, false, 3)
+            .setNodeParams(mMallName!!, 1, false, 3)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("是需要做任务的卖家,返回继续做任务")
                     nodeService.performBackClick(1, object : AfterClickedListener {
                         override fun onClicked() {
-                            // todo 确认是同一商铺后，还需确认 商品名称完全一致
                             //保存当前搜索的方式
                             verifyGoodName()
-
 //                            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
 //                                .put(Constant.KEY_CUR_SEARCH_TYPE, SearchType.KEYWORD)
 //                            responSucceed()
@@ -387,7 +407,6 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("不是需要做任务的卖家，退出重新查找")
-
                     nodeService.apply {
                         performBackClick(0, object : AfterClickedListener {
                             override fun onClicked() {
@@ -420,7 +439,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
 
                 override fun onTaskFailed(failedMsg: String) {
                     nodeService.apply {
-                        performBackClick(1,object :AfterClickedListener{
+                        performBackClick(1, object : AfterClickedListener {
                             override fun onClicked() {
                                 mIsVerifySaler = true
                                 startSearchByKeyWord()
