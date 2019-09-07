@@ -94,21 +94,31 @@ class MyAccessibilityService : BaseAccessibilityService() {
     }
 
 //    private fun test() {
-//        NodeController.Builder()
-//            .setNodeService(this)
-//            .setNodeParams("不支持",1,false,10,true)
-//            .setTaskListener(object :TaskListener{
-//                override fun onTaskFinished() {
-//                    L.i("成功找到")
-//                }
+//        if(!testFlag) {
+//            testFlag = true
+//            NodeController.Builder()
+//                .setNodeService(this)
+//                .setNodeParams("市", 1, true, 10)
+//                .setNodeParams("浙江省", 0, true, true, 10, true)
+//                .setNodeParams("杭州市", 0, true, true, 10, true)
+//                .setNodeParams("西湖区", 0, true, true, 10, true)
+//                .setNodeParams("保存", 0, true, 10)
+//                .setTaskListener(object : TaskListener {
+//                    override fun onTaskFinished() {
+//                        performBackClick(5, object : AfterClickedListener {
+//                            override fun onClicked() {
+//                                L.i("已经点击。")
+//                            }
 //
-//                override fun onTaskFailed(failedMsg: String) {
-//                    L.i("成功找不到")
-//                }
+//                        })
+//                    }
 //
-//            })
-//            .create()
-//            .execute()
+//                    override fun onTaskFailed(failedMsg: String) {
+//                    }
+//                })
+//                .create()
+//                .execute()
+//        }
 //
 //    }
 

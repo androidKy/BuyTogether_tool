@@ -21,6 +21,11 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
     val buyerPhone = taskDataUtil.getBuyer_phone()
     var streetName = taskDataUtil.getStreet()
 
+    // 超出配送范围时，填入一个浙江省，杭州市，西湖区，保证可以配送
+    var fakeProvince :String  = "浙江省"
+    var fakeCity:String = "杭州市"
+    var fakeDistrict:String = "西湖区"
+
 
     var mTaskFinishedListener: TaskListener? = null
     fun setTaskFinishedListener(taskFinishedListener: TaskListener): FillAddressService {
@@ -127,16 +132,41 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
         NodeController.Builder()
             .setNodeService(nodeService)
             .setNodeParams("不支持",1,true,5)
+            .setNodeParams("编辑",0,true,10)
+            .setNodeParams("市",1,true,10)
             .setTaskListener(object :TaskListener{
                 override fun onTaskFinished() {
-
-                    fillAddress()
+                    fillFakeAddressInfo()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
                     responSuccess()
                 }
 
+            })
+            .create()
+            .execute()
+    }
+
+    private fun fillFakeAddressInfo() {
+        NodeController.Builder()
+            .setNodeService(nodeService)
+            .setNodeParams(fakeProvince,0,true,true,10,true)
+            .setNodeParams(fakeCity,0,true,true,10,true)
+            .setNodeParams(fakeDistrict,0,true,true,10,true)
+            .setNodeParams("保存",0,true,10)
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+                    nodeService.performBackClick(5,object :AfterClickedListener{
+                        override fun onClicked() {
+                            responSuccess()
+                        }
+
+                    })
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                }
             })
             .create()
             .execute()
