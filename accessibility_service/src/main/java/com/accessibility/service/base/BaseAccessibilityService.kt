@@ -26,7 +26,6 @@ import com.utils.common.SPUtils
 abstract class BaseAccessibilityService : AccessibilityService() {
     var mCurPageType = PageEnum.START_PAGE
     var mIsLogined = false
-    var mIsInited = false
 
     val mHandler = Handler(Looper.getMainLooper())
 

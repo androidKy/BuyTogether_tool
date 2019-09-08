@@ -166,7 +166,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
     private fun verifyCode() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("输入验证码", 0, false, 8)
+            .setNodeParams("输入验证码", 0, false, 6)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("开始验证码校验")
@@ -220,7 +220,6 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
             .setNodeParams("登录失败", 0, false, 5)
-//            .setNodeParams()
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     //如果是评论任务，不重新获取账号，直接上报登录失败，正常任务就重新获取账号测试
@@ -228,7 +227,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                     if (!isCommentTask!!)
                         dealAccountError()
                     else
-                        responTaskFailed("评论任务：账号已失效")
+                        responTaskFailed("评论任务：id=${mUserId}-${mUserName}账号已失效")
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -267,7 +266,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
 //            .setNodeParams("登录",0,false,5)
-            .setNodeParams("个人中心", 0, false, 15)
+            .setNodeParams("个人中心", 0, true, 15)    //时间长一点，防止网络卡顿
             .setTaskListener(object : TaskListener {
 
                 override fun onTaskFinished() {
@@ -295,7 +294,6 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                      mTaskListener?.onTaskFinished()*/
 
                     L.i("找不到个人中心。。。")
-                    // todo 掉线情况处理
                     LoginFailed(myAccessibilityService)
                         .setTypeListener(object : LoginFailed.TypeListener {
                             override fun onResponType(failedType: Int) {
@@ -307,19 +305,6 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                                 }
                             }
                         })
-                        /*.setTaskListener(object :TaskListener{
-                            override fun onTaskFinished() {
-                                val loginFailedType = this.getLoginFailedType()
-                                when(loginFailedType){
-                                    LoginFailedType.DROP_LINE-> dealDropLine()
-                                    LoginFailedType.UNVAILD-> isUnvalid()
-                                }
-                            }
-
-                            override fun onTaskFailed(failedMsg: String) {
-                            }
-
-                        })*/
                         .startService()
                 }
 

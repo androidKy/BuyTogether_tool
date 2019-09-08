@@ -177,10 +177,10 @@ class MyAccessibilityService : BaseAccessibilityService() {
      * 选择登录
      */
     private fun chooseLogin() {
-        if (mCurPageType == PageEnum.START_PAGE && !mIsInited) {
+        if (mCurPageType == PageEnum.START_PAGE) {
+            setCurPageType(PageEnum.CHOOSING_LOGIN_PAGE)
             initTaskData()
             L.i("拼多多登录界面")
-            setCurPageType(PageEnum.CHOOSING_LOGIN_PAGE)
             /*   OcrUtils.recognizePic(
                    File("/storage/emulated/0/Android/data/screenShot.png"),
                    this.applicationContext
@@ -352,7 +352,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
      */
     private fun initParams() {
         setCurPageType(PageEnum.START_PAGE)
-        mIsInited = false
         mIsLogined = false
         TaskDataUtil.instance.clearData()
     }

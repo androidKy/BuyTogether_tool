@@ -40,11 +40,12 @@ import kotlin.collections.ArrayList
  * Description:
  * Created by Quinin on 2019-06-27.
  **/
-class MainViewModel(val context: Context, val mainView: MainView) : BaseViewModel<Context, BaseView>() {
+class MainViewModel(val context: Context, val mainView: MainView) :
+    BaseViewModel<Context, BaseView>() {
 
     private val mSubscribeList = ArrayList<Disposable>()
     private var mIsCommentTask = false
-    private var mIsFromCache = false
+    //private var mIsFromCache = false
 
     /**
      * 获取任务
@@ -52,17 +53,17 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     fun getTask(isCommentTask: Boolean) {
         mIsCommentTask = isCommentTask
         L.init(MainViewModel::class.java.simpleName)
-        SPUtils.getInstance(Constant.SP_DEVICE_PARAMS).clear()
+        SPUtils.getInstance(Constant.SP_DEVICE_PARAMS).clear(true)
 
         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).run {
             val cacheTaskData = getString(Constant.KEY_TASK_DATA, "")
             if (!TextUtils.isEmpty(cacheTaskData)) {
                 //val afterUnicode = UnicodeUtils.decodeUnicode(cacheTaskData)
                 L.i("从缓存获取任务：$cacheTaskData")
-                mIsFromCache = true
+                //mIsFromCache = true
                 parseTaskData(cacheTaskData)
             } else {
-                mIsFromCache = false
+                // mIsFromCache = false
                 L.i("从服务器获取任务")
                 startGetTask()
             }
@@ -103,7 +104,8 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                 .getCommentTask()
         } else {
             L.i("获取正常任务")
-            val imei = SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS).getString(Constant.KEY_REAL_DEVICE_IMEI)
+            val imei = SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS)
+                .getString(Constant.KEY_REAL_DEVICE_IMEI)
 //            val imei = "865372021527426"
 
 
@@ -143,6 +145,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      * 解析正常任务
      */
     private fun parseNormalTask(result: String): TaskBean {
+        L.i("解析正常任务")
         return try {
             val code = JSONObject(result).getInt("code")
             if (code == 200)
@@ -167,26 +170,17 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      * 解析评论任务
      */
     private fun parseCommentTask(result: String): TaskBean {
+        L.i("解析评论任务")
         var taskBean = TaskBean()
         try {
-            taskBean = when {
-                !mIsFromCache -> {
-
-                    val code = JSONObject(result).getInt("code")
-//                    L.i("评论任务返回的 code = $code")
-                    if (code == 200) {
-                        val commentBean = Gson().fromJson(result, CommentBean::class.java)
-                        ParseDataUtil.parseCommentBean2TaskBean(commentBean)
-                    } else {
-                        taskBean.code = code
-                        taskBean.msg = JSONObject(result).getString("msg")
-
-                        taskBean
-                    }
-                }
-                else -> parseNormalTask(result)
+            val code = JSONObject(result).getInt("code")
+            if (code == 200) {
+                val commentBean = Gson().fromJson(result, CommentBean::class.java)
+                taskBean = ParseDataUtil.parseCommentBean2TaskBean(commentBean)
+            } else {
+                taskBean.code = code
+                taskBean.msg = JSONObject(result).getString("msg")
             }
-
         } catch (e: Exception) {
             L.e(e.message, e)
             taskBean.msg = e.message
@@ -200,9 +194,9 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      * 保存数据到SP
      */
     private fun saveData(taskBean: TaskBean) {
-       /* taskBean.task.account.id = 3234
-        taskBean.task.account.user = "210289767"
-        taskBean.task.account.pwd="gx95k1g8ra"*/
+        /* taskBean.task.account.id = 3234
+         taskBean.task.account.user = "210289767"
+         taskBean.task.account.pwd="gx95k1g8ra"*/
 
         saveAlipayAccountSwitch(taskBean)
         saveTaskData2SP(Gson().toJson(taskBean))
@@ -252,7 +246,8 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
      */
     fun clearData() {
         var isClearAlipay =
-            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getBoolean(Constant.KEY_ALIPAY_ACCOUNT_SWITCH, true)
+            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                .getBoolean(Constant.KEY_ALIPAY_ACCOUNT_SWITCH, true)
         isClearAlipay = false //todo 手动设置不清空支付宝
         ClearDataService().clearData(isClearAlipay, object : TaskListener {
             override fun onTaskFinished() {
@@ -274,9 +269,11 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         //匹配相应的城市
         val cityName = taskBean.task.delivery_address.city
         L.i("target cityName: $cityName")
-        val currentDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).run { format(Date()) }
+        val currentDate =
+            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).run { format(Date()) }
         L.i("currentDate: $currentDate")
-        val lastGetCityDate = SPUtils.getInstance(Constant.SP_CITY_LIST).getString(Constant.KEY_CITY_GET_DATE)
+        val lastGetCityDate =
+            SPUtils.getInstance(Constant.SP_CITY_LIST).getString(Constant.KEY_CITY_GET_DATE)
         if (!TextUtils.isEmpty(lastGetCityDate)) {
             if (TimeUtils.getDays(currentDate, lastGetCityDate) >= 1) { //对比当前时间与上次获取的时间
                 //重新获取
@@ -284,7 +281,8 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                 getCityListFromNet(cityName)
             } else {
                 L.i("从缓存获取城市ID")
-                val data = SPUtils.getInstance(Constant.SP_CITY_LIST).getString(Constant.KEY_CITY_DATA)
+                val data =
+                    SPUtils.getInstance(Constant.SP_CITY_LIST).getString(Constant.KEY_CITY_DATA)
                 if (TextUtils.isEmpty(data)) {
                     getCityListFromNet(cityName)
                 } else {
@@ -314,7 +312,11 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                             put(Constant.KEY_CITY_DATA, strResult)
                             put(
                                 Constant.KEY_CITY_GET_DATE,
-                                SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).run { format(Date()) })
+                                SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).run {
+                                    format(
+                                        Date()
+                                    )
+                                })
                         }
                         getCityCode(cityName, strResult)
                     }
@@ -398,7 +400,9 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         }
 
         L.i(
-            "params:\nmethod: getPort\nnumber: 1\narea:$finalCityId\nimei:${DevicesUtil.getIMEI(context)}\n" +
+            "params:\nmethod: getPort\nnumber: 1\narea:$finalCityId\nimei:${DevicesUtil.getIMEI(
+                context
+            )}\n" +
                     "platformId: 2"
         )
 
@@ -549,7 +553,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                     val lastAlipayAccount = it.getString(Constant.KEY_ALIPAY_ACCOUNT)
 
                     if (this@apply == lastAlipayAccount) {
-                        it.put(Constant.KEY_ALIPAY_ACCOUNT_SWITCH, false)
+                        it.put(Constant.KEY_ALIPAY_ACCOUNT_SWITCH, true)
                     } else it.put(Constant.KEY_ALIPAY_ACCOUNT_SWITCH, true)
                 }
             }
@@ -562,7 +566,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     private fun saveTaskData2SP(strData: String) {
         val spUtils = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
 
-        spUtils.put(Constant.KEY_TASK_DATA, strData)
+        spUtils.put(Constant.KEY_TASK_DATA, strData, true)
     }
 
     /**
@@ -576,7 +580,7 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
                 put(Constant.KEY_TASK_ID, task_id)
 
                 account?.let {
-                    put(Constant.KEY_ACCOUNT_ID, it.id)
+                    put(Constant.KEY_ACCOUNT_ID, it.id, true)
                 }
             }
         }
@@ -590,14 +594,14 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
         taskBean.task?.device?.run {
             spUtils.apply {
                 L.i("模拟imei: $imei")
-                put(DeviceParams.IMEI_KEY, imei)
-                put(DeviceParams.IMSI_KEY, imsi)
-                put(DeviceParams.MAC_KEY, mac)
-                put(DeviceParams.USER_AGENT_KEY, useragent)
-                put(DeviceParams.BRAND_KEY, brand)
-                put(DeviceParams.MODEL_KEY, model)
-                put(DeviceParams.SDK_KEY, android)
-                put(DeviceParams.SYSTEM_KEY, system)
+                put(DeviceParams.IMEI_KEY, imei, true)
+                put(DeviceParams.IMSI_KEY, imsi, true)
+                put(DeviceParams.MAC_KEY, mac, true)
+                put(DeviceParams.USER_AGENT_KEY, useragent, true)
+                put(DeviceParams.BRAND_KEY, brand, true)
+                put(DeviceParams.MODEL_KEY, model, true)
+                put(DeviceParams.SDK_KEY, android, true)
+                put(DeviceParams.SYSTEM_KEY, system, true)
             }
         }
 
@@ -679,7 +683,8 @@ class MainViewModel(val context: Context, val mainView: MainView) : BaseViewMode
     fun showTip(mContainer: FrameLayout?, tip: String) {
         mContainer?.apply {
             removeAllViews()
-            val tipLayoutView = LayoutInflater.from(context).inflate(R.layout.layout_tip, this, true)
+            val tipLayoutView =
+                LayoutInflater.from(context).inflate(R.layout.layout_tip, this, true)
             val textView = tipLayoutView.findViewById(R.id.tv_tip) as TextView
             textView.text = tip
         }

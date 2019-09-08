@@ -40,14 +40,13 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
                     override fun onTaskFailed(failedMsg: String) {
 
                     }
-
                 })
                 .create()
                 .execute()
 
             NodeController.Builder()
                 .setNodeService(myAccessibilityService)
-                .setNodeParams("个人中心", 0, 5)
+                .setNodeParams("个人中心", 0, 15)
                 .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {
                         dealPayResult()

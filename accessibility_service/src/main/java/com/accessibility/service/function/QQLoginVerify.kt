@@ -208,7 +208,6 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
 
     fun responTaskFailed(msg: String) {
         mVerifyCount = 0
-        myAccessibilityService.setCurPageType(PageEnum.START_PAGE)
         mTaskListener?.onTaskFailed(msg)
     }
 }
