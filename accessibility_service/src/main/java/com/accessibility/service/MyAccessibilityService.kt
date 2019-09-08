@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.text.TextUtils
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import com.accessibility.service.auto.NodeController
@@ -58,7 +59,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 } else if (action == ACTION_CONTINUE_TASK) {
                     afterLoginSucceed()
                 } else if (action == ACTION_DEAD_SERVICE) {
-                    doTask()
+                    //doTask()
                 }
             }
         }
@@ -191,6 +192,14 @@ class MyAccessibilityService : BaseAccessibilityService() {
             if (isLogined)   //已经登录成功
             {
                 afterLoginSucceed()     //任务失败，重新进来，不再重新登录
+                return
+            }
+
+            val orderNumber = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                .getString(Constant.KEY_ORDER_NUMBER)
+            if (!TextUtils.isEmpty(orderNumber)) {
+                setCurPageType(PageEnum.PAY_CONFIRM_PAGE)
+                confirmPayResult()
                 return
             }
 

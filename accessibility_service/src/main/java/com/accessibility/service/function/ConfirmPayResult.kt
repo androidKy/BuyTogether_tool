@@ -31,6 +31,22 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
         if (!TextUtils.isEmpty(mallName)) {
             NodeController.Builder()
                 .setNodeService(myAccessibilityService)
+                .setNodeParams("允许", 0, true, 20)
+                .setTaskListener(object : TaskListener {
+                    override fun onTaskFinished() {
+
+                    }
+
+                    override fun onTaskFailed(failedMsg: String) {
+
+                    }
+
+                })
+                .create()
+                .execute()
+
+            NodeController.Builder()
+                .setNodeService(myAccessibilityService)
                 .setNodeParams("个人中心", 0, 5)
                 .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {
@@ -80,6 +96,8 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
+                    SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                        .remove(Constant.KEY_ORDER_NUMBER)
                     dealPayFailed()
                 }
             })
@@ -103,7 +121,7 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    L.i("未下单，返回继续查找下单")
+                    L.i("未下单，返回继续查找下单") //todo
                     myAccessibilityService.apply {
                         performBackClick(1, object : AfterClickedListener {
                             override fun onClicked() {
