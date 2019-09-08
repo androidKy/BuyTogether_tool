@@ -187,6 +187,15 @@ class MyAccessibilityService : BaseAccessibilityService() {
                )
                return
    */
+            //确保同一个账号不会重复下单，应该在登陆前面执行
+            val orderNumber = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                .getString(Constant.KEY_ORDER_NUMBER)
+            if (!TextUtils.isEmpty(orderNumber)) {
+                setCurPageType(PageEnum.PAY_CONFIRM_PAGE)
+                confirmPayResult()
+                return
+            }
+
             val isLogined =
                 SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getBoolean(Constant.KEY_IS_LOGINED)
             if (isLogined)   //已经登录成功
@@ -195,13 +204,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 return
             }
 
-            val orderNumber = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
-                .getString(Constant.KEY_ORDER_NUMBER)
-            if (!TextUtils.isEmpty(orderNumber)) {
-                setCurPageType(PageEnum.PAY_CONFIRM_PAGE)
-                confirmPayResult()
-                return
-            }
 
             NodeController.Builder()
                 .setNodeService(this@MyAccessibilityService)
