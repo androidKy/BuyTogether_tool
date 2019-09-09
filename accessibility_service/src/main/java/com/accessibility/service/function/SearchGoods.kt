@@ -153,22 +153,21 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                     var searchType =
                         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
                             .getInt(Constant.KEY_CUR_SEARCH_TYPE)
-                    // todo 做任务，这里可以写死搜索类型。
-                    searchType = 1
 
-                    searchByBrowser()
-
-//                    if (taskFinishCount != null && taskFinishCount > 0 && searchType > 0) {
-//                    if (taskFinishCount != null && taskFinishCount > 0 && searchType > 0) {
-//                        if (searchType == SearchType.MALLNAME) {
-//                            searchByMallName()
-//                        } else if (searchType == SearchType.BROWSER) {
-//                            searchByBrowser()
-//                        }
-//                    } else {
-//                        inputKeyword()
-//                    }
-
+                    inputKeyword()
+                    //searchByBrowser()
+/*
+                    if (taskFinishCount != null && taskFinishCount > 0 && searchType > 0) {
+                        if (taskFinishCount != null && taskFinishCount > 0 && searchType > 0) {
+                            if (searchType == SearchType.MALLNAME) {
+                                searchByMallName()
+                            } else if (searchType == SearchType.BROWSER) {
+                                searchByBrowser()
+                            }
+                        } else {
+                            inputKeyword()
+                        }
+                    }*/
                 }
 
                 override fun onTaskFailed(failedMsg: String) {

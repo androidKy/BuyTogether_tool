@@ -263,10 +263,27 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
      * 登录成功
      */
     private fun loginSucceed() {
+        //处理登录成功后跳转到见面福利
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("见面福利", 1, false, 6)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    myAccessibilityService.performBackClick()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+
+                }
+
+            })
+            .create()
+            .execute()
+
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
 //            .setNodeParams("登录",0,false,5)
-            .setNodeParams("个人中心", 0, true, 15)    //时间长一点，防止网络卡顿
+            .setNodeParams("个人中心", 0, false, 15)    //时间长一点，防止网络卡顿
             .setTaskListener(object : TaskListener {
 
                 override fun onTaskFinished() {
@@ -302,7 +319,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
 
                                     LoginFailedType.DROP_LINE -> dealDropLine()
                                     LoginFailedType.UNVAILD -> isUnvalid()
-                                    LoginFailedType.ADD_ACCOUNT-> dealAddAccount()
+                                    LoginFailedType.ADD_ACCOUNT -> dealAddAccount()
                                 }
                             }
                         })
@@ -321,9 +338,9 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
      */
     private fun dealAddAccount() {
         myAccessibilityService
-            .performBackClick(5,object :AfterClickedListener{
+            .performBackClick(5, object : AfterClickedListener {
                 override fun onClicked() {
-                    myAccessibilityService.performBackClick(5,object :AfterClickedListener{
+                    myAccessibilityService.performBackClick(5, object : AfterClickedListener {
                         override fun onClicked() {
                             retryGetQQ()
                         }
@@ -363,11 +380,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
      */
     private fun dealDropLine() {
         initLoginInfo()
-        mUserName?.apply {
-            mUserPsw?.apply {
-                inputAccount(this@apply, this)
-            }
-        }
+        authLogin()
     }
 
     /**

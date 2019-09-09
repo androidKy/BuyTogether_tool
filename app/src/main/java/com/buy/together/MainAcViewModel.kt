@@ -120,7 +120,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
         ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
             override fun doInBackground(): Boolean {
                 CmdListUtil.getInstance().apply {
-                    val cmdStr = "am force-stop ${Constant.ALI_PAY_PKG};" +
+                    val cmdStr = //"am force-stop ${Constant.ALI_PAY_PKG};" +
                             "am force-stop ${Constant.BUY_TOGETHER_PKG};" +
                             "am force-stop ${Constant.QQ_TIM_PKG};"
                     execCmd(cmdStr)

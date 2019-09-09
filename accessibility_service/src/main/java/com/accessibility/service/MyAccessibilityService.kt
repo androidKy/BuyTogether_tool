@@ -155,7 +155,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
                     override fun onTaskFailed(failedMsg: String) {
                         responTaskFailed(failedMsg)
                     }
-
                 })
                 .startService()
         }
@@ -314,11 +313,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
     }
 
     private fun afterLoginSucceed() {
-        NodeController.Builder()
-            .setNodeService(this)
-            .setNodeParams("拒绝", 1, 8)
-            .create()
-            .execute()
 
         if (!TaskDataUtil.instance.isCommentTask()!!) {
             L.i("开始自动执行正常任务")

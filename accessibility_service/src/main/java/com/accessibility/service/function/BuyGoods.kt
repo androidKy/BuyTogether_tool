@@ -62,7 +62,7 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
             .setNodeParams("去拼单", 0, 5, true)
             .setNodeParams("参与拼单", 0, 1, true)
             .setNodeParams("参与拼单", 0, 1, true)
-            .setNodeParams("抢先拼单",0,1,true)
+            .setNodeParams("抢先拼单", 0, 1, true)
             .setNodeParams("确定", 0, false, 1)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
@@ -309,13 +309,13 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
             .doOnEvent()
     }
 
-    private fun  hasPayMoreWay() {
+    private fun hasPayMoreWay() {
         NodeController.Builder()
             .setNodeService(nodeService)
-            .setNodeParams("更多支付方式",1,true,5,true)
-            .setNodeParams("支付宝",1,true,5,true)
-            .setNodeParams("立即支付",0,true,5)
-            .setTaskListener(object :TaskListener{
+            .setNodeParams("更多支付方式", 1, true, 5, true)
+            .setNodeParams("支付宝", 1, true, 5, true)
+            .setNodeParams("立即支付", 0, true, 5)
+            .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     payByAlipay()
                 }
@@ -356,7 +356,7 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
         AliPayLogin(nodeService)
             .login(object : TaskListener {
                 override fun onTaskFinished() {
-                    closeAliPay()
+                    //closeAliPay()
                     responSucceed()
                 }
 

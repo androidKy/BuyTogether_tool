@@ -271,6 +271,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
      * 保存任务进度
      */
     private fun saveTaskProgress(progress: String) {
+        //任务进度 todo
         SPUtils.getInstance(nodeService, Constant.SP_TASK_FILE_NAME)
             .put(Constant.KEY_TASK_PROGRESS, progress)
     }

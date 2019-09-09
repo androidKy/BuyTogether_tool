@@ -53,20 +53,21 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
                     }
 
                     override fun onTaskFailed(failedMsg: String) {
-                        NodeController.Builder()
-                            .setNodeService(myAccessibilityService)
-                            .setNodeParams("拒绝", 0, 5)
-                            .setTaskListener(object : TaskListener {
-                                override fun onTaskFinished() {
-                                    confirmGood()
-                                }
+                        responTaskFailed(failedMsg)
+                        /* NodeController.Builder()
+                             .setNodeService(myAccessibilityService)
+                             .setNodeParams("拒绝", 0, 5)
+                             .setTaskListener(object : TaskListener {
+                                 override fun onTaskFinished() {
+                                     confirmGood()
+                                 }
 
-                                override fun onTaskFailed(failedMsg: String) {
-                                    confirmGood()
-                                }
-                            })
-                            .create()
-                            .execute()
+                                 override fun onTaskFailed(failedMsg: String) {
+                                     confirmGood()
+                                 }
+                             })
+                             .create()
+                             .execute()*/
                     }
 
                 })
@@ -157,8 +158,9 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
 
     private fun restartTask() {
         myAccessibilityService.setCurPageType(PageEnum.START_PAGE)
-        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
-            .remove(Constant.KEY_ORDER_NUMBER)
+        //todo 为了防止不是百分百确定订单已支付
+        /* SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+             .remove(Constant.KEY_ORDER_NUMBER)*/
         PackageManagerUtils.getInstance().restartApplication(
             Constant.BUY_TOGETHER_PKG,
             "com.buy.together.MainActivity"
@@ -172,7 +174,7 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
             //.setNodeParams("仍然支付", 0, 5, true)
-            .setNodeParams("立即付款", 1, 5)
+            .setNodeParams("立即", 1, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     myAccessibilityService.postDelay(Runnable {
