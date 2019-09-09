@@ -60,10 +60,10 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
             // .setNodeParams("查看更多", 0, 5, true)
             //.setNodeParams("插队拼单", 0, 5, true)
             .setNodeParams("去拼单", 0, 5, true)
-            .setNodeParams("参与拼单", 0, 3, true)
-            .setNodeParams("参与拼单", 0, 2, true)
-            .setNodeParams("抢先拼单",0,2,true)
-            .setNodeParams("确定", 0, false, 2)
+            .setNodeParams("参与拼单", 0, 1, true)
+            .setNodeParams("参与拼单", 0, 1, true)
+            .setNodeParams("抢先拼单",0,1,true)
+            .setNodeParams("确定", 0, false, 1)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     chooseInfo()
@@ -80,8 +80,8 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
     private fun buyByJoin2() {
         NodeController.Builder()
             .setNodeService(nodeService)
-            .setNodeParams("查看更多", 0, 5, true)
-            .setNodeParams("插队拼单", 0, 5, true)
+            .setNodeParams("查看更多", 0, 1, true)
+            .setNodeParams("插队拼单", 0, 1, true)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     NodeController.Builder()

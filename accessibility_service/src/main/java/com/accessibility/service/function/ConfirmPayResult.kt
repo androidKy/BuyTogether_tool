@@ -1,17 +1,17 @@
 package com.accessibility.service.function
 
-import android.content.Intent
 import android.text.TextUtils
 import android.util.SparseIntArray
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseAcService
-import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
+import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
 import com.safframework.log.L
+import com.utils.common.PackageManagerUtils
 import com.utils.common.SPUtils
 
 /**
@@ -86,18 +86,44 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
             .setNodeService(myAccessibilityService)
             .setNodeParams("查看全部", 1, 3)
             .setNodeParams(mallName!!, 1, false, 3)  //店铺名
-            .setNodeParams("申请退款", 0, false, 3)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     //支付失败
-                    L.i("检测到支付成功：待分享")
-                    responSucceed()
+                    L.i("检测到商店:$mallName")
+                    confirmPayAgain()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
-                        .remove(Constant.KEY_ORDER_NUMBER)
+                    L.i("未下单，返回继续查找下单")
+                    restartTask()
+                }
+            })
+            .create()
+            .execute()
+    }
+
+    /**
+     * 判断是否付款
+     */
+    private fun confirmPayAgain() {
+        /*val goodName = TaskDataUtil.instance.getGoods_name()
+        if (goodName.isNullOrEmpty()) {
+            L.i("商品名字为空,重新开始任务")
+            restartTask()
+            return
+        }*/
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("支付", 1, false, 2)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    L.i("没有支付成功，继续去支付")
                     dealPayFailed()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("已付款")
+                    responSucceed()
                 }
             })
             .create()
@@ -111,27 +137,32 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
             .setNodeParams("去支付", 0, true, 3)
+            //.setNodeParams("付款", 1, true, 3)
             .setNodeParams("更多支付方式", 1, true, 3)
             .setNodeParams("支付宝", 1, true, 3)
-            .setNodeParams("立即支付", 1, true, 3)
+            .setNodeParams("立即", 1, true, 3)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     inputPayPsw()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    L.i("未下单，返回继续查找下单") //todo
-                    myAccessibilityService.apply {
-                        performBackClick(1, object : AfterClickedListener {
-                            override fun onClicked() {
-                                sendBroadcast(Intent(MyAccessibilityService.ACTION_CONTINUE_TASK))
-                            }
-                        })
-                    }
+                    L.i("未下单，返回继续查找下单")
+                    restartTask()
                 }
             })
             .create()
             .execute()
+    }
+
+    private fun restartTask() {
+        myAccessibilityService.setCurPageType(PageEnum.START_PAGE)
+        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+            .remove(Constant.KEY_ORDER_NUMBER)
+        PackageManagerUtils.getInstance().restartApplication(
+            Constant.BUY_TOGETHER_PKG,
+            "com.buy.together.MainActivity"
+        )
     }
 
     /**

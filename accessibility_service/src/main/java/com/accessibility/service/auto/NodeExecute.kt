@@ -17,10 +17,15 @@ import com.safframework.log.L
  * Created by Quinin on 2019-07-12.
  **/
 class NodeExecute(
-    val nodeService: BaseAccessibilityService, val nodeTextList: ArrayList<String>,
-    val nodeClickedList: ArrayList<Boolean>, val nodeFlagList: ArrayList<Int>,
-    val nodeEditTextList: ArrayList<String>, val nodeTimeOutList: ArrayList<Int>,
-    val taskListener: TaskListener, val filterText: String?, val nodeScrolledList: ArrayList<Boolean>,
+    val nodeService: BaseAccessibilityService,
+    val nodeTextList: ArrayList<String>,
+    val nodeClickedList: ArrayList<Boolean>,
+    val nodeFlagList: ArrayList<Int>,
+    val nodeEditTextList: ArrayList<String>,
+    val nodeTimeOutList: ArrayList<Int>,
+    val taskListener: TaskListener,
+    val filterText: String?,
+    val nodeScrolledList: ArrayList<Boolean>,
     val nodeFindList: ArrayList<Boolean>
 ) {
 
@@ -82,11 +87,17 @@ class NodeExecute(
                 val message = mHandler.obtainMessage()
                 message?.arg1 = index
                 message?.what = MSG_NOT_FOUND
-                mHandler.sendMessageDelayed(message, 1500)
+                mHandler.sendMessageDelayed(message, 3 * 1000)
             }
             nodeResult == null && mStartTime > timeout -> //找不到时是否需要下滑查找
                 dealNodeFailed(index, textOrId, editInputText, isClicked, isScrolled)
-            nodeResult != null -> dealNodeSucceed(index, textOrId, editInputText, isClicked, nodeResult)
+            nodeResult != null -> dealNodeSucceed(
+                index,
+                textOrId,
+                editInputText,
+                isClicked,
+                nodeResult
+            )
             else -> dealNodeFailed(index, textOrId, editInputText, isClicked, isScrolled)
         }
     }
@@ -111,7 +122,13 @@ class NodeExecute(
         return nodeInfo
     }
 
-    fun dealNodeFailed(index: Int, textOrId: String, editInputText: String, isClicked: Boolean, isScrolled: Boolean) {
+    fun dealNodeFailed(
+        index: Int,
+        textOrId: String,
+        editInputText: String,
+        isClicked: Boolean,
+        isScrolled: Boolean
+    ) {
         mHandler.removeMessages(MSG_START)
         mHandler.removeMessages(MSG_NOT_FOUND)
         mStartTime = 0
@@ -120,7 +137,7 @@ class NodeExecute(
         if (isScrolled) {
             AdbScrollUtils.instantce
                 .setNodeService(nodeService)
-                .setScrollTotalTime(15 * 1000)
+                .setScrollTotalTime(5 * 1000)
                 .setFindText(textOrId)
                 .setNodeFoundListener(object : NodeFoundListener {
                     override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {

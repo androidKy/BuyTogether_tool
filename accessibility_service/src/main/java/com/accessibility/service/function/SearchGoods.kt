@@ -219,23 +219,24 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
     }
 
     /**
-     * todo 验证节点有时候找不到
+     * 处理安全验证的问题
      */
     private fun dealSecureCheck() {
         NodeController.Builder()
             .setNodeService(nodeService)
-            .setNodeParams("验证", 1, false, 8, true)
+            .setNodeParams("销量", 1, false, 8)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    L.i("搜索有安全验证,直接跳浏览器")
-                    //PackageManagerUtils.getInstance().startApplication()
-                    searchByBrowser()
-                }
-
-                override fun onTaskFailed(failedMsg: String) {
                     mStartTime = System.currentTimeMillis()
                     L.i("搜索开始的时间: $mStartTime")
                     startSearchByKeyWord()
+
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("搜索有安全验证,直接跳浏览器")
+                    //PackageManagerUtils.getInstance().startApplication()
+                    searchByBrowser()
                 }
             })
             .create()
@@ -291,7 +292,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
     private fun startSearchByKeyWord() {
         val currentSearchTime = System.currentTimeMillis()
         val searchIntervalTime = currentSearchTime - mStartTime
-        if (searchIntervalTime / 1000 > 60)   //搜索时间超过1分钟,每个关键字搜索时间为1分钟
+        if (searchIntervalTime / 1000 > 30)   //搜索时间超过半分钟,每个关键字搜索时间为半分钟
         {
             //mStartTime = currentSearchTime
             inputKeyword()
@@ -321,11 +322,12 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
      * 开始查找
      */
     private fun startSearch() {
+        val searchTime = (8..30).random().toLong()
         AdbScrollUtils.instantce
             .setNodeService(nodeService)
             .setFindText(mSearchPrice!!)
-            .setScrollTotalTime(30 * 1000)
-            .setScrollSpeed(1500)
+            .setScrollTotalTime(searchTime * 1000)
+            .setScrollSpeed(1000)
             .setStartXY("540,1700")
             .setStopXY("540,1100")
             .setNodeFoundListener(object : NodeFoundListener {

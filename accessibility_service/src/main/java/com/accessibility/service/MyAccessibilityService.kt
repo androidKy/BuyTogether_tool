@@ -211,6 +211,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
             //确保同一个账号不会重复下单，应该在登陆前面执行
             val orderNumber = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
                 .getString(Constant.KEY_ORDER_NUMBER)
+            L.i("拼多多订单号：$orderNumber")
             if (!TextUtils.isEmpty(orderNumber)) {
                 setCurPageType(PageEnum.PAY_CONFIRM_PAGE)
                 confirmPayResult()
@@ -219,8 +220,14 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
             val isLogined =
                 SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getBoolean(Constant.KEY_IS_LOGINED)
+            L.i("是否已登录：$isLogined")
             if (isLogined)   //已经登录成功
             {
+                NodeController.Builder()
+                    .setNodeService(this)
+                    .setNodeParams("允许", 0, true, 18)
+                    .create()
+                    .execute()
                 afterLoginSucceed()     //任务失败，重新进来，不再重新登录
                 return
             }
@@ -371,7 +378,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
      * 验证是否支付成功
      */
     private fun verifyPaySucceed() {
-        L.i("验证是否支付成功")
+        L.i("重启PDD，验证是否支付成功")
         setCurPageType(PageEnum.PAY_CONFIRM_PAGE)
         PackageManagerUtils.getInstance()
             .restartApplication(

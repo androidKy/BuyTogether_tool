@@ -1,13 +1,10 @@
 package com.buy.together
 
 import android.app.Application
-import com.tencent.bugly.crashreport.CrashReport
 import com.orhanobut.logger.AndroidLogAdapter
-import com.orhanobut.logger.Logger.addLogAdapter
-import com.orhanobut.logger.PrettyFormatStrategy
-import com.orhanobut.logger.FormatStrategy
 import com.orhanobut.logger.Logger
-import com.orhanobut.logger.DiskLogAdapter
+import com.orhanobut.logger.PrettyFormatStrategy
+import com.tencent.bugly.crashreport.CrashReport
 
 
 
@@ -22,9 +19,9 @@ class MyBaseApplication : Application() {
 
 
         val formatStrategy = PrettyFormatStrategy.newBuilder()
-            .showThreadInfo(true)  // (Optional) Whether to show thread info or not. Default true
-            .methodCount(1)         // (Optional) How many method line to show. Default 2
-            .methodOffset(5)        // (Optional) Hides internal method calls up to offset. Default 5
+            //.showThreadInfo(true)  // (Optional) Whether to show thread info or not. Default true
+            //.methodCount(0)         // (Optional) How many method line to show. Default 2
+            //.methodOffset(0)        // (Optional) Hides internal method calls up to offset. Default 5
             .tag("Pdd_Log")   // (Optional) Global tag for every log. Default PRETTY_LOGGER
             .build()
 

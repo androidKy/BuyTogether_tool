@@ -11,16 +11,15 @@ import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.util.Constant
 import com.buy.together.fragment.MainFragment
+import com.orhanobut.logger.CsvFormatStrategy
 import com.orhanobut.logger.DiskLogAdapter
 import com.orhanobut.logger.Logger
 import com.proxy.service.LocalVpnService.START_VPN_SERVICE_REQUEST_CODE
-import com.safframework.log.L
-import com.utils.common.SPUtils
-import com.orhanobut.logger.AndroidLogAdapter
-import com.orhanobut.logger.PrettyFormatStrategy
-import com.orhanobut.logger.FormatStrategy
-import com.orhanobut.logger.CsvFormatStrategy
 import com.proxy.service.core.ProxyConfig
+import com.safframework.log.L
+import com.utils.common.CMDUtil
+import com.utils.common.SPUtils
+import com.utils.common.ThreadUtils
 import com.utils.common.ToastUtils
 
 
@@ -68,24 +67,76 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
     override fun onResume() {
         super.onResume()
+        L.i("开始申请权限")
         mMainAcViewModel?.requestPermission()
+
+    }
+
+    override fun onPermissionGranted() {
+        L.i("权限授予完成")
+        checkAccessibility()
+    }
+
+    private fun checkAccessibility() {
+        L.i("检测无障碍服务是否开启")
         if (!BaseAccessibilityService.isAccessibilitySettingsOn(
                 this,
                 MyAccessibilityService::class.java.canonicalName!!
             )
         ) {
-            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-            startActivity(intent)
-            return
-        }
-        startTask()
+            //自动开启无障碍服务
+            ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
+                override fun onSuccess(result: Boolean?) {
+                    if (result!!) {
+                        Settings.Secure.putString(
+                            this@MainActivity.contentResolver,
+                            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                            this@MainActivity.packageName + "/com.accessibility.service.MyAccessibilityService"
+                        )
+                        Settings.Secure.putInt(
+                            this@MainActivity.contentResolver,
+                            Settings.Secure.ACCESSIBILITY_ENABLED, 1
+                        )
+                        checkAccessibility()
+                    }
+                }
 
-        // 测试直接打开 PDD
+                override fun onCancel() {
+
+                }
+
+                override fun onFail(t: Throwable?) {
+
+                }
+
+                override fun doInBackground(): Boolean {
+                    val result = CMDUtil().execCmd(
+                        "pm grant ${this@MainActivity.packageName} android.permission.WRITE_SECURE_SETTINGS;"
+                    )
+                    /* "settings put secure enabled_accessibility_services ${Constant.BUY_TOGETHER_PKG}/com.accessibility.service.MyAccessibilityService;" +
+                     "settings put secure accessibility_enabled 1;"
+         )*/
+                    L.i("用adb命令开启无障碍:$result")
+                    if (result.contains("Success")) {
+                        return true
+                    }
+
+                    return true
+
+                }
+            })
+            /* val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+             startActivity(intent)
+             return*/
+        } else {
+            startTask()
+            // 测试直接打开 PDD
 //        startPdd()
 //        startBrowse()
 
-        // 支付成功，上报失败时调用。
-        // mMainAcViewModel?.updateTask(true, "success")
+            // 支付成功，上报失败时调用。
+            // mMainAcViewModel?.updateTask(true, "success")
+        }
     }
 
     /**
@@ -151,7 +202,8 @@ class MainActivity : AppCompatActivity(), MainAcView {
         if (requestCode == START_VPN_SERVICE_REQUEST_CODE) {
             L.i("VPN启动回调的Activity")
             if (resultCode == RESULT_OK) {
-                val ipPorts = SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_IP_PORTS)
+                val ipPorts =
+                    SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_IP_PORTS)
                 L.i("第一次打开VPN，需要确认允许VPN连接。ipPorts: $ipPorts")
                 mMainFragment?.startMyVpnService(ipPorts)
             } else {
@@ -171,15 +223,15 @@ class MainActivity : AppCompatActivity(), MainAcView {
     private fun startPdd() {
         //展示弹框
 
-            val launchIntentForPackage =
-                this?.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
-            if (launchIntentForPackage != null) {
-                startActivity(launchIntentForPackage)
-            } else {
-                this?.run {
-                    ToastUtils.showToast(this, "未安装拼多多")
-                }
+        val launchIntentForPackage =
+            this?.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
+        if (launchIntentForPackage != null) {
+            startActivity(launchIntentForPackage)
+        } else {
+            this?.run {
+                ToastUtils.showToast(this, "未安装拼多多")
             }
+        }
     }
 
     private fun startBrowse() {

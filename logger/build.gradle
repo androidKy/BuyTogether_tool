@@ -1,0 +1,28 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+  compileSdkVersion 28
+
+  defaultConfig {
+    minSdkVersion 21
+  }
+
+  lintOptions {
+    textReport true
+    textOutput 'stdout'
+  }
+
+  testOptions {
+    unitTests.returnDefaultValues = true
+  }
+}
+
+dependencies {
+  implementation 'com.android.support:support-annotations:28.0.0'
+
+  //implementation deps.supportAnnotations
+
+}
+
+//apply from: rootProject.file('gradle/maven_push.gradle')

@@ -44,9 +44,10 @@ dependencies {
 
     // log
 
-   api ('com.orhanobut:logger:2.2.0',{
+  /* api ('com.orhanobut:logger:2.2.0',{
        exclude group: 'com.android.support', module: 'support-annotations'
-   })
+   })*/
+    api project(':logger')
 //    implementation 'com.orhanobut:logger:2.2.0'
 }
 

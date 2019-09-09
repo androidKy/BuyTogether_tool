@@ -27,27 +27,29 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
 
     fun requestPermission() {
         val permissionArray = arrayListOf(
-            Manifest.permission.READ_PHONE_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.INTERNET
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.INTERNET
+           // Manifest.permission.WRITE_SECURE_SETTINGS
         )
-        if (!PermissionUtils.isGranted(permissionArray))
-            PermissionUtils
-                .permission(permissionArray)
-                .callback(object : PermissionUtils.FullCallback {
-                    override fun onGranted(permissionsGranted: MutableList<String>?) {
-                        saveData()
-                    }
+        PermissionUtils
+            .permission(permissionArray)
+            .callback(object : PermissionUtils.FullCallback {
+                override fun onGranted(permissionsGranted: MutableList<String>?) {
+                    saveData()
+                    mainAcView.onPermissionGranted()
+                }
 
-                    override fun onDenied(
-                        permissionsDeniedForever: MutableList<String>?,
-                        permissionsDenied: MutableList<String>?
-                    ) {
-                        ToastUtils.showToast(context, "请授予该应用相应的权限")
-                        PackageManagerUtils.getInstance().killApplication(context.packageName)
-                    }
-
-                })
-                .request()
+                override fun onDenied(
+                    permissionsDeniedForever: MutableList<String>?,
+                    permissionsDenied: MutableList<String>?
+                ) {
+                    ToastUtils.showToast(context, "请授予该应用相应的权限")
+                   // PackageManagerUtils.getInstance().killApplication(context.packageName)
+                }
+            })
+            .request()
     }
 
     /**
@@ -66,7 +68,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
             val appName = packageInfo.applicationInfo.loadLabel(context.packageManager).toString()
             // 获取到应用所在包的名字,即在AndriodMainfest中的package的值。
             val packageName = packageInfo.packageName
-            L.i("app name: $appName packageName: $packageName")
+            // L.i("app name: $appName packageName: $packageName")
 
             AppInfo().run {
                 appLabel = appName

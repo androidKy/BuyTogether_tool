@@ -60,7 +60,7 @@ class NodeController {
 
         fun setNodeParams(textList: List<String>, isScrolled: Boolean): Builder {
             for (text in textList)
-                setNodeParams(text, 0, true, isScrolled, 5, true)
+                setNodeParams(text, 0, true, isScrolled, 2, true)
 
             return this@Builder
         }
@@ -84,7 +84,12 @@ class NodeController {
         }
 
 
-        fun setNodeParams(text: String, nodeFlag: Int, timeout: Int, findNextFlag: Boolean): Builder {
+        fun setNodeParams(
+            text: String,
+            nodeFlag: Int,
+            timeout: Int,
+            findNextFlag: Boolean
+        ): Builder {
             setNodeParams(text, nodeFlag, true, false, "null", timeout, findNextFlag)
             return this@Builder
         }
@@ -151,7 +156,12 @@ class NodeController {
             return this@Builder
         }
 
-        fun setNodeParams(text: String, nodeFlag: Int, isClicked: Boolean, editInputText: String): Builder {
+        fun setNodeParams(
+            text: String,
+            nodeFlag: Int,
+            isClicked: Boolean,
+            editInputText: String
+        ): Builder {
             setNodeParams(
                 text,
                 nodeFlag,
@@ -183,11 +193,19 @@ class NodeController {
             foundNodeTimeOut: Int,
             findNextFlag: Boolean
         ): Builder {
+            if (foundNodeTimeOut >= 3) {
+                nodeTimeOutList.add(foundNodeTimeOut / 3)
+            } else {
+                if (foundNodeTimeOut == 0) {
+                    nodeTimeOutList.add(1)
+                } else
+                    nodeTimeOutList.add(foundNodeTimeOut)
+            }
             nodeTextList.add(text)
             nodeClickedList.add(isClicked)
             nodeFlagList.add(nodeFlag)
             nodeEditTextList.add(editInputText)
-            nodeTimeOutList.add(foundNodeTimeOut)
+
             nodeScrolledList.add(isScrolled)
             nodeFindNextList.add(findNextFlag)
             return this@Builder

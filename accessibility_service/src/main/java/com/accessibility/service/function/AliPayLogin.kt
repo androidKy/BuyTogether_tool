@@ -166,13 +166,32 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
             .setNodeParams("立即付款", 1, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    myAccessibilityService.postDelay(Runnable {
-                        adbInputPsw()
-                    }, 3)
+                    isPayUI()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
                     responTaskFailed("支付宝付款环节失败-$failedMsg")
+                }
+            })
+            .create()
+            .execute()
+    }
+
+    /**
+     * 是否是支付密码界面
+     */
+    private fun isPayUI() {
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("忘记密码", 1,false)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    L.i("已跳转到输入密码界面")
+                    adbInputPsw()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("找不到节点：$failedMsg")
                 }
             })
             .create()
@@ -201,6 +220,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                 override fun onTaskFinished() {
                     //支付成功
                     myAccessibilityService.postDelay(Runnable {
+                        L.i("密码已输入，准备重启PDD")
                         responTaskSuccess()
                     }, 5)
                 }
@@ -213,36 +233,36 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     /**
      *   单纯的点击后退动作。
      */
-   /* private fun backClick() {
-        myAccessibilityService.performBackClick(3, object : AfterClickedListener {
-            override fun onClicked() {
-                isFindSearch()
-            }
-        })
+    /* private fun backClick() {
+         myAccessibilityService.performBackClick(3, object : AfterClickedListener {
+             override fun onClicked() {
+                 isFindSearch()
+             }
+         })
 
-    }
+     }
 
-    private fun isFindSearch() {
-        NodeController.Builder()
-            .setNodeService(myAccessibilityService)
-            .setNodeParams("搜索", 1, false, 5, true)
-//            .setNodeParams("继续逛逛",0,false,5)   这节点找不到
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    L.i("支付成功，跳转到搜索界面")
-                    responTaskSuccess()
-                }
+     private fun isFindSearch() {
+         NodeController.Builder()
+             .setNodeService(myAccessibilityService)
+             .setNodeParams("搜索", 1, false, 5, true)
+ //            .setNodeParams("继续逛逛",0,false,5)   这节点找不到
+             .setTaskListener(object : TaskListener {
+                 override fun onTaskFinished() {
+                     L.i("支付成功，跳转到搜索界面")
+                     responTaskSuccess()
+                 }
 
-                override fun onTaskFailed(failedMsg: String) {
-                    L.i("支付失败，isFindSearch()...")
-                    backClick()
+                 override fun onTaskFailed(failedMsg: String) {
+                     L.i("支付失败，isFindSearch()...")
+                     backClick()
 
-                }
+                 }
 
-            })
-            .create()
-            .execute()
-    }*/
+             })
+             .create()
+             .execute()
+     }*/
 
     /**
      * 根据密码找到对应的xy坐标
