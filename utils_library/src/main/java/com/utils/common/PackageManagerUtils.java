@@ -70,7 +70,6 @@ public class PackageManagerUtils {
             @Override
             public Boolean doInBackground() throws Throwable {
                 CMDUtil cmdUtil = new CMDUtil();
-                cmdUtil.execCmd("settings put secure accessibility_enabled 1");
                 cmdUtil.execCmd("am force-stop " + pkgName + ";am start -n " + pkgName + "/" + activityName);
                 return false;
             }

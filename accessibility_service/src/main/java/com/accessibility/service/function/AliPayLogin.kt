@@ -183,7 +183,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     private fun isPayUI() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("忘记密码", 1,false)
+            .setNodeParams("忘记密码", 1, false)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("已跳转到输入密码界面")
@@ -221,8 +221,9 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
                     //支付成功
                     myAccessibilityService.postDelay(Runnable {
                         L.i("密码已输入，准备重启PDD")
+                        myAccessibilityService.performBackClick()
                         responTaskSuccess()
-                    }, 5)
+                    }, 6)
                 }
             })
             .create()

@@ -224,7 +224,16 @@ class MyAccessibilityService : BaseAccessibilityService() {
             {
                 NodeController.Builder()
                     .setNodeService(this)
-                    .setNodeParams("允许", 0, true, 18)
+                    .setNodeParams("个人中心", 0, false, 15)
+                    .setTaskListener(object : TaskListener {
+                        override fun onTaskFinished() {
+                            L.i("已找到个人中心")
+                        }
+
+                        override fun onTaskFailed(failedMsg: String) {
+                            this@MyAccessibilityService.performBackClick()
+                        }
+                    })
                     .create()
                     .execute()
                 afterLoginSucceed()     //任务失败，重新进来，不再重新登录

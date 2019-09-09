@@ -125,7 +125,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
     private fun isLoginSucceed() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("授权并登录", 0, 5)
+            .setNodeParams("授权并登录", 0, 9)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("授权登录，是否这里卡住.")
@@ -244,7 +244,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
     private fun authLogin() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("授权并登录", 0, 5)
+            .setNodeParams("授权并登录", 0, 9)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     loginSucceed()
@@ -266,16 +266,15 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
         //处理登录成功后跳转到见面福利
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("见面福利", 1, false, 6)
+            .setNodeParams("个人中心", 0, false, 15)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    myAccessibilityService.performBackClick()
+                    L.i("已找到个人中心")
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-
+                    myAccessibilityService.performBackClick()
                 }
-
             })
             .create()
             .execute()

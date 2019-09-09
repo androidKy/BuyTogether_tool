@@ -146,16 +146,15 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
         NodeController.Builder()
             .setNodeService(nodeService)
             .setNodeParams(fakeProvince, 0, true, true, 10, true)
-            .setNodeParams(fakeCity, 0, true, true, 10, true)
-            .setNodeParams(fakeDistrict, 0, true, true, 10, true)
-            .setNodeParams("保存", 0, true, 10)
+            .setNodeParams(fakeCity, 0, true, true, 3, true)
+            .setNodeParams(fakeDistrict, 0, true, true, 3, true)
+            .setNodeParams("保存", 0)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    nodeService.performBackClick(5, object : AfterClickedListener {
+                    nodeService.performBackClick(2, object : AfterClickedListener {
                         override fun onClicked() {
                             responSuccess()
                         }
-
                     })
                 }
 
@@ -397,7 +396,7 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
         NodeController.Builder()
             .setNodeService(nodeService)
             .setNodeParams("其他区", 0, true, true, 3, true)
-            .setNodeParams("保存")
+            .setNodeParams("保存", 0, true)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     responSuccess()
