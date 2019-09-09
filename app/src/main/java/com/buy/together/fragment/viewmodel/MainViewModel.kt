@@ -107,12 +107,18 @@ class MainViewModel(val context: Context, val mainView: MainView) :
             val imei = SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS)
                 .getString(Constant.KEY_REAL_DEVICE_IMEI)
 //            val imei = "865372021527426"
-
-
             L.i("真实imei：$imei")
             ApiManager()
                 .setDataListener(object : DataListener {
                     override fun onSucceed(result: String) {
+                        //保存服务器下发的taskId，用于判断任务是否超时
+                        try {
+                            Gson().fromJson(result,TaskBean::class.java).task.apply {
+                                SPUtils.getInstance(Constant.SP_TASK_TIME_OUT).put(Constant.KEY_TASK_ID,task_id)
+                            }
+                        } catch (e: Exception) {
+                            L.e(e.message,e)
+                        }
                         parseTaskData(result)
                     }
 
@@ -646,20 +652,19 @@ class MainViewModel(val context: Context, val mainView: MainView) :
 
             override fun onFail(t: Throwable?) {
             }
-
         })
     }
 
     /**
      * 执行一个定时器去定时获取任务
-     * todo 修改定时器时间
+     *
      */
     fun startTaskTimer(isCommentTask: Boolean) {
         TimerUtils.instance.start(object : TimerTask() {
             override fun run() {
                 getTask(isCommentTask)
             }
-        }, 10 * 1 * 1000L)
+        }, 18 * 1 * 1000L)
     }
 
     fun stopTaskTimer() {

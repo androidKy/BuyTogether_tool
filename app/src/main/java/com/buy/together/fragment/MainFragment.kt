@@ -72,7 +72,8 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         DisplayUtil.screenWidthPx = dm.widthPixels
         DisplayUtil.screenhightPx = dm.heightPixels
         DisplayUtil.screenWidthDip = DisplayUtil.px2dip(context, dm.widthPixels.toFloat()).toFloat()
-        DisplayUtil.screenHightDip = DisplayUtil.px2dip(context, dm.heightPixels.toFloat()).toFloat()
+        DisplayUtil.screenHightDip =
+            DisplayUtil.px2dip(context, dm.heightPixels.toFloat()).toFloat()
     }
 
     private fun initTableView(tableDatas: ArrayList<ArrayList<String>>) {
@@ -116,7 +117,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         if (mIsResumed) {
             mVpnFailedConnectCount = 0
             activity?.apply {
-                mIsCommentTask = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getBoolean(Constant.KEY_TASK_TYPE)
+                //mIsCommentTask = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getBoolean(Constant.KEY_TASK_TYPE)
                 LocalVpnManager.getInstance().stopVpnService(activity)
                 mViewModel?.getTask(mIsCommentTask)
             }
@@ -138,7 +139,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
             }
             taskBean.code == 201 -> //没有待领取的任务，启动一个定时器去定时获取
             {
-                mIsCommentTask = !mIsCommentTask
+                //  mIsCommentTask = !mIsCommentTask
                 mViewModel?.stopTaskTimer()
                 mViewModel?.startTaskTimer(mIsCommentTask)
                 mViewModel?.showTip(mContainer, "没有待领取的任务")
@@ -252,7 +253,8 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         activity?.run {
             val proxyIPBean = Gson().fromJson(result, ProxyIPBean::class.java)
             proxyIPBean?.data?.apply {
-                LocalVpnManager.getInstance().initData(this@run, authuser, authpass, domain, port?.get(0)?.toString())
+                LocalVpnManager.getInstance()
+                    .initData(this@run, authuser, authpass, domain, port?.get(0)?.toString())
                 LocalVpnManager.getInstance().startVpnService(this@run)
             }
         }
@@ -272,9 +274,11 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
             // mViewModel?.checkVpnConnected()
         } else {
             //VPN 连接失败
+            startTask()
         }
     }
 
+    @Deprecated("没有调用")
     override fun onResponVpnResult(result: Boolean) {
         if (result) {
             LocalVpnService.IsRunning = true
@@ -283,7 +287,8 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
             L.i("VPN连接失败，尝试重新连接次数：$mVpnFailedConnectCount")
             mVpnFailedConnectCount++
             if (mVpnFailedConnectCount < 5) {
-                val ipPorts = SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_IP_PORTS)
+                val ipPorts =
+                    SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_IP_PORTS)
                 startMyVpnService(ipPorts)
             } else {
                 context?.run {
@@ -332,10 +337,21 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     private fun startPdd() {
         //展示弹框
         mContainer?.postDelayed({
-
             val launchIntentForPackage =
                 context?.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
             if (launchIntentForPackage != null) {
+                //一个任务超时时间，超过一定时间后，根据是否还在做同一个任务，强制刷单APP重启
+                mContainer?.apply {
+                    postDelayed(Runnable {
+                        val startTaskId = SPUtils.getInstance(Constant.SP_TASK_TIME_OUT).getString(Constant.KEY_TASK_ID)
+                        val curTaskId = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getString(Constant.KEY_TASK_ID)
+                        L.i("启动Pdd时的任务ID：$startTaskId 当前任务的ID：$curTaskId")
+                        if (startTaskId == curTaskId)    //任务已超时，重新开始任务
+                        {
+                            startTask()
+                        }
+                    }, 60 * 1000 * 8)
+                }
                 startActivity(launchIntentForPackage)
             } else {
                 context?.run {

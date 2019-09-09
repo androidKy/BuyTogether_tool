@@ -21,6 +21,7 @@ import com.utils.common.CMDUtil
 import com.utils.common.SPUtils
 import com.utils.common.ThreadUtils
 import com.utils.common.ToastUtils
+import kotlin.concurrent.thread
 
 
 class MainActivity : AppCompatActivity(), MainAcView {
@@ -150,7 +151,6 @@ class MainActivity : AppCompatActivity(), MainAcView {
                 MyAccessibilityService.setTaskListener(TaskListenerImpl())
             }
         }
-
     }
 
     inner class TaskListenerImpl : TaskListener {
@@ -174,7 +174,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
     override fun onResponUpdateTask() {
         L.i("更新任务状态完成，重新开始任务")
         //PackageManagerUtils.getInstance().restartApplication(this)
-        //延迟1秒，等SP的异步清理完信息
+        //延迟2秒，等SP的异步清理完信息
         Handler(Looper.getMainLooper()).postDelayed({
             mTaskRunning = false
             startTask()
