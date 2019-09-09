@@ -266,6 +266,7 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
             .setXY(ADB_XY.PAY_NOW.name)
             .setText(buyerName!!)
             .setXY(ADB_XY.PAY_NOW.phone)
+            .setXY(ADB_XY.PAY_NOW.phone)
             .setText(buyerPhone!!)
             .setXY(ADB_XY.PAY_NOW.detailed)
             .setText(streetName!!)

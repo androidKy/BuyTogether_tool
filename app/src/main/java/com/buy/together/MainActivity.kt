@@ -82,6 +82,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
         // 测试直接打开 PDD
 //        startPdd()
+//        startBrowse()
 
         // 支付成功，上报失败时调用。
         // mMainAcViewModel?.updateTask(true, "success")
@@ -179,5 +180,19 @@ class MainActivity : AppCompatActivity(), MainAcView {
                     ToastUtils.showToast(this, "未安装拼多多")
                 }
             }
+    }
+
+    private fun startBrowse() {
+        //展示弹框
+
+        val launchIntentForPackage =
+            this?.packageManager?.getLaunchIntentForPackage(Constant.XIAOMI_BROWSER_PKG)
+        if (launchIntentForPackage != null) {
+            startActivity(launchIntentForPackage)
+        } else {
+            this?.run {
+                ToastUtils.showToast(this, "未安装拼多多")
+            }
+        }
     }
 }

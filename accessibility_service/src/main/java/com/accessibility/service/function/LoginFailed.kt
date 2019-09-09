@@ -42,7 +42,7 @@ class LoginFailed(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
     private fun dealDropLine() {
         NodeController.Builder()
             .setNodeService(nodeService)
-            .setNodeParams("请使用其它方式登录", 0, 3)
+            .setNodeParams("请使用其它方式登录", 0, 5)
             .setNodeParams("QQ登录", 0, 2)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
@@ -71,14 +71,33 @@ class LoginFailed(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                 override fun onTaskFinished() {
                     L.i("找到 ‘确定’ 节点，确认账号被封。")
                     loginFailedType = LoginFailedType.UNVAILD
-                    L.i("mTypeListenern = $mTypeListener")
-                    L.i("loginFailedType = $loginFailedType")
                     mTypeListener?.onResponType(loginFailedType!!)
 
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
+                    isFindAddAccount()
+                }
 
+            })
+            .create()
+            .execute()
+    }
+
+    /**
+     *  是否找到 “添加帐号”
+     */
+    private fun isFindAddAccount() {
+        NodeController.Builder()
+            .setNodeService(nodeService)
+            .setNodeParams("添加账号",0,false,10)
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+                    loginFailedType = LoginFailedType.ADD_ACCOUNT
+                    mTypeListener?.onResponType(loginFailedType!!)
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
                 }
 
             })

@@ -302,6 +302,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
 
                                     LoginFailedType.DROP_LINE -> dealDropLine()
                                     LoginFailedType.UNVAILD -> isUnvalid()
+                                    LoginFailedType.ADD_ACCOUNT-> dealAddAccount()
                                 }
                             }
                         })
@@ -313,6 +314,23 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
             .create()
             .execute()
 
+    }
+
+    /**
+     *  处理页面返回 “添加账号”
+     */
+    private fun dealAddAccount() {
+        myAccessibilityService
+            .performBackClick(5,object :AfterClickedListener{
+                override fun onClicked() {
+                    myAccessibilityService.performBackClick(5,object :AfterClickedListener{
+                        override fun onClicked() {
+                            retryGetQQ()
+                        }
+                    })
+                }
+
+            })
     }
 
     private fun closeQQ_TIM() {

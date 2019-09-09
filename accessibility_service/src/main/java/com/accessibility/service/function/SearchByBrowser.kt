@@ -16,11 +16,18 @@ import com.utils.common.PackageManagerUtils
  * Description:
  * Created by Quinin on 2019-08-15.
  **/
-class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService) :
-    BaseAcService(myAccessibilityService) {
+class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService) : BaseAcService(myAccessibilityService) {
 
     //540,365
     //970,140
+    companion object {
+        //    浏览器类型
+        const val BROWSER_A:String = "A"
+        const val BROWSER_B:String = "B"
+    }
+
+
+
     override fun startService() {
         //复制文本内容到剪贴板，然后打开浏览器
         val goodUrl = TaskDataUtil.instance.getGoodUrl()
@@ -66,21 +73,28 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
     private fun checkBrowseType() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("跳过", 1, 3)
-            .setNodeParams("游戏", 1, 3)
+            .setNodeParams("快如闪电", 0, 10)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    skipNavigation()
+                    browseType(BROWSER_A)
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    skipNavigation()
+                    browseType(BROWSER_B)
                 }
             })
             .create()
             .execute()
 
     }
+
+    private fun browseType(type: String) {
+        when(type){
+            BROWSER_A-> skipNavigation()
+            BROWSER_B-> openGoodUrl_TypeB()
+        }
+    }
+
 
     /**
      * 跳过导航
@@ -90,7 +104,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
             .setSwipeXY("1000,950", "100,950")
             .setSwipeXY("1000,950", "100,950")
             .setSwipeXY("1000,950", "100,950")
-            .setXY("960,175")   //点击跳过 CDJ坐标
+//            .setXY("960,175")   //点击跳过 CDJ坐标
             .setXY("960,110")   // 点击跳过 XKY坐标
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
@@ -122,8 +136,33 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("跳转商品链接失败:$failedMsg")
-                    //responFailed("跳转商品链接失败:$failedMsg")
+                    // B型机会进入此处通过搜索框搜索。
                     clickSearchBox()
+                }
+            })
+            .create()
+            .execute()
+    }
+
+    /**
+     * 打开商品链接
+     */
+    private fun openGoodUrl_TypeB() {
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("跳过",0,true,10,true)
+            .setNodeParams("同意并使用")
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+//                    L.i("已跳转到商品详情页面")
+//                    click2pdd()
+                    clickSearchBox()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+//                    L.i("跳转商品链接失败:$failedMsg")
+                    // B型机会进入此处通过搜索框搜索。
+//                    clickSearchBox()
                 }
             })
             .create()
@@ -209,4 +248,6 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
             .create()
             .execute()
     }
+
+
 }

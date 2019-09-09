@@ -268,7 +268,7 @@ object L {
 
         }*/
         msg?.apply {
-            Logger.i(this);
+                Logger.i(this);
         }
 
     }

@@ -153,12 +153,10 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                     var searchType =
                         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
                             .getInt(Constant.KEY_CUR_SEARCH_TYPE)
-                    // todo 做任务，暂时写死做任务类型为2
+                    // todo 做任务，这里可以写死搜索类型。
                     searchType = 1
 
-                    inputKeyword()
-
-//                    searchByBrowser()
+                    searchByBrowser()
 
 //                    if (taskFinishCount != null && taskFinishCount > 0 && searchType > 0) {
 //                    if (taskFinishCount != null && taskFinishCount > 0 && searchType > 0) {

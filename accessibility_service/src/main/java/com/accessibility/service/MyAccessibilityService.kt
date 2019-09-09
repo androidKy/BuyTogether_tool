@@ -116,10 +116,31 @@ class MyAccessibilityService : BaseAccessibilityService() {
             try {
                 chooseLogin()
                 confirmPayResult()
+//                test()
             } catch (e: Exception) {
                 L.e(e.message)
             }
         }
+    }
+
+    private fun test() {
+        if(!testFlag){
+            NodeController.Builder()
+                .setNodeService(this)
+                .setNodeParams("快如闪电",0,10,true)
+                .setTaskListener(object :TaskListener{
+                    override fun onTaskFinished() {
+                        L.i("？？？")
+                    }
+
+                    override fun onTaskFailed(failedMsg: String) {
+                    }
+
+                })
+                .create()
+                .execute()
+        }
+
     }
 
     private fun confirmPayResult() {
@@ -242,12 +263,36 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    L.i("$failedMsg was not found.")
-                    responTaskFailed("拼多多登录授权失败")
+                   // 有可能弹出见面福利
+                    closeBenefit()
                 }
             })
             .create()
             .execute()
+    }
+
+    private fun closeBenefit() {
+        NodeController.Builder()
+            .setNodeService(this)
+            .setNodeParams("见面福利",0,false,10)
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+                   performBackClick(3,object :AfterClickedListener{
+                       override fun onClicked() {
+                           enterLoginFailed()
+                       }
+
+                   })
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    responTaskFailed("找不到见面福利，并且登录失败")
+                }
+
+            })
+            .create()
+            .execute()
+
     }
 
     inner class LoginListenerImpl : TaskListener {
