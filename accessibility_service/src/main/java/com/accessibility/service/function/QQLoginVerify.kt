@@ -158,13 +158,26 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
 //                                checkVerifyResult()
                                 //
                                 mTaskListener?.onTaskFinished()
-
                             }
 
                             override fun onTaskFailed(failedMsg: String) {
                                 L.i("$failedMsg was not found.")
 //                                responTaskFailed("登录验证失败")
-                                checkVerifyResult()
+                                //checkVerifyResult()
+                                NodeController.Builder()
+                                    .setNodeService(myAccessibilityService)
+                                    .setNodeParams("确定", 0, false, 6)
+                                    .setTaskListener(object : TaskListener {
+                                        override fun onTaskFinished() {
+                                            responTaskFailed("账号密码错误")
+                                        }
+
+                                        override fun onTaskFailed(failedMsg: String) {
+                                            checkVerifyResult()
+                                        }
+                                    })
+                                    .create()
+                                    .execute()
 
                             }
                         })
@@ -198,7 +211,6 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
                     mTaskListener?.onTaskFinished()
                     // 可能掉线情况
                     L.i("暂时注释，LoginFailed")
-
                 }
             })
             .create()

@@ -192,22 +192,12 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
 //            L.i("验证码登录完成,检查登录结果")
             L.i("验证码检验并授权登录成功")
             loginSucceed()
-
-            // 断线情况账号、密码等数据丢失。
-//            initLoginInfo()
-//            mUserName?.apply {
-//                mUserPsw?.apply {
-//                    inputAccount(this@apply,this)
-//                }
-//            }
-//            checkLoginResult()
-
-
         }
 
         override fun onTaskFailed(failedMsg: String) {
             L.i("验证登录失败：$failedMsg")
-            responTaskFailed("验证登录失败: $failedMsg")
+            //responTaskFailed("验证登录失败: $failedMsg")
+            checkLoginResult()
         }
 
     }
@@ -289,7 +279,6 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
 //                    L.i("登录失败")
 //                    updateAccount(2)
 //                    responTaskFailed("账号登录失败：$mUserName")
-
                     //找到个人中心，上报账号，顺便执行 ADB命令强制关闭 QQ和TIM
                     SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
                         .put(Constant.KEY_IS_LOGINED, true)
