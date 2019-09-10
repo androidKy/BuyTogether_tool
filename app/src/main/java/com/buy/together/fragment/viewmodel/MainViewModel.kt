@@ -338,7 +338,7 @@ class MainViewModel(val context: Context, val mainView: MainView) :
      * 获取任务城市的相应code
      */
     private fun getCityCode(cityName: String, cityData: String) {
-        L.i("cityName: $cityName cityData string: $cityData ")
+        L.i("cityName: $cityName")
         ThreadUtils.executeByCached(object : ThreadUtils.Task<String>() {
             override fun doInBackground(): String {
                 var result: String = ""

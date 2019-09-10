@@ -81,8 +81,10 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
                 .getSingleNodeByClassName(nodeService, WidgetConstant.RECYCLERVIEW)
         } catch (e: Exception) {
             L.i("无障碍服务崩溃：${e.message}")
-            PackageManagerUtils.getInstance()
-                .restartApplication(Constant.PKG_NAME, "com.buy.together.MainActivity")
+            PackageManagerUtils.restartApplication(
+                Constant.PKG_NAME,
+                "com.buy.together.MainActivity"
+            )
         }
     }
 

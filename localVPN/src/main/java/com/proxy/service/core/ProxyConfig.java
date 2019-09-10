@@ -3,19 +3,25 @@ package com.proxy.service.core;
 import android.annotation.SuppressLint;
 import android.os.Build;
 import android.text.TextUtils;
+
 import com.androidnetworking.AndroidNetworking;
 import com.proxy.service.header.CommonMethods;
 import com.proxy.service.shadowsocks.ShadowsocksConfig;
 import com.safframework.log.L;
-import okhttp3.Response;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import okhttp3.Response;
 
 
 public class ProxyConfig {
@@ -316,7 +322,7 @@ public class ProxyConfig {
 
         int lineNumber = 0;
         for (String line : lines) {
-            L.i("line:" + line);
+            //L.i("line:" + line);
             lineNumber++;
             String[] items = line.split("\\s+");
 //            L.i("items:" + Arrays.toString(items));

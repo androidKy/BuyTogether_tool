@@ -15,13 +15,11 @@ import com.orhanobut.logger.CsvFormatStrategy
 import com.orhanobut.logger.DiskLogAdapter
 import com.orhanobut.logger.Logger
 import com.proxy.service.LocalVpnService.START_VPN_SERVICE_REQUEST_CODE
-import com.proxy.service.core.ProxyConfig
 import com.safframework.log.L
 import com.utils.common.CMDUtil
 import com.utils.common.SPUtils
 import com.utils.common.ThreadUtils
 import com.utils.common.ToastUtils
-import kotlin.concurrent.thread
 
 
 class MainActivity : AppCompatActivity(), MainAcView {
@@ -40,7 +38,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
             .build()
         Logger.addLogAdapter(DiskLogAdapter(formatStrategy))
 
-        ProxyConfig.Instance.globalMode = true
+       // ProxyConfig.Instance.globalMode = true //todo
         /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(Intent(this, KeepLiveService::class.java))
         } else {
@@ -136,7 +134,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
 //        startBrowse()
 
             // 支付成功，上报失败时调用。
-            // mMainAcViewModel?.updateTask(true, "success")
+           // mMainAcViewModel?.updateTask(true, "success")
         }
     }
 

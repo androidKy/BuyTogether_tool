@@ -13,7 +13,7 @@ import java.util.List;
  * date:2019/3/15
  */
 public class PackageManagerUtils {
-    private volatile static PackageManagerUtils mInstance;
+    /*private volatile static PackageManagerUtils mInstance;
 
     private PackageManagerUtils() {
     }
@@ -27,9 +27,9 @@ public class PackageManagerUtils {
             }
         }
         return mInstance;
-    }
+    }*/
 
-    public boolean killApplication(String packageName) {
+    public static boolean killApplication(String packageName) {
         if (TextUtils.isEmpty(packageName)) {
             return false;
         }
@@ -37,7 +37,7 @@ public class PackageManagerUtils {
         return result.contains("Success");
     }
 
-    public void startApplication(final String pkgName) {
+    public static void startApplication(final String pkgName) {
         ThreadUtils.executeByCached(new ThreadUtils.Task<Boolean>() {
             @Override
             public Boolean doInBackground() throws Throwable {
@@ -64,7 +64,7 @@ public class PackageManagerUtils {
         });
     }
 
-    public void restartApplication(final String pkgName, final String activityName) {
+    public static void restartApplication(final String pkgName, final String activityName) {
         // 关闭辅助点击
         ThreadUtils.executeByCached(new ThreadUtils.Task<Boolean>() {
             @Override

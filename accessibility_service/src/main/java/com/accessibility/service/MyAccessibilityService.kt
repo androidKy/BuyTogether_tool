@@ -124,11 +124,11 @@ class MyAccessibilityService : BaseAccessibilityService() {
     }
 
     private fun test() {
-        if(!testFlag){
+        if (!testFlag) {
             NodeController.Builder()
                 .setNodeService(this)
-                .setNodeParams("快如闪电",0,10,true)
-                .setTaskListener(object :TaskListener{
+                .setNodeParams("快如闪电", 0, 10, true)
+                .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {
                         L.i("？？？")
                     }
@@ -278,7 +278,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                   // 有可能弹出见面福利
+                    // 有可能弹出见面福利
                     closeBenefit()
                 }
             })
@@ -289,15 +289,15 @@ class MyAccessibilityService : BaseAccessibilityService() {
     private fun closeBenefit() {
         NodeController.Builder()
             .setNodeService(this)
-            .setNodeParams("见面福利",0,false,10)
-            .setTaskListener(object :TaskListener{
+            .setNodeParams("见面福利", 0, false, 10)
+            .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                   performBackClick(3,object :AfterClickedListener{
-                       override fun onClicked() {
-                           enterLoginFailed()
-                       }
+                    performBackClick(3, object : AfterClickedListener {
+                        override fun onClicked() {
+                            enterLoginFailed()
+                        }
 
-                   })
+                    })
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -383,11 +383,10 @@ class MyAccessibilityService : BaseAccessibilityService() {
     private fun verifyPaySucceed() {
         L.i("重启PDD，验证是否支付成功")
         setCurPageType(PageEnum.PAY_CONFIRM_PAGE)
-        PackageManagerUtils.getInstance()
-            .restartApplication(
-                PKG_PINDUODUO,
-                "${PKG_PINDUODUO}.ui.activity.MainFrameActivity"
-            )
+        PackageManagerUtils.restartApplication(
+            PKG_PINDUODUO,
+            "${PKG_PINDUODUO}.ui.activity.MainFrameActivity"
+        )
     }
 
 

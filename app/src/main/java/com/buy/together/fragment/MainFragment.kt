@@ -35,7 +35,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     private var mViewModel: MainViewModel? = null
     private var mVpnFailedConnectCount: Int = 0 //VPN连接失败次数
     private var mIsResumed: Boolean = false  //Fragment是否被创建
-    private var mIsCommentTask: Boolean = false  //是否是评论任务
+    private var mIsCommentTask: Boolean = true  //是否是评论任务
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_main
@@ -343,8 +343,8 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
                 //一个任务超时时间，超过一定时间后，根据是否还在做同一个任务，强制刷单APP重启
                 mContainer?.apply {
                     postDelayed(Runnable {
-                        val startTaskId = SPUtils.getInstance(Constant.SP_TASK_TIME_OUT).getString(Constant.KEY_TASK_ID)
-                        val curTaskId = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getString(Constant.KEY_TASK_ID)
+                        val startTaskId = SPUtils.getInstance(Constant.SP_TASK_TIME_OUT).getInt(Constant.KEY_TASK_ID)
+                        val curTaskId = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_ID)
                         L.i("启动Pdd时的任务ID：$startTaskId 当前任务的ID：$curTaskId")
                         if (startTaskId == curTaskId)    //任务已超时，重新开始任务
                         {

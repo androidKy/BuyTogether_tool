@@ -160,10 +160,7 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
 
     private fun restartTask() {
         myAccessibilityService.setCurPageType(PageEnum.START_PAGE)
-        //todo 为了防止不是百分百确定订单已支付
-        /* SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
-             .remove(Constant.KEY_ORDER_NUMBER)*/
-        PackageManagerUtils.getInstance().restartApplication(
+        PackageManagerUtils.restartApplication(
             Constant.BUY_TOGETHER_PKG,
             "com.buy.together.MainActivity"
         )

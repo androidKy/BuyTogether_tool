@@ -160,8 +160,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
             }
         } catch (e: Exception) {
             L.i("半查找节点无障碍服务崩溃：${e.message}")
-            PackageManagerUtils.getInstance()
-                .restartApplication(Constant.PKG_NAME, "com.buy.together.MainActivity")
+            PackageManagerUtils.restartApplication(Constant.PKG_NAME, "com.buy.together.MainActivity")
         }
         //L.i("$text not found")
         return null
@@ -208,8 +207,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
             }
         } catch (e: Exception) {
             L.i("全查找节点无障碍服务崩溃：${e.message}")
-            PackageManagerUtils.getInstance()
-                .restartApplication(Constant.PKG_NAME, "com.buy.together.MainActivity")
+            PackageManagerUtils.restartApplication(Constant.PKG_NAME, "com.buy.together.MainActivity")
         }
 
         //L.i("$text not found")

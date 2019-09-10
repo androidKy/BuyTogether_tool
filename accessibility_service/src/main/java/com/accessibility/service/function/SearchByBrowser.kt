@@ -42,7 +42,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
         clipboardManager.text = goodUrl
 
         L.i("开始打开浏览器")
-        PackageManagerUtils.getInstance().startApplication(Constant.XIAOMI_BROWSER_PKG)
+        PackageManagerUtils.startApplication(Constant.XIAOMI_BROWSER_PKG)
         /*myAccessibilityService.packageManager.getLaunchIntentForPackage(Constant.XIAOMI_BROWSER_PKG).apply {
             if (this != null)
                 myAccessibilityService.startActivity(this)
