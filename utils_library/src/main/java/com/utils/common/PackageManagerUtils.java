@@ -1,8 +1,12 @@
 package com.utils.common;
 
+import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 
 import java.util.List;
@@ -64,19 +68,24 @@ public class PackageManagerUtils {
         });
     }
 
+
     public static void restartApplication(final String pkgName, final String activityName) {
+        ActivityManager mAm = (ActivityManager) Utils.getApp().getSystemService(Context.ACTIVITY_SERVICE);
+        mAm.killBackgroundProcesses(pkgName);
+
+        startActivity(pkgName);
         // 关闭辅助点击
-        ThreadUtils.executeByCached(new ThreadUtils.Task<Boolean>() {
+       /* ThreadUtils.executeByCached(new ThreadUtils.Task<Boolean>() {
             @Override
             public Boolean doInBackground() throws Throwable {
                 CMDUtil cmdUtil = new CMDUtil();
-                cmdUtil.execCmd("am force-stop " + pkgName + ";am start -n " + pkgName + "/" + activityName);
+                cmdUtil.execCmd("am force-stop " + pkgName);
                 return false;
             }
 
             @Override
             public void onSuccess(Boolean result) {
-
+                startActivity(pkgName);
             }
 
             @Override
@@ -88,11 +97,21 @@ public class PackageManagerUtils {
             public void onFail(Throwable t) {
 
             }
-        });
+        });*/
         //android.os.Process.killProcess(android.os.Process.myPid());
        /* final Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);*/
+    }
+
+    private static void startActivity(final String pkgName) {
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = Utils.getApp().getPackageManager().getLaunchIntentForPackage(pkgName);
+                Utils.getApp().startActivity(intent);
+            }
+        }, 3000);
     }
 
 //    public void forceStopApplication() {

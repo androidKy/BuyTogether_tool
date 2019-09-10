@@ -294,7 +294,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                     SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
                         .put(Constant.KEY_IS_LOGINED, true)
                     saveAccountName()
-                    closeQQ_TIM()
+                    //closeQQ_TIM()
                     updateAccount(1)
                     myAccessibilityService.setIsLogined(true)
                     mTaskListener?.onTaskFinished()
@@ -410,7 +410,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                                         // 回到登录界面，再次拉取账号测试。
                                         // 上报错误账号，清理 QQ轻聊版，TIM数据，再重新登录
                                         updateAccount(2)
-                                        clearQQAndTimData()
+                                        //clearQQAndTimData()
 //                                    continueLoginQQ()
                                     }
                                 })

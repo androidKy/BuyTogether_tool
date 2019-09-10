@@ -5,6 +5,7 @@ import android.util.SparseIntArray
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
+import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
@@ -42,8 +43,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
             Constant.SP_TASK_FILE_NAME
         )
             .getBoolean(Constant.KEY_ALIPAY_ACCOUNT_SWITCH)
-        isSwitchAccount = false //todo 手动设置不需要切换账号登录
-        L.i("是否需要切换支付宝账号：$isSwitchAccount")
+        isSwitchAccount = false
         if (isSwitchAccount)
             login()
         else {
@@ -219,11 +219,12 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
 
                 override fun onTaskFinished() {
                     //支付成功
-                    myAccessibilityService.postDelay(Runnable {
-                        L.i("密码已输入，准备重启PDD")
-                        myAccessibilityService.performBackClick()
-                        responTaskSuccess()
-                    }, 6)
+                    myAccessibilityService.performBackClick(5, object : AfterClickedListener {
+                        override fun onClicked() {
+                            L.i("密码已输入，准备重启PDD")
+                            responTaskSuccess()
+                        }
+                    })
                 }
             })
             .create()

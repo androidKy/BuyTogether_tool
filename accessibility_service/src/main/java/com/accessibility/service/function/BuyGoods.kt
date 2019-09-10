@@ -298,7 +298,6 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
                 override fun onTaskFinished() {
                     //开始支付
 //                    payForNow()
-                    // todo 应该先查找有无 “更多支付方式”
                     hasPayMoreWay()
                 }
 
@@ -321,8 +320,7 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    // todo
-                    L.i("支付环节有BUG，待修复")
+                    responFailed(failedMsg)
                 }
 
             })
@@ -366,31 +364,6 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
             })
     }
 
-    /**
-     *  关闭支付宝
-     */
-    private fun closeAliPay() {
-        ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
-            override fun doInBackground(): Boolean {
-                val closeAlipayCMD = "am force-stop ${Constant.ALI_PAY_PKG};"
-                CMDUtil().execCmd(closeAlipayCMD)
 
-                return true
-            }
-
-            override fun onSuccess(result: Boolean?) {
-                L.i("支付成功后，成功关闭支付宝")
-            }
-
-            override fun onCancel() {
-                L.i("关闭支付宝中断")
-            }
-
-            override fun onFail(t: Throwable?) {
-                L.i("没有关闭支付宝")
-            }
-
-        })
-    }
 
 }

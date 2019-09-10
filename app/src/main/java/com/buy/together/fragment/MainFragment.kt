@@ -4,6 +4,7 @@ import android.text.TextUtils
 import android.widget.FrameLayout
 import com.accessibility.service.data.TaskBean
 import com.accessibility.service.util.Constant
+import com.buy.together.BuildConfig
 import com.buy.together.R
 import com.buy.together.base.BaseFragment
 import com.buy.together.bean.CloseProxyBean
@@ -35,7 +36,11 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     private var mViewModel: MainViewModel? = null
     private var mVpnFailedConnectCount: Int = 0 //VPN连接失败次数
     private var mIsResumed: Boolean = false  //Fragment是否被创建
-    private var mIsCommentTask: Boolean = true  //是否是评论任务
+    private var mIsCommentTask: Boolean = false  //是否是评论任务
+
+    init {
+        mIsCommentTask = BuildConfig.isCommentTask
+    }
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_main
@@ -268,13 +273,11 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         if (isRunning!!)   //代理连接成功
         {
             //protectSocket()
-
             LocalVpnService.IsRunning = true
             startPdd()
             // mViewModel?.checkVpnConnected()
         } else {
             //VPN 连接失败
-            startTask()
         }
     }
 
@@ -341,17 +344,23 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
                 context?.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
             if (launchIntentForPackage != null) {
                 //一个任务超时时间，超过一定时间后，根据是否还在做同一个任务，强制刷单APP重启
+               /* SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
+                    val taskId = getInt(Constant.KEY_TASK_ID)
+                    put(taskId.toString(), System.currentTimeMillis())
+                }
                 mContainer?.apply {
                     postDelayed(Runnable {
-                        val startTaskId = SPUtils.getInstance(Constant.SP_TASK_TIME_OUT).getInt(Constant.KEY_TASK_ID)
-                        val curTaskId = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getInt(Constant.KEY_TASK_ID)
-                        L.i("启动Pdd时的任务ID：$startTaskId 当前任务的ID：$curTaskId")
-                        if (startTaskId == curTaskId)    //任务已超时，重新开始任务
-                        {
-                            startTask()
+                        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
+                            val taskId = getInt(Constant.KEY_TASK_ID)
+                            val startTaskTime = getLong(taskId.toString())
+                            if(System.currentTimeMillis() - startTaskTime > 1000*60*7)
+                            {
+                                startTask()
+                            }
                         }
+
                     }, 60 * 1000 * 8)
-                }
+                }*/
                 startActivity(launchIntentForPackage)
             } else {
                 context?.run {

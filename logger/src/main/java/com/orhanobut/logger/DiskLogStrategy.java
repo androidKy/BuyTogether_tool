@@ -88,7 +88,6 @@ public class DiskLogStrategy implements LogStrategy {
 
       File folder = new File(folderName);
       if (!folder.exists()) {
-        //TODO: What if folder is not created, what happens then?
         folder.mkdirs();
       }
 

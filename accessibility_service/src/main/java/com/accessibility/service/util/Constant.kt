@@ -20,7 +20,6 @@ class Constant {
         const val SP_REAL_DEVICE_PARAMS = "real_device_params_sp"
         const val KEY_REAL_DEVICE_IMEI = "key_real_imei"
 
-        const val KEY_START_TASK_TIME = "key_start_task_time"   //任务开始时间
 
         const val KEY_TASK_DATA = "key_task_data"
         const val KEY_TASK_ID = "key_task_id"

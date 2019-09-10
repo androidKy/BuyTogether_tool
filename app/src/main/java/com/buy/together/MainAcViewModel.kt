@@ -13,7 +13,10 @@ import com.buy.together.base.BaseViewModel
 import com.proxy.service.core.AppInfo
 import com.proxy.service.core.AppProxyManager
 import com.safframework.log.L
-import com.utils.common.*
+import com.utils.common.DevicesUtil
+import com.utils.common.PermissionUtils
+import com.utils.common.SPUtils
+import com.utils.common.ToastUtils
 import com.utils.common.pdd_api.ApiManager
 import com.utils.common.pdd_api.DataListener
 import org.json.JSONObject
@@ -117,7 +120,12 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
      * 完成一轮任务，更新任务完成情况
      */
     fun updateTask(isSucceed: Boolean, remark: String) {
-        ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
+        val isCommentTask = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+            .getBoolean(Constant.KEY_TASK_TYPE)
+        if (isCommentTask)
+            updateCommentTask(isSucceed, remark)
+        else updateNormalTask(isSucceed, remark)
+       /* ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
             override fun doInBackground(): Boolean {
                 CmdListUtil.getInstance().apply {
                     val cmdStr = //"am force-stop ${Constant.ALI_PAY_PKG};" +
@@ -129,11 +137,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
             }
 
             override fun onSuccess(result: Boolean?) {
-                val isCommentTask = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
-                    .getBoolean(Constant.KEY_TASK_TYPE)
-                if (isCommentTask)
-                    updateCommentTask(isSucceed, remark)
-                else updateNormalTask(isSucceed, remark)
+
             }
 
             override fun onCancel() {
@@ -142,7 +146,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
             override fun onFail(t: Throwable?) {
             }
 
-        })
+        })*/
     }
 
     /**
@@ -199,7 +203,6 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
             if (!isSucceed) {
                 orderNumber = ""
                 orderMoney = ""
-                //todo 不上报任务状态，只上报错误信息，重新开始任务
                 sendTaskStatusReceiver()
                 mainAcView.onResponUpdateTask()
                 return

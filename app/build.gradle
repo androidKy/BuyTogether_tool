@@ -15,6 +15,7 @@ static def releaseTime() {
 
 android {
     compileSdkVersion 28
+    flavorDimensions 'default'
     defaultConfig {
         applicationId "com.shopping.pdd"
         minSdkVersion 21
@@ -64,6 +65,23 @@ android {
         }
     }
 
+    productFlavors{
+        normalTask{
+            applicationId "com.shopping.pdd"
+            versionCode 1
+            versionName "1.0"
+            manifestPlaceholders = [app_name:"@string/app_name"]
+            buildConfigField "boolean","isCommentTask","false"
+        }
+
+        commentTask{
+            applicationId "com.shopping.pdd"
+            versionCode 1
+            versionName "1.0"
+            manifestPlaceholders = [app_name:"@string/app_comment"]
+            buildConfigField "boolean","isCommentTask","true"
+        }
+    }
 }
 
 dependencies {

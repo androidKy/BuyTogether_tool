@@ -112,13 +112,6 @@ class MainViewModel(val context: Context, val mainView: MainView) :
                 .setDataListener(object : DataListener {
                     override fun onSucceed(result: String) {
                         //保存服务器下发的taskId，用于判断任务是否超时
-                        try {
-                            Gson().fromJson(result,TaskBean::class.java).task.apply {
-                                SPUtils.getInstance(Constant.SP_TASK_TIME_OUT).put(Constant.KEY_TASK_ID,task_id)
-                            }
-                        } catch (e: Exception) {
-                            L.e(e.message,e)
-                        }
                         parseTaskData(result)
                     }
 
@@ -254,7 +247,7 @@ class MainViewModel(val context: Context, val mainView: MainView) :
         var isClearAlipay =
             SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
                 .getBoolean(Constant.KEY_ALIPAY_ACCOUNT_SWITCH, true)
-        isClearAlipay = false //todo 手动设置不清空支付宝
+        isClearAlipay = false
         ClearDataService().clearData(isClearAlipay, object : TaskListener {
             override fun onTaskFinished() {
                 mainView.onClearDataResult("Success")

@@ -35,7 +35,7 @@ class HttpHook : HookListener {
 
                 if (paramSize != null) {
                     if (paramSize > 1) (0 until paramSize).forEach { i ->
-                        //TODO when param is object
+
                         // XposedBridge.log("$tag string format param[$i]=${param.args[i]}")
                     }
                 }

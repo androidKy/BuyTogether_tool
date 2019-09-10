@@ -19,7 +19,7 @@ class ClearDataService {
             override fun doInBackground(): Boolean {
                 var clearDataCmd = "pm clear ${Constant.QQ_TIM_PKG};" +
                         //"pm clear ${Constant.BUY_TOGETHER_PKG};" +
-                        "am force-stop ${Constant.BUY_TOGETHER_PKG};" +
+                       // "am force-stop ${Constant.BUY_TOGETHER_PKG};" +
                         "pm clear ${Constant.XIAOMI_BROWSER_PKG};"
                 val isLogined =
                     SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)

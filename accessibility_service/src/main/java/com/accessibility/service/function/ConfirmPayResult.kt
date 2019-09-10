@@ -29,20 +29,20 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
     private fun confirmGood() {
         val mallName = TaskDataUtil.instance.getMall_name()
         if (!TextUtils.isEmpty(mallName)) {
-            /*NodeController.Builder()
+            NodeController.Builder()
                 .setNodeService(myAccessibilityService)
-                .setNodeParams("个人中心", 0, true, 15)
+                .setNodeParams("允许", 0, 15)
                 .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {
-
+                        myAccessibilityService.performBackClick()
                     }
 
                     override fun onTaskFailed(failedMsg: String) {
-                        myAccessibilityService.performBackClick()
+
                     }
                 })
                 .create()
-                .execute()*/
+                .execute()
 
             NodeController.Builder()
                 .setNodeService(myAccessibilityService)
@@ -53,9 +53,8 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
                     }
 
                     override fun onTaskFailed(failedMsg: String) {
-                        myAccessibilityService.performBackClick()
-                        //responTaskFailed(failedMsg)
-                        confirmGood()
+                        responTaskFailed(failedMsg)
+                        //confirmGood()
                         /* NodeController.Builder()
                              .setNodeService(myAccessibilityService)
                              .setNodeParams("拒绝", 0, 5)
