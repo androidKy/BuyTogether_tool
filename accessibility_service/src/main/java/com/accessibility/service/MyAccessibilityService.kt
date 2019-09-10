@@ -115,7 +115,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
         ) {
             try {
                 chooseLogin()
-                confirmPayResult()
+                //confirmPayResult()
 //                test()
             } catch (e: Exception) {
                 L.e(e.message)
@@ -144,52 +144,17 @@ class MyAccessibilityService : BaseAccessibilityService() {
     }
 
     private fun confirmPayResult() {
-        if (mCurPageType == PageEnum.PAY_CONFIRM_PAGE) {
-            setCurPageType(PageEnum.PAY_SUCCEED)
-            ConfirmPayResult(this)
-                .setTaskListener(object : TaskListener {
-                    override fun onTaskFinished() {
-                        responTaskFinished()
-                    }
+        ConfirmPayResult(this)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    responTaskFinished()
+                }
 
-                    override fun onTaskFailed(failedMsg: String) {
-                        responTaskFailed(failedMsg)
-                    }
-                })
-                .startService()
-        }
-    }
-
-    /**
-     * 正在支付界面时，选择支付宝方式
-     */
-    private fun paying() {
-        if (mCurPageType == PageEnum.PAYING_PAGE) {
-            L.i("正在支付")
-            val morePayChannel = findViewByText("更多支付方式")
-            if (morePayChannel != null) {
-                performViewClick(morePayChannel, object : AfterClickedListener {
-                    override fun onClicked() {
-                        L.i("更多支付方式节点被点击")
-                        performViewClick(findViewByText("支付宝"), 0, object : AfterClickedListener {
-                            override fun onClicked() {
-                                L.i("支付宝方式被点击")
-                                setCurPageType(PageEnum.PAY_SUCCEED)
-                            }
-                        })
-                    }
-                })
-            }
-            val alipayNode = findViewByText("支付宝")
-            if (alipayNode != null) {
-                performViewClick(alipayNode, object : AfterClickedListener {
-                    override fun onClicked() {
-                        L.i("支付宝节点被点击")
-                        setCurPageType(PageEnum.PAY_SUCCEED)
-                    }
-                })
-            }
-        }
+                override fun onTaskFailed(failedMsg: String) {
+                    responTaskFailed(failedMsg)
+                }
+            })
+            .startService()
     }
 
 
@@ -212,7 +177,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 .getString(Constant.KEY_ORDER_NUMBER)
             L.i("拼多多订单号：$orderNumber")
             if (!TextUtils.isEmpty(orderNumber)) {
-                setCurPageType(PageEnum.PAY_CONFIRM_PAGE)
                 confirmPayResult()
                 return
             }
@@ -382,7 +346,10 @@ class MyAccessibilityService : BaseAccessibilityService() {
      */
     private fun verifyPaySucceed() {
         L.i("重启PDD，验证是否支付成功")
-        setCurPageType(PageEnum.PAY_CONFIRM_PAGE)
+        postDelay(Runnable {
+            setCurPageType(PageEnum.START_PAGE)
+        },2)
+
         PackageManagerUtils.restartApplication(
             PKG_PINDUODUO,
             "${PKG_PINDUODUO}.ui.activity.MainFrameActivity"
@@ -406,7 +373,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
      */
     private fun initParams() {
         setCurPageType(PageEnum.START_PAGE)
-        mIsLogined = false
         TaskDataUtil.instance.clearData()
     }
 

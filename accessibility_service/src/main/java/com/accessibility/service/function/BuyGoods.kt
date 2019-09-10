@@ -6,13 +6,9 @@ import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseAcService
 import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.listener.TaskListener
-import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.AdbScrollUtils
-import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
 import com.safframework.log.L
-import com.utils.common.CMDUtil
-import com.utils.common.ThreadUtils
 
 /**
  * Description:下订单服务
@@ -282,7 +278,6 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
     private fun setPageStatus() {
         if (!mIsConfrimChoosed) {
             mIsConfrimChoosed = true
-            nodeService.setCurPageType(PageEnum.PAYING_PAGE)
             nodeService.postDelay(Runnable {
                 chooseAddress()
             }, 5)

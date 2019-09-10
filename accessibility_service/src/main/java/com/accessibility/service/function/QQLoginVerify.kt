@@ -5,7 +5,6 @@ import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.listener.TaskListener
-import com.accessibility.service.page.PageEnum
 import com.safframework.log.L
 import com.utils.common.screen.ScreenShotActivity
 import com.utils.common.verifycode.VerifyCodeUtils
@@ -28,7 +27,7 @@ class QQLoginVerify(val myAccessibilityService: MyAccessibilityService) {
             responTaskFailed("验证码校验失败次数达到限制：$mVerifyCount")
             return
         }
-        myAccessibilityService.setCurPageType(PageEnum.VERIFY_CODE)
+        //myAccessibilityService.setCurPageType(PageEnum.VERIFY_CODE)
         screenShot()
     }
 

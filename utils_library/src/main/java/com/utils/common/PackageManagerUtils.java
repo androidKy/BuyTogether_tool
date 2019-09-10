@@ -1,7 +1,6 @@
 package com.utils.common;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Handler;
@@ -84,7 +83,7 @@ public class PackageManagerUtils {
 
             @Override
             public void onSuccess(Boolean result) {
-                startActivity(pkgName);
+                startActivity(pkgName,activityName);
             }
 
             @Override
@@ -103,12 +102,35 @@ public class PackageManagerUtils {
         context.startActivity(intent);*/
     }
 
-    private static void startActivity(final String pkgName) {
+    private static void startActivity(final String pkgName, final String activityName) {
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent intent = Utils.getApp().getPackageManager().getLaunchIntentForPackage(pkgName);
-                Utils.getApp().startActivity(intent);
+               /* Intent intent = Utils.getApp().getPackageManager().getLaunchIntentForPackage(pkgName);
+                Utils.getApp().startActivity(intent);*/
+                ThreadUtils.executeByCached(new ThreadUtils.Task<Boolean>() {
+                    @Override
+                    public Boolean doInBackground() throws Throwable {
+                        CMDUtil cmdUtil = new CMDUtil();
+                        cmdUtil.execCmd("am start -n " + pkgName + "/" + activityName);
+                        return false;
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        //startActivity(pkgName);
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+
+                    @Override
+                    public void onFail(Throwable t) {
+
+                    }
+                });
             }
         }, 3000);
     }
