@@ -29,51 +29,7 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
     private fun confirmGood() {
         val mallName = TaskDataUtil.instance.getMall_name()
         if (!TextUtils.isEmpty(mallName)) {
-            NodeController.Builder()
-                .setNodeService(myAccessibilityService)
-                .setNodeParams("允许", 0, 15)
-                .setTaskListener(object : TaskListener {
-                    override fun onTaskFinished() {
-                        myAccessibilityService.performBackClick()
-                    }
-
-                    override fun onTaskFailed(failedMsg: String) {
-
-                    }
-                })
-                .create()
-                .execute()
-
-            NodeController.Builder()
-                .setNodeService(myAccessibilityService)
-                .setNodeParams("个人中心", 0, 15)
-                .setTaskListener(object : TaskListener {
-                    override fun onTaskFinished() {
-                        dealPayResult()
-                    }
-
-                    override fun onTaskFailed(failedMsg: String) {
-                        responTaskFailed(failedMsg)
-                        //confirmGood()
-                        /* NodeController.Builder()
-                             .setNodeService(myAccessibilityService)
-                             .setNodeParams("拒绝", 0, 5)
-                             .setTaskListener(object : TaskListener {
-                                 override fun onTaskFinished() {
-                                     confirmGood()
-                                 }
-
-                                 override fun onTaskFailed(failedMsg: String) {
-                                     confirmGood()
-                                 }
-                             })
-                             .create()
-                             .execute()*/
-                    }
-
-                })
-                .create()
-                .execute()
+            dealPayResult()
 
         } else responFailed("店铺名字不能为空")
 
@@ -108,29 +64,53 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
      * 判断是否付款
      */
     private fun confirmPayAgain() {
-        /*val goodName = TaskDataUtil.instance.getGoods_name()
-        if (goodName.isNullOrEmpty()) {
-            L.i("商品名字为空,重新开始任务")
-            restartTask()
-            return
-        }*/
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("支付", 1, false, 2)
+            .setNodeParams("拼单成功", 1, false, 2)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    L.i("没有支付成功，继续去支付")
-                    dealPayFailed()
+                    L.i("参团拼单已付款")
+                    responSucceed()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    L.i("已付款")
-                    responSucceed()
+                    try {
+                        val sharedNodes =
+                            myAccessibilityService.rootInActiveWindow?.findAccessibilityNodeInfosByText(
+                                "待分享"
+                            )
+                        if (sharedNodes?.size!! > 1)    //支付成功
+                        {
+                            L.i("发起拼单已付款")
+                            responSucceed()
+                        } else {
+                            NodeController.Builder()
+                                .setNodeService(myAccessibilityService)
+                                .setNodeParams("支付", 1, false, 2)
+                                .setTaskListener(object : TaskListener {
+                                    override fun onTaskFinished() {
+                                        L.i("没有支付成功，继续去支付")
+                                        dealPayFailed()
+                                    }
+
+                                    override fun onTaskFailed(failedMsg: String) {
+
+                                    }
+                                })
+                                .create()
+                                .execute()
+                        }
+                    } catch (e: Exception) {
+                        L.e(e.message, e)
+                        responTaskFailed("待分享异常")
+                    }
                 }
+
             })
             .create()
             .execute()
     }
+
 
     /**
      * 支付失败
@@ -161,7 +141,7 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
         myAccessibilityService.setCurPageType(PageEnum.START_PAGE)
         PackageManagerUtils.restartApplication(
             Constant.BUY_TOGETHER_PKG,
-            "com.buy.together.MainActivity"
+            "${MyAccessibilityService.PKG_PINDUODUO}.ui.activity.MainFrameActivity"
         )
     }
 
@@ -169,23 +149,38 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
      * 输入支付¬密码
      */
     private fun inputPayPsw() {
-        NodeController.Builder()
-            .setNodeService(myAccessibilityService)
-            //.setNodeParams("仍然支付", 0, 5, true)
-            .setNodeParams("立即", 1, 5)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    myAccessibilityService.postDelay(Runnable {
-                        adbInputPsw()
-                    }, 3)
-                }
+        myAccessibilityService.postDelay(Runnable {
+            NodeController.Builder()
+                .setNodeService(myAccessibilityService)
+                //.setNodeParams("仍然支付", 0, 5, true)
+                .setNodeParams("立即", 1, 5)
+                .setTaskListener(object : TaskListener {
+                    override fun onTaskFinished() {
+                        NodeController.Builder()
+                            .setNodeService(myAccessibilityService)
+                            .setNodeParams("忘记密码", 1, false, 9)
+                            .setTaskListener(object : TaskListener {
+                                override fun onTaskFinished() {
+                                    L.i("已跳转到支付界面")
+                                    adbInputPsw()
+                                }
 
-                override fun onTaskFailed(failedMsg: String) {
-                    responTaskFailed("支付宝付款环节失败-$failedMsg")
-                }
-            })
-            .create()
-            .execute()
+                                override fun onTaskFailed(failedMsg: String) {
+                                    L.i("未跳转到输入密码界面:$failedMsg")
+                                    responTaskFailed(failedMsg)
+                                }
+                            })
+                            .create()
+                            .execute()
+                    }
+
+                    override fun onTaskFailed(failedMsg: String) {
+                        responTaskFailed("支付宝付款环节失败-$failedMsg")
+                    }
+                })
+                .create()
+                .execute()
+        }, 3)
     }
 
 
@@ -208,10 +203,10 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
                 }
 
                 override fun onTaskFinished() {
-                    //支付成功
+                    //支付成功 todo需要确认支付成功才上报
                     myAccessibilityService.postDelay(Runnable {
-                        responTaskSuccess()
-                    }, 5)
+                        responTaskFailed("重新打开PDD检查是否支付成功")
+                    }, 3)
                 }
             })
             .create()

@@ -160,6 +160,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
             }
         } catch (e: Exception) {
             L.i("半查找节点无障碍服务崩溃：${e.message}")
+            PackageManagerUtils.killApplication(Constant.BUY_TOGETHER_PKG)
             PackageManagerUtils.restartApplication(Constant.PKG_NAME, "com.buy.together.MainActivity")
         }
         //L.i("$text not found")

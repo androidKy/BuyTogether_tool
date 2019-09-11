@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
+
 import com.safframework.log.L;
 import com.utils.common.ToastUtils;
 
@@ -85,7 +86,7 @@ public class LocalVpnManager {
                 public void run() {
                     activity.stopService(mLocalIntent);
                 }
-            }, 200);
+            }, 1000);
         }
     }
 }

@@ -144,17 +144,33 @@ class MyAccessibilityService : BaseAccessibilityService() {
     }
 
     private fun confirmPayResult() {
-        ConfirmPayResult(this)
+        NodeController.Builder()
+            .setNodeService(this)
+            .setNodeParams("个人中心", 0, true, 6)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    responTaskFinished()
+                    L.i("已找到个人中心")
+                    ConfirmPayResult(this@MyAccessibilityService)
+                        .setTaskListener(object : TaskListener {
+                            override fun onTaskFinished() {
+                                responTaskFinished()
+                            }
+
+                            override fun onTaskFailed(failedMsg: String) {
+                                responTaskFailed(failedMsg)
+                            }
+                        })
+                        .startService()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    responTaskFailed(failedMsg)
+                    this@MyAccessibilityService.performBackClick()
+                    confirmPayResult()
                 }
             })
-            .startService()
+            .create()
+            .execute()
+
     }
 
 
@@ -186,21 +202,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
             L.i("是否已登录：$isLogined")
             if (isLogined)   //已经登录成功
             {
-                NodeController.Builder()
-                    .setNodeService(this)
-                    .setNodeParams("个人中心", 0, false, 15)
-                    .setTaskListener(object : TaskListener {
-                        override fun onTaskFinished() {
-                            L.i("已找到个人中心")
-                        }
-
-                        override fun onTaskFailed(failedMsg: String) {
-                            this@MyAccessibilityService.performBackClick()
-                        }
-                    })
-                    .create()
-                    .execute()
-                afterLoginSucceed()     //任务失败，重新进来，不再重新登录
+                findPersonal()
                 return
             }
 
@@ -226,6 +228,25 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 .create()
                 .execute()
         }
+    }
+
+    private fun findPersonal() {
+        NodeController.Builder()
+            .setNodeService(this)
+            .setNodeParams("个人中心", 0, false, 6)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    L.i("已找到个人中心")
+                    afterLoginSucceed()     //任务失败，重新进来，不再重新登录
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    this@MyAccessibilityService.performBackClick()
+                    findPersonal()
+                }
+            })
+            .create()
+            .execute()
     }
 
     private fun enterLoginFailed() {
@@ -348,8 +369,9 @@ class MyAccessibilityService : BaseAccessibilityService() {
         L.i("重启PDD，验证是否支付成功")
         postDelay(Runnable {
             setCurPageType(PageEnum.START_PAGE)
-        },2)
+        }, 2)
 
+        PackageManagerUtils.killApplication(Constant.ALI_PAY_PKG)
         PackageManagerUtils.restartApplication(
             PKG_PINDUODUO,
             "${PKG_PINDUODUO}.ui.activity.MainFrameActivity"
@@ -365,6 +387,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
     private fun responTaskFailed(msg: String) {
         //initParams()
+        setCurPageType(PageEnum.START_PAGE)
         mTaskListener?.onTaskFailed(msg)
     }
 

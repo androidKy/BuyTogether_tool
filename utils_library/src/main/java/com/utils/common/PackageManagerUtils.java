@@ -31,12 +31,32 @@ public class PackageManagerUtils {
         return mInstance;
     }*/
 
-    public static boolean killApplication(String packageName) {
+    public static void killApplication(final String packageName) {
         if (TextUtils.isEmpty(packageName)) {
-            return false;
+            return ;
         }
-        String result = new CMDUtil().execCmd("am force-stop " + packageName);
-        return result.contains("Success");
+        ThreadUtils.executeByCached(new ThreadUtils.Task<Boolean>() {
+            @Override
+            public Boolean doInBackground() throws Throwable {
+                String result = new CMDUtil().execCmd("am force-stop " + packageName);
+                return null;
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onFail(Throwable t) {
+
+            }
+        });
     }
 
     public static void startApplication(final String pkgName) {
@@ -70,7 +90,6 @@ public class PackageManagerUtils {
     public static void restartApplication(final String pkgName, final String activityName) {
       /*  ActivityManager mAm = (ActivityManager) Utils.getApp().getSystemService(Context.ACTIVITY_SERVICE);
         mAm.killBackgroundProcesses(pkgName);
-
         startActivity(pkgName);*/
         // 关闭辅助点击
         ThreadUtils.executeByCached(new ThreadUtils.Task<Boolean>() {
