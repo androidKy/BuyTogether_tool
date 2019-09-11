@@ -122,9 +122,11 @@ abstract class BaseAccessibilityService : AccessibilityService() {
     /**
      * 根据text获取节点
      */
-    fun findViewByText(text: String): AccessibilityNodeInfo? {
+
+   @Synchronized fun findViewByText(text: String): AccessibilityNodeInfo? {
         try {
-            if (rootInActiveWindow == null) {
+            val rootWindow = rootInActiveWindow
+            if (rootWindow == null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     val nodeWindowList = windows
                     //L.i("window size:${nodeWindowList.size}")
@@ -147,7 +149,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
                         }
                 }
             } else {
-                val nodeList = rootInActiveWindow.findAccessibilityNodeInfosByText(text)
+                val nodeList = rootWindow.findAccessibilityNodeInfosByText(text)
                 // L.i("nodeList size = ${nodeList.size} textList = $text ")
                 if (nodeList.size > 0) {
                     for (node in nodeList) {
@@ -161,6 +163,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         } catch (e: Exception) {
             L.i("半查找节点无障碍服务崩溃：${e.message}")
             PackageManagerUtils.killApplication(Constant.BUY_TOGETHER_PKG)
+            PackageManagerUtils.killApplication(Constant.ALI_PAY_PKG)
             PackageManagerUtils.restartApplication(Constant.PKG_NAME, "com.buy.together.MainActivity")
         }
         //L.i("$text not found")
@@ -170,9 +173,10 @@ abstract class BaseAccessibilityService : AccessibilityService() {
     /**
      * 查找与text完全相同的节点
      */
-    fun findViewByFullText(text: String): AccessibilityNodeInfo? {
+    @Synchronized fun findViewByFullText(text: String): AccessibilityNodeInfo? {
         try {
-            if (rootInActiveWindow == null) {
+            val rootWindow = rootInActiveWindow
+            if (rootWindow == null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     val nodeWindowList = windows
                     // L.i("window size:${nodeWindowList.size}")
@@ -194,9 +198,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
                         }
                 }
             } else {
-                val accessibilityNodeInfo = rootInActiveWindow ?: return null
-
-                val nodeList = accessibilityNodeInfo.findAccessibilityNodeInfosByText(text)
+                val nodeList = rootWindow.findAccessibilityNodeInfosByText(text)
 
                 if (nodeList.size > 0) {
                     for (node in nodeList) {

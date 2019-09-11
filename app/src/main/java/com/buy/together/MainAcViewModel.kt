@@ -13,10 +13,7 @@ import com.buy.together.base.BaseViewModel
 import com.proxy.service.core.AppInfo
 import com.proxy.service.core.AppProxyManager
 import com.safframework.log.L
-import com.utils.common.DevicesUtil
-import com.utils.common.PermissionUtils
-import com.utils.common.SPUtils
-import com.utils.common.ToastUtils
+import com.utils.common.*
 import com.utils.common.pdd_api.ApiManager
 import com.utils.common.pdd_api.DataListener
 import org.json.JSONObject
@@ -34,7 +31,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.INTERNET
-           // Manifest.permission.WRITE_SECURE_SETTINGS
+            // Manifest.permission.WRITE_SECURE_SETTINGS
         )
         PermissionUtils
             .permission(permissionArray)
@@ -49,7 +46,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
                     permissionsDenied: MutableList<String>?
                 ) {
                     ToastUtils.showToast(context, "请授予该应用相应的权限")
-                   // PackageManagerUtils.getInstance().killApplication(context.packageName)
+                    // PackageManagerUtils.getInstance().killApplication(context.packageName)
                 }
             })
             .request()
@@ -120,24 +117,22 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
      * 完成一轮任务，更新任务完成情况
      */
     fun updateTask(isSucceed: Boolean, remark: String) {
-        val isCommentTask = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
-            .getBoolean(Constant.KEY_TASK_TYPE)
-        if (isCommentTask)
-            updateCommentTask(isSucceed, remark)
-        else updateNormalTask(isSucceed, remark)
-       /* ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
+        ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
             override fun doInBackground(): Boolean {
                 CmdListUtil.getInstance().apply {
-                    val cmdStr = //"am force-stop ${Constant.ALI_PAY_PKG};" +
-                            "am force-stop ${Constant.BUY_TOGETHER_PKG};" +
-                            "am force-stop ${Constant.QQ_TIM_PKG};"
+                    val cmdStr = "am force-stop ${Constant.ALI_PAY_PKG};" +
+                            "am force-stop ${Constant.BUY_TOGETHER_PKG};"
                     execCmd(cmdStr)
                     return true
                 }
             }
 
             override fun onSuccess(result: Boolean?) {
-
+                val isCommentTask = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                    .getBoolean(Constant.KEY_TASK_TYPE)
+                if (isCommentTask)
+                    updateCommentTask(isSucceed, remark)
+                else updateNormalTask(isSucceed, remark)
             }
 
             override fun onCancel() {
@@ -146,7 +141,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
             override fun onFail(t: Throwable?) {
             }
 
-        })*/
+        })
     }
 
     /**

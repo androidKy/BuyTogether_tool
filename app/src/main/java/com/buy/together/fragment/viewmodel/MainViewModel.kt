@@ -106,7 +106,7 @@ class MainViewModel(val context: Context, val mainView: MainView) :
             L.i("获取正常任务")
             val imei = SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS)
                 .getString(Constant.KEY_REAL_DEVICE_IMEI)
-//            val imei = "865372021527426"
+          //  val imei = "866187037596234"
             L.i("真实imei：$imei")
             ApiManager()
                 .setDataListener(object : DataListener {

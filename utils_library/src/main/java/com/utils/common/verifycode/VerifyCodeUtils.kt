@@ -62,11 +62,13 @@ class VerifyCodeUtils {
 
                 override fun onCancel() {
                     L.i("执行验证码验证的线程被取消")
+                    resultListener.onResult("")
                 }
 
                 override fun onFail(t: Throwable?) {
                     t?.run {
                         L.e(message, this)
+                        resultListener.onResult("")
                     }
                 }
 

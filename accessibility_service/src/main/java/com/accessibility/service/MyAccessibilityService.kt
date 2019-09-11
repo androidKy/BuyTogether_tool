@@ -55,6 +55,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
         override fun onReceive(context: Context?, intent: Intent?) {
             intent?.apply {
                 if (action == ACTION_TASK_STATUS) {
+                    L.i("接收到任务状态改变的广播")
                     initParams()
                 } else if (action == ACTION_CONTINUE_TASK) {
                     afterLoginSucceed()
@@ -108,17 +109,27 @@ class MyAccessibilityService : BaseAccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-
-        val eventType = event?.eventType
-        if (eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ||
-            eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED
-        ) {
-            try {
-                chooseLogin()
-                //confirmPayResult()
+        try {
+            chooseLogin()
+            //confirmPayResult()
 //                test()
-            } catch (e: Exception) {
-                L.e(e.message)
+            clickPermission(event)
+        } catch (e: Exception) {
+            L.e(e.message)
+        }
+    }
+
+    private fun clickPermission(event: AccessibilityEvent?) {
+        event?.apply {
+            postDelay(Runnable {
+                findViewByFullText("允许")?.let {
+                    L.i("pkgName: ${this.packageName}")
+                    performViewClick(it)
+                }
+            },1)
+
+            findViewByFullText("好的")?.let {
+                performViewClick(it)
             }
         }
     }
@@ -209,8 +220,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
             NodeController.Builder()
                 .setNodeService(this@MyAccessibilityService)
-                .setNodeParams("好的", 0, 3, true)
-                .setNodeParams("允许", 0, 3, true)
+                //.setNodeParams("好的", 0, 3, true)
+                //.setNodeParams("允许", 0, 3, true)
                 .setNodeParams("请使用其它方式登录", 0, 2)
                 .setNodeParams("QQ登录", 0, 2)
                 .setTaskListener(object : TaskListener {
@@ -264,35 +275,19 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
                 override fun onTaskFailed(failedMsg: String) {
                     // 有可能弹出见面福利
-                    closeBenefit()
+                    dealAccident()
                 }
             })
             .create()
             .execute()
     }
 
-    private fun closeBenefit() {
-        NodeController.Builder()
-            .setNodeService(this)
-            .setNodeParams("见面福利", 0, false, 10)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    performBackClick(3, object : AfterClickedListener {
-                        override fun onClicked() {
-                            enterLoginFailed()
-                        }
-
-                    })
-                }
-
-                override fun onTaskFailed(failedMsg: String) {
-                    responTaskFailed("找不到见面福利，并且登录失败")
-                }
-
-            })
-            .create()
-            .execute()
-
+    private fun dealAccident() {
+        performBackClick(2, object : AfterClickedListener {
+            override fun onClicked() {
+                enterLoginFailed()
+            }
+        })
     }
 
     inner class LoginListenerImpl : TaskListener {
@@ -387,7 +382,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
     private fun responTaskFailed(msg: String) {
         //initParams()
-        setCurPageType(PageEnum.START_PAGE)
         mTaskListener?.onTaskFailed(msg)
     }
 

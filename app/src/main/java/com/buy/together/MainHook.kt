@@ -8,14 +8,37 @@ import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 
 class MainHook : IXposedHookLoadPackage {
+   /* override fun initZygote(startupParam: IXposedHookZygoteInit.StartupParam?) {
+        try {
+            XposedBridge.hookAllMethods(
+                XposedHelpers.findClass(
+                    "com.android.internal.policy.impl.PhoneWindowManager",
+                    this::class.java.classLoader
+                ), "checkAddPermission", object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam?) {
+                        param?.result = 0
+                        *//*if (param?.args?.get(0) != null && param.args[0] is WindowManager.LayoutParams) {
+                            val params = param.args[0] as WindowManager.LayoutParams
+
+                            if (params.type == WindowManager.LayoutParams.TYPE_SYSTEM_ERROR) {
+                                param.result = 0  //当检测到是系统错误对话框时，返回0，即ok！
+                            }
+                        }*//*
+                    }
+                })
+        } catch (e: Exception) {
+
+        }
+    }*/
+
+
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam?) {
         val packageName = lpparam?.packageName
 
         if (TextUtils.isEmpty(packageName))
             return
 
-        if(packageName.equals(Constant.ALI_PAY_PKG))
-        {
+        if (packageName.equals(Constant.ALI_PAY_PKG)) {
             lpparam?.apply {
                 CloakHook().hook(this)
             }

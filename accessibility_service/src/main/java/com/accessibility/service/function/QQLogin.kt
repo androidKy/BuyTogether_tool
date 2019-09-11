@@ -253,21 +253,6 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
      * 登录成功
      */
     private fun loginSucceed() {
-        //处理登录成功后跳转到见面福利
-        NodeController.Builder()
-            .setNodeService(myAccessibilityService)
-            .setNodeParams("个人中心", 0, false, 15)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    L.i("已找到个人中心")
-                }
-
-                override fun onTaskFailed(failedMsg: String) {
-                    myAccessibilityService.performBackClick()
-                }
-            })
-            .create()
-            .execute()
 
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
@@ -291,6 +276,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
 
 
                 override fun onTaskFailed(failedMsg: String) {
+                    myAccessibilityService.performBackClick()
 //                    L.i("登录成功，账号ID: $mUserId 账号名: $mUserName")
 //                    isNeedAddAccount()
                     /* saveAccountName()

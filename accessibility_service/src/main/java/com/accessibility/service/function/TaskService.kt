@@ -57,7 +57,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
      * 开始做任务
      */
     private fun scanGoods() {
-        mScanGoodTime = (10..15).random()
+        mScanGoodTime = (8..20).random()
 
         try {
             NodeUtils.instance
@@ -103,6 +103,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
         override fun onScrollFinished(nodeInfo: AccessibilityNodeInfo) {
             L.i("浏览完成,根据任务类型是否需要进行下一步任务")
             mTaskProgress.append("1")
+            saveTaskProgress(mTaskProgress.toString())
             TaskDataUtil.instance.getTask_type()?.apply {
                 when (this) {
                     12, 123, 124, 1234 -> talkWithSaler()
@@ -130,6 +131,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
             L.i("已聊过天")
             //continueTask()
             mTaskProgress.append("2")
+            saveTaskProgress(mTaskProgress.toString())
             TaskDataUtil.instance.getTask_type()?.apply {
                 when (this) {
                     23, 234, 123, 1234 -> collectGoods()
@@ -172,6 +174,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
      */
     private fun continueTask() {
         mTaskProgress.append("2")
+        saveTaskProgress(mTaskProgress.toString())
         nodeService.performBackClick(2, object : AfterClickedListener {
             override fun onClicked() {
                 TaskDataUtil.instance.getTask_type()?.apply {
@@ -195,6 +198,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("$failedMsg was not found.商品已收藏")
                     mTaskProgress.append("3")
+                    saveTaskProgress(mTaskProgress.toString())
                     TaskDataUtil.instance.getTask_type()?.apply {
                         when (this) {
                             1234, 134, 234, 34 -> buyGoods()
@@ -208,6 +212,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
                 override fun onTaskFinished() {
                     L.i("商品已收藏")
                     mTaskProgress.append("3")
+                    saveTaskProgress(mTaskProgress.toString())
                     TaskDataUtil.instance.getTask_type()?.apply {
                         when (this) {
                             1234, 134, 234, 34 -> buyGoods()
@@ -232,6 +237,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     mTaskProgress.append("4")
+                    saveTaskProgress(mTaskProgress.toString())
                     responSuccess()
                 }
 
@@ -273,19 +279,19 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
      * 保存任务进度
      */
     private fun saveTaskProgress(progress: String) {
-        //任务进度 todo
+        //任务进度
         SPUtils.getInstance(nodeService, Constant.SP_TASK_FILE_NAME)
-            .put(Constant.KEY_TASK_PROGRESS, progress)
+            .put(Constant.KEY_TASK_PROGRESS, progress, true)
     }
 
 
     private fun responFailed(failedMsg: String) {
-        saveTaskProgress(mTaskProgress.toString())
+        //saveTaskProgress(mTaskProgress.toString())
         mTaskFinishedListener?.onTaskFailed(failedMsg)
     }
 
     private fun responSuccess() {
-        saveTaskProgress(mTaskProgress.toString())
+        //saveTaskProgress(mTaskProgress.toString())
         mTaskFinishedListener?.onTaskFinished()
     }
 }

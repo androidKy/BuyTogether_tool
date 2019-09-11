@@ -94,7 +94,8 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
                                     }
 
                                     override fun onTaskFailed(failedMsg: String) {
-
+                                        L.i("有订单号却找不到订单去支付")
+                                        responTaskFailed(failedMsg)
                                     }
                                 })
                                 .create()
@@ -158,7 +159,7 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
                     override fun onTaskFinished() {
                         NodeController.Builder()
                             .setNodeService(myAccessibilityService)
-                            .setNodeParams("忘记密码", 1, false, 9)
+                            .setNodeParams("忘记密码", 1, false, 8)
                             .setTaskListener(object : TaskListener {
                                 override fun onTaskFinished() {
                                     L.i("已跳转到支付界面")
