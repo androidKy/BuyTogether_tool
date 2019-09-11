@@ -121,7 +121,8 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
             override fun doInBackground(): Boolean {
                 CmdListUtil.getInstance().apply {
                     val cmdStr = "am force-stop ${Constant.ALI_PAY_PKG};" +
-                            "am force-stop ${Constant.BUY_TOGETHER_PKG};"
+                            "am force-stop ${Constant.BUY_TOGETHER_PKG};"+
+                            "am force-stop ${Constant.XIAOMI_BROWSER_PKG};"
                     execCmd(cmdStr)
                     return true
                 }

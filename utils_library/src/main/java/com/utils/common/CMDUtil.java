@@ -185,7 +185,7 @@ public class CMDUtil {
      */
     public void asyncProcessDestroy(final Process process) {
         //processDestroy(process);
-        ThreadUtils.executeByCached(new ThreadUtils.Task<Boolean>() {
+      /*  ThreadUtils.executeByCached(new ThreadUtils.Task<Boolean>() {
             @Override
             public Boolean doInBackground() throws Throwable {
                 processDestroy(process);
@@ -206,14 +206,14 @@ public class CMDUtil {
             public void onFail(Throwable t) {
 
             }
-        });
-       /* Thread thread = new Thread(new Runnable() {
+        });*/
+        Thread thread = new Thread("Daemon") {
             @Override
             public void run() {
                 processDestroy(process);
             }
-        });
+        };
         thread.setDaemon(true);
-        thread.start();*/
+        thread.start();
     }
 }
