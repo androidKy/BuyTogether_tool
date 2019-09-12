@@ -1,5 +1,6 @@
 package com.accessibility.service.function
 
+import android.content.Intent
 import android.text.TextUtils
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.auto.AdbScriptController
@@ -10,6 +11,8 @@ import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.LoginFailedType
 import com.accessibility.service.util.Constant
+import com.accessibility.service.util.DeviceParams
+import com.accessibility.service.util.PackageManagerUtils
 import com.accessibility.service.util.TaskDataUtil
 import com.google.gson.Gson
 import com.safframework.log.L
@@ -83,9 +86,9 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
+                    L.i("跳转不到QQ登录界面")
                     responTaskFailed("跳转不到QQ登录界面")
                 }
-
             })
             .create()
             .execute()
@@ -171,7 +174,6 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                 override fun onTaskFinished() {
                     L.i("开始验证码校验")
                     QQLoginVerify(myAccessibilityService).startVerify(VerifyCodeListener())
-
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -261,12 +263,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
             .setTaskListener(object : TaskListener {
 
                 override fun onTaskFinished() {
-//                    L.i("登录失败")
-//                    updateAccount(2)
-//                    responTaskFailed("账号登录失败：$mUserName")
-                    //找到个人中心，上报账号，顺便执行 ADB命令强制关闭 QQ和TIM
-                    SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
-                        .put(Constant.KEY_IS_LOGINED, true)
+                    SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).put(Constant.KEY_IS_LOGINED, true)
                     saveAccountName()
                     //closeQQ_TIM()
                     updateAccount(1)
@@ -274,16 +271,8 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                     mTaskListener?.onTaskFinished()
                 }
 
-
                 override fun onTaskFailed(failedMsg: String) {
                     myAccessibilityService.performBackClick()
-//                    L.i("登录成功，账号ID: $mUserId 账号名: $mUserName")
-//                    isNeedAddAccount()
-                    /* saveAccountName()
-                     updateAccount(1)
-                     myAccessibilityService.setIsLogined(true)
-                     mTaskListener?.onTaskFinished()*/
-
                     L.i("找不到个人中心。。。")
                     LoginFailed(myAccessibilityService)
                         .setTypeListener(object : LoginFailed.TypeListener {
@@ -299,8 +288,6 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                         })
                         .startService()
                 }
-
-
             })
             .create()
             .execute()
@@ -485,7 +472,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    responTaskFailed("账号涉嫌违规被冻结: $failedMsg was not found.")
+
                 }
             })
             .create()
@@ -501,11 +488,13 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
             responTaskFailed("${mUserName}账号失效，评论任务失败")
             return
         }
-        if (mLoginFailedCount <= 18) {
-            getAccount()
+        //重新取数据并且重新打开pdd开始任务
+        getAccount()
+        /*if (mLoginFailedCount <= 18) {
+
         } else {
             responTaskFailed("重新拉取账号超过10次")
-        }
+        }*/
     }
 
     /**
@@ -522,26 +511,48 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                     override fun onSucceed(result: String) {
                         try {
                             L.i("获取账号结果：$result")
-                            val accountBean = Gson().fromJson(result, AccountBean::class.java)
-                            if (accountBean.code != 200) {
-                                L.i("重新拉取账号失败: ${accountBean.code}")
-                                return
-                            }
-                            accountBean.data.apply {
-                                account.run {
-                                    updateTaskData(this)
-                                    mTaskListener?.let {
-                                        //更新账号信息
-                                        if (!TextUtils.isEmpty(user) && !TextUtils.isEmpty(pwd)) {
-                                            mUserName = user
-                                            mUserPsw = pwd
-                                            mUserId = id
-                                            mLoginFailedCount++
-                                            login(mUserName!!, mUserPsw!!)
-                                        } else responTaskFailed("账号密码为空")
+                            val taskBean = Gson().fromJson(result,TaskBean::class.java)
+                            if(taskBean.code == 200)
+                            {
+                                saveData(result)
+
+                                ClearDataService().clearData(object:TaskListener{
+                                    override fun onTaskFinished() {
+                                        myAccessibilityService.sendBroadcast(Intent(MyAccessibilityService.ACTION_TASK_STATUS))
+                                        PackageManagerUtils.startActivity(Constant.BUY_TOGETHER_PKG,
+                                            "${Constant.BUY_TOGETHER_PKG}.ui.activity.MainFrameActivity")
                                     }
-                                }
+
+                                    override fun onTaskFailed(failedMsg: String) {
+                                        L.i("清理数据失败")
+                                        myAccessibilityService.sendBroadcast(Intent(MyAccessibilityService.ACTION_TASK_STATUS))
+                                        PackageManagerUtils.startActivity(Constant.BUY_TOGETHER_PKG,
+                                            "${Constant.BUY_TOGETHER_PKG}.ui.activity.MainFrameActivity")
+                                    }
+                                })
+                            }else{
+                                responTaskFailed("重新拉取账号失败:${taskBean.msg}")
                             }
+                            /* val accountBean = Gson().fromJson(result, AccountBean::class.java)
+                             if (accountBean.code != 200) {
+                                 L.i("重新拉取账号失败: ${accountBean.code}")
+                                 return
+                             }
+                             accountBean.data.apply {
+                                 account.run {
+                                     updateTaskData(this)
+                                     mTaskListener?.let {
+                                         //更新账号信息
+                                         if (!TextUtils.isEmpty(user) && !TextUtils.isEmpty(pwd)) {
+                                             mUserName = user
+                                             mUserPsw = pwd
+                                             mUserId = id
+                                             mLoginFailedCount++
+                                             login(mUserName!!, mUserPsw!!)
+                                         } else responTaskFailed("账号密码为空")
+                                     }
+                                 }
+                             }*/
                         } catch (e: Exception) {
                             L.e(e.message)
                             responTaskFailed("重新获取账号失败: ${e.message}")
@@ -555,6 +566,62 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
         } else {
             responTaskFailed("任务ID不存在，拉取账号失败")
         }
+    }
+
+    /**
+     * 保存数据，重新打开拼多多
+     */
+    private fun saveData(strData: String) {
+        /* taskBean.task.account.id = 3234
+         taskBean.task.account.user = "210289767"
+         taskBean.task.account.pwd="gx95k1g8ra"*/
+        val spUtils = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+        spUtils.put(Constant.KEY_TASK_DATA, strData, true)
+        val taskBean = Gson().fromJson(strData, TaskBean::class.java)
+
+        saveUploadParams(taskBean)
+        saveDeviceParams(taskBean)
+    }
+
+    /**
+     * 保存请求接口需要上传的参数
+     */
+    private fun saveUploadParams(taskBean: TaskBean) {
+        val spUtils = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+        taskBean.task?.apply {
+            spUtils.apply {
+                L.i("保存的任务ID：$task_id")
+                put(Constant.KEY_TASK_ID, task_id,true)
+
+                account?.let {
+                    put(Constant.KEY_ACCOUNT_ID, it.id, true)
+                }
+            }
+        }
+    }
+
+    /**
+     * 保存设备参数
+     */
+    private fun saveDeviceParams(taskBean: TaskBean) {
+        val spUtils = SPUtils.getInstance(Constant.SP_DEVICE_PARAMS)
+        taskBean.task?.device?.run {
+            spUtils.apply {
+                L.i(
+                    "模拟imei: $imei 真实imei: ${SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS)
+                        .getString(Constant.KEY_REAL_DEVICE_IMEI)}"
+                )
+                put(DeviceParams.IMEI_KEY, imei, true)
+                put(DeviceParams.IMSI_KEY, imsi, true)
+                put(DeviceParams.MAC_KEY, mac, true)
+                put(DeviceParams.USER_AGENT_KEY, useragent, true)
+                put(DeviceParams.BRAND_KEY, brand, true)
+                put(DeviceParams.MODEL_KEY, model, true)
+                put(DeviceParams.SDK_KEY, android, true)
+                put(DeviceParams.SYSTEM_KEY, system, true)
+            }
+        }
+
     }
 
     /**

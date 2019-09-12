@@ -8,9 +8,9 @@ import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseAcService
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.util.Constant
+import com.accessibility.service.util.PackageManagerUtils
 import com.accessibility.service.util.TaskDataUtil
 import com.safframework.log.L
-import com.utils.common.PackageManagerUtils
 
 /**
  * Description:
@@ -42,7 +42,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
         clipboardManager.text = goodUrl
 
         L.i("开始打开浏览器")
-        PackageManagerUtils.startApplication(Constant.XIAOMI_BROWSER_PKG)
+        PackageManagerUtils.startXiaomiBrowser(Constant.XIAOMI_BROWSER_PKG)
         /*myAccessibilityService.packageManager.getLaunchIntentForPackage(Constant.XIAOMI_BROWSER_PKG).apply {
             if (this != null)
                 myAccessibilityService.startActivity(this)
@@ -53,7 +53,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
             L.i("浏览器已打开")
             checkBrowseType()
 //            skipNavigation()
-        }, 8)
+        }, 5)
         /* NodeController.Builder()
              .setNodeService(myAccessibilityService)
              .setNodeFoundListener(object : TaskListener {

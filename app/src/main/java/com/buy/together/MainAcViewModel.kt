@@ -6,7 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.provider.Settings
 import com.accessibility.service.MyAccessibilityService
+import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.util.Constant
 import com.accessibility.service.util.UpdateSPManager
 import com.buy.together.base.BaseViewModel
@@ -111,6 +113,63 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
                 put(Constant.KEY_REAL_DEVICE_IMEI, DevicesUtil.getIMEI(context))
         }
 
+    }
+
+    /**
+     * 检查无障碍服务是否开启
+     */
+    fun checkAccessibilityService(){
+        L.i("检测无障碍服务是否开启")
+        if (!BaseAccessibilityService.isAccessibilitySettingsOn(
+                context,
+                MyAccessibilityService::class.java.canonicalName!!
+            )
+        ) {
+            //自动开启无障碍服务
+            ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
+                override fun onSuccess(result: Boolean?) {
+                    if (result!!) {
+                        Settings.Secure.putString(
+                            context.contentResolver,
+                            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                            context.packageName + "/com.accessibility.service.MyAccessibilityService"
+                        )
+                        Settings.Secure.putInt(
+                            context.contentResolver,
+                            Settings.Secure.ACCESSIBILITY_ENABLED, 1
+                        )
+                        checkAccessibilityService()
+                    }
+                }
+
+                override fun onCancel() {
+
+                }
+
+                override fun onFail(t: Throwable?) {
+
+                }
+
+                override fun doInBackground(): Boolean {
+                    val result = CMDUtil().execCmd(
+                        "pm grant ${context.packageName} android.permission.WRITE_SECURE_SETTINGS;"
+                    )
+                    /* "settings put secure enabled_accessibility_services ${Constant.BUY_TOGETHER_PKG}/com.accessibility.service.MyAccessibilityService;" +
+                     "settings put secure accessibility_enabled 1;"
+         )*/
+                    L.i("用adb命令开启无障碍:$result")
+                    if (result.contains("Success")) {
+                        return true
+                    }
+
+                    return true
+
+                }
+            })
+
+        } else {
+            mainAcView.onAccessibilityService()
+        }
     }
 
     /**

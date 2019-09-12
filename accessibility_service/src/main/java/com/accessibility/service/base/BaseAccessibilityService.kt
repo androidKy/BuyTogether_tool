@@ -13,10 +13,10 @@ import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.Constant
+import com.accessibility.service.util.PackageManagerUtils
 import com.accessibility.service.util.TaskDataUtil
 import com.google.gson.Gson
 import com.safframework.log.L
-import com.utils.common.PackageManagerUtils
 import com.utils.common.SPUtils
 
 /**

@@ -20,23 +20,23 @@ class ApiManager {
 
     companion object {
         private const val URL_SERVER_DOMAIN: String = "49.234.51.174:8000"
-        private const val URL_TEST_DOMAIN: String = "192.168.0.117:8080"
+        private const val URL_TEST_DOMAIN: String = "118.25.137.21:8000"
         private const val URL_HTTP: String = "http://"
         const val POST_JSON_CONTENT_TYPE: String = "application/json"
 
-         const val URL_GET_TASK: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/get/"
-         const val URL_GET_COMMENT_TASK: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/comment/"
-         const val URL_UPDATE_TASK_INFO: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/inform/"
-         const val URL_GET_ACCOUNT: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/account/?id="
-         const val URL_UPDATE_ACCOUNT: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/account/"
-         const val URL_GET_ADDRESS: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/address/"
+        /*  const val URL_GET_TASK: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/get/"
+          const val URL_GET_COMMENT_TASK: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/comment/"
+          const val URL_UPDATE_TASK_INFO: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/inform/"
+          const val URL_GET_ACCOUNT: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/account/?id="
+          const val URL_UPDATE_ACCOUNT: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/account/"
+          const val URL_GET_ADDRESS: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/address/"*/
 
-        /*const val URL_GET_TASK: String = "$URL_HTTP$URL_TEST_DOMAIN/task/get/"
+        const val URL_GET_TASK: String = "$URL_HTTP$URL_TEST_DOMAIN/task/get/"
         const val URL_GET_COMMENT_TASK: String = "$URL_HTTP$URL_TEST_DOMAIN/task/comment/"
         const val URL_UPDATE_TASK_INFO: String = "$URL_HTTP$URL_TEST_DOMAIN/task/inform/"
         const val URL_GET_ACCOUNT: String = "$URL_HTTP$URL_TEST_DOMAIN/others/account/?id="
         const val URL_UPDATE_ACCOUNT: String = "$URL_HTTP$URL_TEST_DOMAIN/others/account/"
-        const val URL_GET_ADDRESS: String = "$URL_HTTP$URL_TEST_DOMAIN/others/address/"*/
+        const val URL_GET_ADDRESS: String = "$URL_HTTP$URL_TEST_DOMAIN/others/address/"
     }
 
     init {

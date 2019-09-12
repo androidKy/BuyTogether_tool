@@ -154,6 +154,9 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
                 context?.run {
                     mViewModel?.showTip(mContainer, "获取数据失败：${taskBean.msg}")
                     ToastUtils.showToast(this, "获取数据失败：${taskBean.msg}")
+
+                    mViewModel?.stopTaskTimer()
+                    mViewModel?.startTaskTimer(mIsCommentTask)
                 }
             }
         }
@@ -187,14 +190,6 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         if (result == "Success") {
 //            startPdd()  //不用代理
             getPort() //用代理
-            /*  val curPort = SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_CUR_PORT)
-              if (!TextUtils.isEmpty(curPort) && LocalVpnService.IsRunning) {  //如果端口不为空
-                  //stopMyVpnService()
-                  L.i("关闭端口：$curPort")
-                  mViewModel?.closePort(curPort)
-              } else {
-
-              }*/
         } else {
             context?.apply {
                 mViewModel?.showTip(mContainer, "应用未获得root权限")
@@ -216,7 +211,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     private fun closePort() {
         val curPort = SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_CUR_PORT)
         if (!TextUtils.isEmpty(curPort)) {  //如果端口不为空
-            //stopMyVpnService()
+            //stopMyVpnService(
             L.i("开始关闭端口：$curPort")
             mViewModel?.closePort(curPort)
         } else {
@@ -234,9 +229,11 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     }
 
     override fun onResponPortsFailed(errorMsg: String) {
-        ToastUtils.showToast(context!!, errorMsg)
         L.i("请求代理数据出错：$errorMsg")
-        startTask()
+        context?.apply {
+            ToastUtils.showToast(this, errorMsg)
+            //startTask()
+        }
     }
 
     /**
@@ -344,23 +341,23 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
                 context?.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
             if (launchIntentForPackage != null) {
                 //一个任务超时时间，超过一定时间后，根据是否还在做同一个任务，强制刷单APP重启
-               /* SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
-                    val taskId = getInt(Constant.KEY_TASK_ID)
-                    put(taskId.toString(), System.currentTimeMillis())
-                }
-                mContainer?.apply {
-                    postDelayed(Runnable {
-                        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
-                            val taskId = getInt(Constant.KEY_TASK_ID)
-                            val startTaskTime = getLong(taskId.toString())
-                            if(System.currentTimeMillis() - startTaskTime > 1000*60*7)
-                            {
-                                startTask()
-                            }
-                        }
+                /* SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
+                     val taskId = getInt(Constant.KEY_TASK_ID)
+                     put(taskId.toString(), System.currentTimeMillis())
+                 }
+                 mContainer?.apply {
+                     postDelayed(Runnable {
+                         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
+                             val taskId = getInt(Constant.KEY_TASK_ID)
+                             val startTaskTime = getLong(taskId.toString())
+                             if(System.currentTimeMillis() - startTaskTime > 1000*60*7)
+                             {
+                                 startTask()
+                             }
+                         }
 
-                    }, 60 * 1000 * 8)
-                }*/
+                     }, 60 * 1000 * 8)
+                 }*/
                 startActivity(launchIntentForPackage)
             } else {
                 context?.run {

@@ -59,7 +59,7 @@ class ClearDataService {
         })
     }
 
-    fun clearData(taskListener: TaskListener) {
+    fun  clearData(taskListener: TaskListener) {
         //请求root权限，并且清理QQ登录的数据
         clearData(false, taskListener)
     }
