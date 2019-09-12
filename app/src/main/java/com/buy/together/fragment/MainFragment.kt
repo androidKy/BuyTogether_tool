@@ -118,6 +118,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     /**
      * 开始任务
      */
+    @Synchronized
     fun startTask() {
         if (mIsResumed) {
             mVpnFailedConnectCount = 0

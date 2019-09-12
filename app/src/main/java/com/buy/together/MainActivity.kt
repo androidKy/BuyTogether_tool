@@ -27,7 +27,9 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
 
     private var mMainFragment: MainFragment? = null
+
     private var mTaskRunning: Boolean = false
+
     private var mMainAcViewModel: MainAcViewModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -142,6 +144,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
     /**
      * 开始任务
      */
+    @Synchronized
     private fun startTask() {
         mMainFragment?.apply {
             if (!mTaskRunning) {

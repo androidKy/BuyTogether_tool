@@ -126,7 +126,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
                     L.i("pkgName: ${this.packageName}")
                     performViewClick(it)
                 }
-            },1)
+            },2)
 
             findViewByFullText("好的")?.let {
                 performViewClick(it)
@@ -146,7 +146,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
                     override fun onTaskFailed(failedMsg: String) {
                     }
-
                 })
                 .create()
                 .execute()
@@ -362,15 +361,22 @@ class MyAccessibilityService : BaseAccessibilityService() {
      */
     private fun verifyPaySucceed() {
         L.i("重启PDD，验证是否支付成功")
+        val launchIntentForPackage =
+            packageManager?.getLaunchIntentForPackage(Constant.PKG_NAME)
+        launchIntentForPackage?.apply {
+            startActivity(this)
+        }
+
         postDelay(Runnable {
             setCurPageType(PageEnum.START_PAGE)
-        }, 2)
 
-        PackageManagerUtils.killApplication(Constant.ALI_PAY_PKG)
-        PackageManagerUtils.restartApplication(
-            PKG_PINDUODUO,
-            "${PKG_PINDUODUO}.ui.activity.MainFrameActivity"
-        )
+            PackageManagerUtils.killApplication(Constant.ALI_PAY_PKG)
+            PackageManagerUtils.restartApplication(
+                PKG_PINDUODUO,
+                "${PKG_PINDUODUO}.ui.activity.MainFrameActivity"
+            )
+        }, 5)
+
     }
 
 

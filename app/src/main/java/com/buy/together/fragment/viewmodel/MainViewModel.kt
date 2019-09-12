@@ -106,7 +106,7 @@ class MainViewModel(val context: Context, val mainView: MainView) :
             L.i("获取正常任务")
             val imei = SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS)
                 .getString(Constant.KEY_REAL_DEVICE_IMEI)
-          //  val imei = "866187037596234"
+            //  val imei = "866187037596234"
             L.i("真实imei：$imei")
             ApiManager()
                 .setDataListener(object : DataListener {
@@ -410,7 +410,10 @@ class MainViewModel(val context: Context, val mainView: MainView) :
             .addBodyParameter(Constant.POST_PARAM_METHOD, "getPort")
             .addBodyParameter(Constant.POST_PARAM_PLATFORMID, "2")
             .addBodyParameter(Constant.POST_PARAM_AREA, finalCityId)
-            .addBodyParameter(Constant.POST_PARAM_IMEI, DevicesUtil.getIMEI(context))
+            .addBodyParameter(
+                Constant.POST_PARAM_IMEI, SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS)
+                    .getString(Constant.KEY_REAL_DEVICE_IMEI)
+            )
             .addBodyParameter(Constant.POST_PARAM_NUMBER, 1.toString())
             .build()
             .getAsJSONObject(object : JSONObjectRequestListener {
@@ -446,6 +449,7 @@ class MainViewModel(val context: Context, val mainView: MainView) :
 
     /**
      * 关闭端口
+     *
      */
     fun closePort(curPort: String) {
         AndroidNetworking.post(Constant.URL_PROXY_IP)
@@ -453,7 +457,10 @@ class MainViewModel(val context: Context, val mainView: MainView) :
             .addBodyParameter(Constant.POST_PARAM_METHOD, "closePort")
             .addBodyParameter(Constant.POST_PARAM_PLATFORMID, "2")
             .addBodyParameter(Constant.POST_PARAM_PORT, curPort)
-            .addBodyParameter(Constant.POST_PARAM_IMEI, DevicesUtil.getIMEI(context))
+            .addBodyParameter(
+                Constant.POST_PARAM_IMEI, SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS)
+                    .getString(Constant.KEY_REAL_DEVICE_IMEI)
+            )
             .build()
             .getAsJSONObject(object : JSONObjectRequestListener {
                 override fun onResponse(response: JSONObject?) {
