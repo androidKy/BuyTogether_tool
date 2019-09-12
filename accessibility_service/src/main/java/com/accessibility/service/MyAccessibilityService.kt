@@ -84,8 +84,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
         mTaskStatusReceiver?.apply {
             unregisterReceiver(this)
         }
-
-        PackageManagerUtils.restartApplication(Constant.PKG_NAME, "com.buy.together.MainActivity")
+       // PackageManagerUtils.restartApplication(Constant.PKG_NAME, "com.buy.together.MainActivity")
     }
 
     /**
@@ -122,7 +121,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
                     L.i("pkgName: ${this.packageName}")
                     performViewClick(it)
                 }
-            }, 1)
+            }, 2)
 
             findViewByFullText("好的")?.let {
                 performViewClick(it)

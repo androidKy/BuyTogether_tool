@@ -293,7 +293,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
             } else {
                 context?.run {
                     ToastUtils.showToast(this, "VPN连接失败,重新请求端口")
-                    startTask()
+                    //startTask()
                 }
             }
         }

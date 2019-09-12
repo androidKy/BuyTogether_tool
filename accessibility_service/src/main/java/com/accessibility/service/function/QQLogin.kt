@@ -507,7 +507,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
         L.i("账号无效，重新拉取账号，任务ID：$taskId")
         if (taskId > 0) {
             ApiManager()
-                .getQQAccount(taskId.toString(), object : DataListener {
+                .setDataListener(object:DataListener{
                     override fun onSucceed(result: String) {
                         try {
                             L.i("获取账号结果：$result")
@@ -563,6 +563,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                         responTaskFailed("重新拉取账号失败: $errorMsg")
                     }
                 })
+                .getQQAccount(taskId.toString())
         } else {
             responTaskFailed("任务ID不存在，拉取账号失败")
         }

@@ -7,7 +7,6 @@ import android.content.IntentFilter
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.support.v7.app.AppCompatActivity
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.listener.TaskListener
@@ -29,7 +28,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
     private var mMainFragment: MainFragment? = null
     private var mTaskRunning: Boolean = false
     private var mMainAcViewModel: MainAcViewModel? = null
-    private var mTaskReceiver:TaskReceiver? = null
+    private var mTaskReceiver: TaskReceiver? = null
 
     companion object {
         const val ACTION_TASK_RESTART = "com.task.restart"      //发生未知错误，任务重新开始，重新请求代理和读取缓存的任务
@@ -62,18 +61,53 @@ class MainActivity : AppCompatActivity(), MainAcView {
         val intentFilter = IntentFilter()
         intentFilter.addAction(ACTION_TASK_RESTART)
         intentFilter.addAction(ACTION_APP_RESTART)
-        registerReceiver(mTaskReceiver,intentFilter)
+        registerReceiver(mTaskReceiver, intentFilter)
+
+    }
+
+    private fun initFragment() {
+        val beginTransaction = supportFragmentManager.beginTransaction()
+        mMainFragment = MainFragment()
+
+        beginTransaction.add(R.id.main_container, mMainFragment!!)
+
+        beginTransaction.commitNow()
     }
 
     override fun onStart() {
         super.onStart()
+        L.i("开始申请权限")
+        mMainAcViewModel?.requestPermission()
     }
 
     override fun onResume() {
         super.onResume()
-        L.i("开始申请权限")
-        mMainAcViewModel?.requestPermission()
 
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == START_VPN_SERVICE_REQUEST_CODE) {
+            L.i("VPN启动回调的Activity")
+            if (resultCode == RESULT_OK) {
+                val ipPorts =
+                    SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_IP_PORTS)
+                L.i("第一次打开VPN，需要确认允许VPN连接。ipPorts: $ipPorts")
+                mMainFragment?.startMyVpnService(ipPorts)
+            } else {
+                //log("onActivityResult", "resultCode != RESULT_OK")
+                //onLogReceived("canceled.")
+                //EventBus.getDefault().postSticky(PostModel(PostCode.DisConnect_VPN))
+            }
+            return
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mTaskReceiver?.apply {
+            unregisterReceiver(this)
+        }
     }
 
     override fun onPermissionGranted() {
@@ -83,12 +117,15 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
 
     override fun onAccessibilityService() {
-        startTask()
+        if (!mTaskRunning) {
+            startTask()
+        }
     }
 
     /**
      * 开始任务
      */
+    @Synchronized
     private fun startTask() {
         mMainFragment?.apply {
             if (!mTaskRunning) {
@@ -119,60 +156,15 @@ class MainActivity : AppCompatActivity(), MainAcView {
      */
     override fun onResponUpdateTask() {
         L.i("更新任务状态完成，重新开始任务")
-        //PackageManagerUtils.getInstance().restartApplication(this)
         //延迟2秒，等SP的异步清理完信息
         Handler(Looper.getMainLooper()).postDelayed({
-            Settings.Secure.putString(
-                this@MainActivity.contentResolver,
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                this@MainActivity.packageName + "/com.accessibility.service.MyAccessibilityService"
-            )
-            Settings.Secure.putInt(
-                this@MainActivity.contentResolver,
-                Settings.Secure.ACCESSIBILITY_ENABLED, 0
-            )
-            mMainAcViewModel?.checkAccessibilityService()
-            /* mTaskRunning = false
-             startTask()*/
+            mTaskRunning = false
+            startTask()
         }, 2000)
     }
 
     override fun onFailed(msg: String?) {
         L.i(msg)
-    }
-
-    private fun initFragment() {
-        val beginTransaction = supportFragmentManager.beginTransaction()
-        mMainFragment = MainFragment()
-
-        beginTransaction.add(R.id.main_container, mMainFragment!!)
-
-        beginTransaction.commitNow()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == START_VPN_SERVICE_REQUEST_CODE) {
-            L.i("VPN启动回调的Activity")
-            if (resultCode == RESULT_OK) {
-                val ipPorts =
-                    SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_IP_PORTS)
-                L.i("第一次打开VPN，需要确认允许VPN连接。ipPorts: $ipPorts")
-                mMainFragment?.startMyVpnService(ipPorts)
-            } else {
-                //log("onActivityResult", "resultCode != RESULT_OK")
-                //onLogReceived("canceled.")
-                //EventBus.getDefault().postSticky(PostModel(PostCode.DisConnect_VPN))
-            }
-            return
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mTaskReceiver?.apply {
-            unregisterReceiver(this)
-        }
     }
 
 
