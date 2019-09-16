@@ -9,4 +9,6 @@ import com.buy.together.base.BaseView
 interface MainAcView:BaseView {
     fun onResponUpdateTask()
     fun onPermissionGranted()
+
+    fun onAccessibilityService()
 }

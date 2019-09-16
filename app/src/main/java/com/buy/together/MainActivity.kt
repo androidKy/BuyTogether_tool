@@ -1,36 +1,43 @@
 package com.buy.together
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.support.v7.app.AppCompatActivity
-import com.accessibility.service.MyAccessibilityService
-import com.accessibility.service.base.BaseAccessibilityService
-import com.accessibility.service.listener.TaskListener
+import com.accessibility.service.MyAccessibilityService.Companion.ACTION_APP_RESTART
+import com.accessibility.service.MyAccessibilityService.Companion.ACTION_TASK_FAILED
+import com.accessibility.service.MyAccessibilityService.Companion.ACTION_TASK_RESTART
+import com.accessibility.service.MyAccessibilityService.Companion.ACTION_TASK_SUCCEED
+import com.accessibility.service.MyAccessibilityService.Companion.KEY_TASK_MSG
 import com.accessibility.service.util.Constant
 import com.buy.together.fragment.MainFragment
+import com.buy.together.receiver.NetChangeObserver
+import com.buy.together.receiver.NetStateReceiver
+import com.buy.together.utils.NetUtils
 import com.orhanobut.logger.CsvFormatStrategy
 import com.orhanobut.logger.DiskLogAdapter
 import com.orhanobut.logger.Logger
 import com.proxy.service.LocalVpnService.START_VPN_SERVICE_REQUEST_CODE
 import com.proxy.service.core.ProxyConfig
 import com.safframework.log.L
-import com.utils.common.CMDUtil
 import com.utils.common.SPUtils
-import com.utils.common.ThreadUtils
 import com.utils.common.ToastUtils
 
 
 class MainActivity : AppCompatActivity(), MainAcView {
 
-
     private var mMainFragment: MainFragment? = null
-
     private var mTaskRunning: Boolean = false
-
     private var mMainAcViewModel: MainAcViewModel? = null
+    private var mTaskReceiver: TaskReceiver? = null
+
+    companion object {
+
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,11 +49,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
         Logger.addLogAdapter(DiskLogAdapter(formatStrategy))
 
         ProxyConfig.Instance.globalMode = true
-        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(Intent(this, KeepLiveService::class.java))
-        } else {
-            startService(Intent(this, KeepLiveService::class.java))
-        }*/
+
         initFragment()
 
         mMainAcViewModel = MainAcViewModel(this, this)
@@ -54,140 +57,29 @@ class MainActivity : AppCompatActivity(), MainAcView {
             addApps2Proxy()
         }
 
+        registerReceiver()
+    }
+
+    private fun registerReceiver() {
+        mTaskReceiver = TaskReceiver()
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(ACTION_TASK_RESTART)
+        intentFilter.addAction(ACTION_APP_RESTART)
+        intentFilter.addAction(ACTION_TASK_SUCCEED)
+        intentFilter.addAction(ACTION_TASK_FAILED)
+        registerReceiver(mTaskReceiver, intentFilter)
         // crashInJava()
-    }
+        NetStateReceiver.registerNetworkStateReceiver(this)
+        NetStateReceiver.registerObserver(object : NetChangeObserver {
+            override fun onNetConnected(type: NetUtils.NetType?) {
+                // L.i("网络连接正常")
 
-    fun crashInJava() {
-        var nullStr: String? = "hello"
-        val convertValue = nullStr?.toInt()
-    }
-
-
-    override fun onStart() {
-        super.onStart()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        L.i("开始申请权限")
-        mMainAcViewModel?.requestPermission()
-
-    }
-
-    override fun onPermissionGranted() {
-        L.i("权限授予完成")
-        checkAccessibility()
-    }
-
-    private fun checkAccessibility() {
-        L.i("检测无障碍服务是否开启")
-        if (!BaseAccessibilityService.isAccessibilitySettingsOn(
-                this,
-                MyAccessibilityService::class.java.canonicalName!!
-            )
-        ) {
-            //自动开启无障碍服务
-            ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
-                override fun onSuccess(result: Boolean?) {
-                    if (result!!) {
-                        Settings.Secure.putString(
-                            this@MainActivity.contentResolver,
-                            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                            this@MainActivity.packageName + "/com.accessibility.service.MyAccessibilityService"
-                        )
-                        Settings.Secure.putInt(
-                            this@MainActivity.contentResolver,
-                            Settings.Secure.ACCESSIBILITY_ENABLED, 1
-                        )
-                        checkAccessibility()
-                    }
-                }
-
-                override fun onCancel() {
-
-                }
-
-                override fun onFail(t: Throwable?) {
-
-                }
-
-                override fun doInBackground(): Boolean {
-                    val result = CMDUtil().execCmd(
-                        "pm grant ${this@MainActivity.packageName} android.permission.WRITE_SECURE_SETTINGS;"
-                    )
-                    /* "settings put secure enabled_accessibility_services ${Constant.BUY_TOGETHER_PKG}/com.accessibility.service.MyAccessibilityService;" +
-                     "settings put secure accessibility_enabled 1;"
-         )*/
-                    L.i("用adb命令开启无障碍:$result")
-                    if (result.contains("Success")) {
-                        return true
-                    }
-
-                    return true
-
-                }
-            })
-            /* val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-             startActivity(intent)
-             return*/
-        } else {
-            startTask()
-            // 测试直接打开 PDD
-//        startPdd()
-//        startBrowse()
-
-            // 支付成功，上报失败时调用。
-            // mMainAcViewModel?.updateTask(true, "success")
-        }
-    }
-
-    /**
-     * 开始任务
-     */
-    @Synchronized
-    private fun startTask() {
-        mMainFragment?.apply {
-            if (!mTaskRunning) {
-                mTaskRunning = true
-                startTask()
-                MyAccessibilityService.setTaskListener(TaskListenerImpl())
             }
-        }
-    }
 
-    inner class TaskListenerImpl : TaskListener {
-        override fun onTaskFinished() {
-            L.i("任务完成，更新任务状态")
-            mMainAcViewModel?.updateTask(true, "success")
-
-        }
-
-        override fun onTaskFailed(failedMsg: String) {
-            L.i("任务失败：重新开始任务.errorMsg:$failedMsg")
-            // ToastUtils.showToast(this@MainActivity, "任务失败：$failedMsg")
-            mMainAcViewModel?.updateTask(false, failedMsg)
-        }
-    }
-
-    /**
-     * 任务完成情况已更新
-     * @see MainAcViewModel.updateTask
-     */
-    override fun onResponUpdateTask() {
-        L.i("更新任务状态完成，重新开始任务")
-        //PackageManagerUtils.getInstance().restartApplication(this)
-        //延迟2秒，等SP的异步清理完信息
-        Handler(Looper.getMainLooper()).postDelayed({
-            mTaskRunning = false
-            startTask()
-        }, 2000)
-    }
-
-    /**
-     *
-     */
-    override fun onFailed(msg: String?) {
-
+            override fun onNetDisConnect() {
+                ToastUtils.showToast(this@MainActivity, "网络发生异常")   //todo 网络异常的处理
+            }
+        })
     }
 
     private fun initFragment() {
@@ -197,6 +89,18 @@ class MainActivity : AppCompatActivity(), MainAcView {
         beginTransaction.add(R.id.main_container, mMainFragment!!)
 
         beginTransaction.commitNow()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        L.i("开始申请权限")
+        if (!mTaskRunning)
+            mMainAcViewModel?.requestPermission()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -219,6 +123,53 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
     override fun onDestroy() {
         super.onDestroy()
+        mTaskReceiver?.apply {
+            unregisterReceiver(this)
+        }
+        NetStateReceiver.unRegisterNetworkStateReceiver(this)
+    }
+
+    override fun onPermissionGranted() {
+        L.i("权限授予完成")
+        mMainAcViewModel?.checkAccessibilityService()
+    }
+
+
+    override fun onAccessibilityService() {
+        if (!mTaskRunning) {
+            startTask()
+        }
+    }
+
+    /**
+     * 开始任务
+     */
+    @Synchronized
+    private fun startTask() {
+        mMainFragment?.apply {
+            if (!mTaskRunning) {
+                mTaskRunning = true
+                startTask()
+            }
+        }
+    }
+
+
+    /**
+     * 任务完成情况已更新
+     * @see MainAcViewModel.updateTask
+     */
+    override fun onResponUpdateTask() {
+        L.i("更新任务状态完成，重新开始任务")
+        //延迟2秒，等SP的异步清理完信息
+        Handler(Looper.getMainLooper()).postDelayed({
+            mTaskRunning = false
+            startTask()
+        }, 2000)
+    }
+
+    override fun onFailed(msg: String?) {
+        L.i(msg)
     }
 
 
@@ -226,27 +177,55 @@ class MainActivity : AppCompatActivity(), MainAcView {
         //展示弹框
 
         val launchIntentForPackage =
-            this?.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
+            this.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
         if (launchIntentForPackage != null) {
             startActivity(launchIntentForPackage)
         } else {
-            this?.run {
-                ToastUtils.showToast(this, "未安装拼多多")
-            }
+            ToastUtils.showToast(this, "未安装拼多多")
         }
     }
 
     private fun startBrowse() {
         //展示弹框
-
         val launchIntentForPackage =
-            this?.packageManager?.getLaunchIntentForPackage(Constant.XIAOMI_BROWSER_PKG)
+            this.packageManager?.getLaunchIntentForPackage(Constant.XIAOMI_BROWSER_PKG)
         if (launchIntentForPackage != null) {
             startActivity(launchIntentForPackage)
         } else {
-            this?.run {
-                ToastUtils.showToast(this, "未安装拼多多")
+            ToastUtils.showToast(this, "未安装拼多多")
+        }
+    }
+
+    /**
+     * 接收任务的各种异常和关闭、重启APP的处理
+     */
+    inner class TaskReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            intent?.action?.apply {
+                when (this) {
+                    ACTION_TASK_RESTART -> {
+                        mTaskRunning = false
+                        mMainAcViewModel?.checkAccessibilityService()
+                    }
+
+                    ACTION_APP_RESTART -> {
+
+                    }
+
+                    ACTION_TASK_FAILED -> {
+                        val msg = intent.getStringExtra(KEY_TASK_MSG)
+                        L.i("任务失败：重新开始任务.errorMsg:$msg")
+                        // ToastUtils.showToast(this@MainActivity, "任务失败：$failedMsg")
+                        mMainAcViewModel?.updateTask(false, msg)
+                    }
+
+                    ACTION_TASK_SUCCEED -> {
+                        L.i("任务完成，更新任务状态")
+                        mMainAcViewModel?.updateTask(true, "success")
+                    }
+                }
             }
+
         }
     }
 }

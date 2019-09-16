@@ -1,6 +1,7 @@
 package com.buy.together
 
 import android.app.Application
+import com.buy.together.utils.CrashHandler
 import com.orhanobut.logger.AndroidLogAdapter
 import com.orhanobut.logger.Logger
 import com.orhanobut.logger.PrettyFormatStrategy
@@ -17,6 +18,7 @@ class MyBaseApplication : Application() {
 
         CrashReport.initCrashReport(this, "bddd8c650b", false)
 
+        CrashHandler.getInstance().init(this)
 
         val formatStrategy = PrettyFormatStrategy.newBuilder()
             //.showThreadInfo(true)  // (Optional) Whether to show thread info or not. Default true

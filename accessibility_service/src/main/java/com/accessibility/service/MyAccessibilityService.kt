@@ -14,9 +14,9 @@ import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.Constant
+import com.accessibility.service.util.PackageManagerUtils
 import com.accessibility.service.util.TaskDataUtil
 import com.safframework.log.L
-import com.utils.common.PackageManagerUtils
 import com.utils.common.SPUtils
 
 /**
@@ -36,15 +36,18 @@ class MyAccessibilityService : BaseAccessibilityService() {
         const val PKG_PINDUODUO = "com.xunmeng.pinduoduo"
         const val PKG_QQ = "com.tencent.mobileqq"
         const val ACTION_TASK_STATUS: String = "com.task.status"
-        const val ACTION_CONTINUE_TASK: String = "com.task.continue"
-        const val ACTION_DEAD_SERVICE: String = "com.service.dead"
 
-        var mTaskListener: TaskListener? = null
+        const val ACTION_TASK_RESTART = "com.task.restart"      //发生未知错误，任务重新开始，重新请求代理和读取缓存的任务
+        const val ACTION_APP_RESTART = "com.pdd.restart"        //拼多多APP重新启动
+        const val ACTION_TASK_FAILED = "com.task.failed" //任务失败更新任务状态
+        const val ACTION_TASK_SUCCEED = "com.task.succeed"  //任务成功更新任务状态
+        const val KEY_TASK_MSG = "key__task_msg" //任务更新的备注
+       /* var mTaskListener: TaskListener? = null
 
         fun setTaskListener(taskListener: TaskListener) {
             mTaskListener = taskListener
         }
-
+*/
     }
 
     override fun onInterrupt() {
@@ -53,14 +56,10 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
     inner class TaskStatusReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            intent?.apply {
-                if (action == ACTION_TASK_STATUS) {
+            intent?.action?.apply {
+                if (this == ACTION_TASK_STATUS) {
                     L.i("接收到任务状态改变的广播")
                     initParams()
-                } else if (action == ACTION_CONTINUE_TASK) {
-                    afterLoginSucceed()
-                } else if (action == ACTION_DEAD_SERVICE) {
-                    //doTask()
                 }
             }
         }
@@ -88,6 +87,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
         mTaskStatusReceiver?.apply {
             unregisterReceiver(this)
         }
+       // PackageManagerUtils.restartApplication(Constant.PKG_NAME, "com.buy.together.MainActivity")
     }
 
     /**
@@ -111,8 +111,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         try {
             chooseLogin()
-            //confirmPayResult()
-//                test()
             clickPermission(event)
         } catch (e: Exception) {
             L.e(e.message)
@@ -126,63 +124,13 @@ class MyAccessibilityService : BaseAccessibilityService() {
                     L.i("pkgName: ${this.packageName}")
                     performViewClick(it)
                 }
-            },2)
+            }, 2)
 
             findViewByFullText("好的")?.let {
                 performViewClick(it)
             }
         }
     }
-
-    private fun test() {
-        if (!testFlag) {
-            NodeController.Builder()
-                .setNodeService(this)
-                .setNodeParams("快如闪电", 0, 10, true)
-                .setTaskListener(object : TaskListener {
-                    override fun onTaskFinished() {
-                        L.i("？？？")
-                    }
-
-                    override fun onTaskFailed(failedMsg: String) {
-                    }
-                })
-                .create()
-                .execute()
-        }
-
-    }
-
-    private fun confirmPayResult() {
-        NodeController.Builder()
-            .setNodeService(this)
-            .setNodeParams("个人中心", 0, true, 6)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    L.i("已找到个人中心")
-                    ConfirmPayResult(this@MyAccessibilityService)
-                        .setTaskListener(object : TaskListener {
-                            override fun onTaskFinished() {
-                                responTaskFinished()
-                            }
-
-                            override fun onTaskFailed(failedMsg: String) {
-                                responTaskFailed(failedMsg)
-                            }
-                        })
-                        .startService()
-                }
-
-                override fun onTaskFailed(failedMsg: String) {
-                    this@MyAccessibilityService.performBackClick()
-                    confirmPayResult()
-                }
-            })
-            .create()
-            .execute()
-
-    }
-
 
     /**
      * 选择登录
@@ -215,7 +163,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 findPersonal()
                 return
             }
-
 
             NodeController.Builder()
                 .setNodeService(this@MyAccessibilityService)
@@ -259,6 +206,37 @@ class MyAccessibilityService : BaseAccessibilityService() {
             .execute()
     }
 
+
+    private fun confirmPayResult() {
+        NodeController.Builder()
+            .setNodeService(this)
+            .setNodeParams("个人中心", 0, true, 6)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    L.i("已找到个人中心")
+                    ConfirmPayResult(this@MyAccessibilityService)
+                        .setTaskListener(object : TaskListener {
+                            override fun onTaskFinished() {
+                                responTaskFinished()
+                            }
+
+                            override fun onTaskFailed(failedMsg: String) {
+                                responTaskFailed(failedMsg)
+                            }
+                        })
+                        .startService()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    this@MyAccessibilityService.performBackClick()
+                    confirmPayResult()
+                }
+            })
+            .create()
+            .execute()
+
+    }
+
     private fun enterLoginFailed() {
         NodeController.Builder()
             .setNodeService(this@MyAccessibilityService)
@@ -289,6 +267,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
         })
     }
 
+
     inner class LoginListenerImpl : TaskListener {
         override fun onTaskFinished() {
             //登录完成后，判断是评论任务还是正常任务
@@ -300,8 +279,10 @@ class MyAccessibilityService : BaseAccessibilityService() {
         }
     }
 
+    /**
+     * 登录成功后的处理
+     */
     private fun afterLoginSucceed() {
-
         if (!TaskDataUtil.instance.isCommentTask()!!) {
             L.i("开始自动执行正常任务")
             SearchGoods(this@MyAccessibilityService)
@@ -361,11 +342,12 @@ class MyAccessibilityService : BaseAccessibilityService() {
      */
     private fun verifyPaySucceed() {
         L.i("重启PDD，验证是否支付成功")
-        val launchIntentForPackage =
-            packageManager?.getLaunchIntentForPackage(Constant.PKG_NAME)
-        launchIntentForPackage?.apply {
-            startActivity(this)
-        }
+        /* val launchIntentForPackage =
+             packageManager?.getLaunchIntentForPackage(Constant.PKG_NAME)
+         launchIntentForPackage?.apply {
+             startActivity(this)
+         }*/
+        startPddTask()
 
         postDelay(Runnable {
             setCurPageType(PageEnum.START_PAGE)
@@ -383,12 +365,22 @@ class MyAccessibilityService : BaseAccessibilityService() {
     private fun responTaskFinished() {
         L.i("任务完成，重新开始下一轮任务")
         //initParams()
-        mTaskListener?.onTaskFinished()
+        startPddTask()
+        postDelay(Runnable {
+            //mTaskListener?.onTaskFinished()
+            sendBroadcast(Intent(ACTION_TASK_SUCCEED))
+        }, 2)
     }
 
     private fun responTaskFailed(msg: String) {
         //initParams()
-        mTaskListener?.onTaskFailed(msg)
+        startPddTask()
+        postDelay(Runnable {
+           // mTaskListener?.onTaskFailed(msg)
+            val intent = Intent(ACTION_TASK_FAILED)
+            intent.putExtra(KEY_TASK_MSG,msg)
+            sendBroadcast(intent)
+        }, 2)
     }
 
     /**
@@ -396,7 +388,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
      */
     private fun initParams() {
         setCurPageType(PageEnum.START_PAGE)
-        TaskDataUtil.instance.clearData()
+        //TaskDataUtil.instance.clearData()
     }
 
 }

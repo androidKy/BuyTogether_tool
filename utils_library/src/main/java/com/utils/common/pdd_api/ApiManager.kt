@@ -6,6 +6,7 @@ import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.OkHttpResponseListener
 import com.safframework.log.L
 import com.utils.common.NetworkUtils
+import com.utils.common.SPUtils
 import com.utils.common.ThreadUtils
 import com.utils.common.UnicodeUtils
 import okhttp3.Response
@@ -19,24 +20,27 @@ class ApiManager {
     private var mDataListener: DataListener? = null
 
     companion object {
+        const val SP_REAL_DEVICE_PARAMS = "real_device_params_sp"
+        const val KEY_REAL_DEVICE_IMEI = "key_real_imei"
+
         private const val URL_SERVER_DOMAIN: String = "49.234.51.174:8000"
-        private const val URL_TEST_DOMAIN: String = "192.168.0.117:8080"
+        private const val URL_TEST_DOMAIN: String = "118.25.137.21:8000"
         private const val URL_HTTP: String = "http://"
         const val POST_JSON_CONTENT_TYPE: String = "application/json"
 
-         const val URL_GET_TASK: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/get/"
-         const val URL_GET_COMMENT_TASK: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/comment/"
-         const val URL_UPDATE_TASK_INFO: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/inform/"
-         const val URL_GET_ACCOUNT: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/account/?id="
-         const val URL_UPDATE_ACCOUNT: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/account/"
-         const val URL_GET_ADDRESS: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/address/"
+        const val URL_GET_TASK: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/get/"
+        const val URL_GET_COMMENT_TASK: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/comment/"
+        const val URL_UPDATE_TASK_INFO: String = "$URL_HTTP$URL_SERVER_DOMAIN/task/inform/"
+        const val URL_GET_ACCOUNT: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/account/?id="
+        const val URL_UPDATE_ACCOUNT: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/account/"
+        const val URL_GET_ADDRESS: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/address/"
 
-        /*const val URL_GET_TASK: String = "$URL_HTTP$URL_TEST_DOMAIN/task/get/"
-        const val URL_GET_COMMENT_TASK: String = "$URL_HTTP$URL_TEST_DOMAIN/task/comment/"
-        const val URL_UPDATE_TASK_INFO: String = "$URL_HTTP$URL_TEST_DOMAIN/task/inform/"
-        const val URL_GET_ACCOUNT: String = "$URL_HTTP$URL_TEST_DOMAIN/others/account/?id="
-        const val URL_UPDATE_ACCOUNT: String = "$URL_HTTP$URL_TEST_DOMAIN/others/account/"
-        const val URL_GET_ADDRESS: String = "$URL_HTTP$URL_TEST_DOMAIN/others/address/"*/
+        /* const val URL_GET_TASK: String = "$URL_HTTP$URL_TEST_DOMAIN/task/get/"
+         const val URL_GET_COMMENT_TASK: String = "$URL_HTTP$URL_TEST_DOMAIN/task/comment/"
+         const val URL_UPDATE_TASK_INFO: String = "$URL_HTTP$URL_TEST_DOMAIN/task/inform/"
+         const val URL_GET_ACCOUNT: String = "$URL_HTTP$URL_TEST_DOMAIN/others/account/?id="
+         const val URL_UPDATE_ACCOUNT: String = "$URL_HTTP$URL_TEST_DOMAIN/others/account/"
+         const val URL_GET_ADDRESS: String = "$URL_HTTP$URL_TEST_DOMAIN/others/address/"*/
     }
 
     init {
@@ -82,7 +86,11 @@ class ApiManager {
     fun getCommentTask() {
         checkNetwork(object : NetworkListener {
             override fun valid() {
-                AndroidNetworking.get(URL_GET_COMMENT_TASK)
+                AndroidNetworking.get(
+                    "${URL_GET_COMMENT_TASK}?imei=${SPUtils.getInstance(
+                        SP_REAL_DEVICE_PARAMS
+                    ).getString(KEY_REAL_DEVICE_IMEI)}"
+                )
                     .addHeaders("API-AUTH", "a69caa73-f126-444d-879c-74e75d433940")
                     .build()
                     .getAsOkHttpResponse(object : OkHttpResponseListener {
@@ -106,7 +114,7 @@ class ApiManager {
      * 获取QQ账号
      * @param taskId 任务ID
      */
-    fun getQQAccount(taskId: String, dataListener: DataListener) {
+    fun getQQAccount(taskId: String) {
         checkNetwork(object : NetworkListener {
             override fun valid() {
                 AndroidNetworking.get("$URL_GET_ACCOUNT$taskId")
@@ -114,16 +122,11 @@ class ApiManager {
                     .build()
                     .getAsOkHttpResponse(object : OkHttpResponseListener {
                         override fun onResponse(response: Response?) {
-                            response?.body()?.string()?.run {
-                                dataListener.onSucceed(this)
-                            }
+                            responseSucceed(response, "QQ登录失败，获取QQ账号成功")
                         }
 
                         override fun onError(anError: ANError?) {
-                            //responseError(anError, "获取账号失败")
-                            anError?.errorDetail?.run {
-                                dataListener.onFailed(this)
-                            }
+                            responseError(anError, "QQ登录失败,获取QQ账号失败")
                         }
                     })
             }
@@ -265,6 +268,10 @@ class ApiManager {
                     put("order_id", orderId)
                     put("remark", failedMark)
                     put("order_amount", orderMoney)
+                    put(
+                        "imei",
+                        SPUtils.getInstance(SP_REAL_DEVICE_PARAMS).getString(KEY_REAL_DEVICE_IMEI)
+                    )
 
                     AndroidNetworking.post(URL_UPDATE_TASK_INFO)
                         .setContentType(POST_JSON_CONTENT_TYPE)
@@ -300,6 +307,10 @@ class ApiManager {
                     put("task_id", taskId)
                     put("success", isSucceed)
                     put("remark", remark)
+                    put(
+                        "imei",
+                        SPUtils.getInstance(SP_REAL_DEVICE_PARAMS).getString(KEY_REAL_DEVICE_IMEI)
+                    )
 
                     AndroidNetworking.post(URL_UPDATE_TASK_INFO)
                         .setContentType(POST_JSON_CONTENT_TYPE)

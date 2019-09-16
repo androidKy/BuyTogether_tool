@@ -9,7 +9,6 @@ import com.accessibility.service.listener.NodeFoundListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.util.*
 import com.safframework.log.L
-import com.utils.common.PackageManagerUtils
 import com.utils.common.SPUtils
 
 /**
@@ -81,10 +80,6 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
                 .getSingleNodeByClassName(nodeService, WidgetConstant.RECYCLERVIEW)
         } catch (e: Exception) {
             L.i("无障碍服务崩溃：${e.message}")
-            PackageManagerUtils.restartApplication(
-                Constant.PKG_NAME,
-                "com.buy.together.MainActivity"
-            )
         }
     }
 
@@ -233,11 +228,11 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
      */
     private fun buyGoods() {
         L.i("购买商品，并且选择商品各个参数")
+        mTaskProgress.append("4")
+        saveTaskProgress(mTaskProgress.toString())
         BuyGoods(nodeService)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    mTaskProgress.append("4")
-                    saveTaskProgress(mTaskProgress.toString())
                     responSuccess()
                 }
 
