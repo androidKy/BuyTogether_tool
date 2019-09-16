@@ -53,7 +53,8 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("未下单，返回继续查找下单")
-                    restartTask()
+                    //restartTask()
+                    responTaskFailed("$mallName 商品检测不到，返回继续查找下单")
                 }
             })
             .create()
@@ -131,19 +132,12 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("未下单，返回继续查找下单")
-                    restartTask()
+                    //restartTask()
+                    responTaskFailed("找不到待支付的订单")
                 }
             })
             .create()
             .execute()
-    }
-
-    private fun restartTask() {
-        myAccessibilityService.setCurPageType(PageEnum.START_PAGE)
-        PackageManagerUtils.restartApplication(
-            Constant.BUY_TOGETHER_PKG,
-            "${MyAccessibilityService.PKG_PINDUODUO}.ui.activity.MainFrameActivity"
-        )
     }
 
     /**
@@ -157,22 +151,17 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
                 .setNodeParams("立即", 1, 5)
                 .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {
-                        NodeController.Builder()
-                            .setNodeService(myAccessibilityService)
-                            .setNodeParams("忘记密码", 1, false, 8)
-                            .setTaskListener(object : TaskListener {
-                                override fun onTaskFinished() {
-                                    L.i("已跳转到支付界面")
-                                    adbInputPsw()
-                                }
+                        myAccessibilityService.apply {
+                            postDelay(Runnable {
+                                val nodeHuaBei = findViewByText("花呗")
+                                if(nodeHuaBei == null)
+                                {
+                                    isInputPswPage()
+                                }else{  //todo 不开通花呗，继续用余额支付
 
-                                override fun onTaskFailed(failedMsg: String) {
-                                    L.i("未跳转到输入密码界面:$failedMsg")
-                                    responTaskFailed(failedMsg)
                                 }
-                            })
-                            .create()
-                            .execute()
+                            },2)
+                        }
                     }
 
                     override fun onTaskFailed(failedMsg: String) {
@@ -182,6 +171,55 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
                 .create()
                 .execute()
         }, 3)
+    }
+
+    /**
+     * 是否是输入密码的界面
+     */
+    private fun isInputPswPage(){
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("忘记密码", 1, false, 8)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    L.i("已跳转到支付界面")
+                    adbInputPsw()
+                   /* NodeController.Builder()
+                        .setNodeService(myAccessibilityService)
+                        .setNodeParams("付款",1,false,5)
+                        .setTaskListener(object:TaskListener{
+                            override fun onTaskFinished() {
+                                AdbScriptController.Builder()
+                                    .setText("Aa870843")
+                                    .setTaskListener(object:TaskListener{
+                                        override fun onTaskFinished() {
+                                            //restartPddAfterPsw()
+                                        }
+
+                                        override fun onTaskFailed(failedMsg: String) {
+                                        }
+
+                                    })
+                                    .create()
+                                    .execute()
+                            }
+
+                            override fun onTaskFailed(failedMsg: String) {
+                                L.i("付款节点没找到")
+                            }
+
+                        })
+                        .create()
+                        .execute()*/
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("未跳转到输入密码界面:$failedMsg")
+                    responTaskFailed(failedMsg)
+                }
+            })
+            .create()
+            .execute()
     }
 
 
@@ -205,13 +243,32 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
 
                 override fun onTaskFinished() {
                     //支付成功 todo需要确认支付成功才上报
-                    myAccessibilityService.postDelay(Runnable {
-                        responTaskFailed("重新打开PDD检查是否支付成功")
-                    }, 3)
+                    /* myAccessibilityService.postDelay(Runnable {
+                         responTaskFailed("重新打开PDD检查是否支付成功")
+                     }, 3)*/
+                   restartPddAfterPsw()
                 }
             })
             .create()
             .execute()
+    }
+
+    /**
+     * 输入密码后，重启拼多多
+     */
+    private fun restartPddAfterPsw(){
+        myAccessibilityService.apply {
+            startPddTask()
+            postDelay(Runnable {
+                setCurPageType(PageEnum.START_PAGE)
+
+                PackageManagerUtils.killApplication(Constant.ALI_PAY_PKG)
+                PackageManagerUtils.restartApplication(
+                    MyAccessibilityService.PKG_PINDUODUO,
+                    "${MyAccessibilityService.PKG_PINDUODUO}.ui.activity.MainFrameActivity"
+                )
+            }, 5)
+        }
     }
 
     /**
@@ -276,7 +333,7 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
     }
 
     fun responTaskFailed(msg: String) {
-        responTaskFailed(msg)
+        responFailed(msg)
     }
 
 }

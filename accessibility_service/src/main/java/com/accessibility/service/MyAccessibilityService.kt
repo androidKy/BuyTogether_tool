@@ -126,7 +126,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
                     L.i("pkgName: ${this.packageName}")
                     performViewClick(it)
                 }
-            },2)
+            }, 2)
 
             findViewByFullText("好的")?.let {
                 performViewClick(it)
@@ -361,11 +361,12 @@ class MyAccessibilityService : BaseAccessibilityService() {
      */
     private fun verifyPaySucceed() {
         L.i("重启PDD，验证是否支付成功")
-        val launchIntentForPackage =
-            packageManager?.getLaunchIntentForPackage(Constant.PKG_NAME)
-        launchIntentForPackage?.apply {
-            startActivity(this)
-        }
+        /* val launchIntentForPackage =
+             packageManager?.getLaunchIntentForPackage(Constant.PKG_NAME)
+         launchIntentForPackage?.apply {
+             startActivity(this)
+         }*/
+        startPddTask()
 
         postDelay(Runnable {
             setCurPageType(PageEnum.START_PAGE)
@@ -383,12 +384,18 @@ class MyAccessibilityService : BaseAccessibilityService() {
     private fun responTaskFinished() {
         L.i("任务完成，重新开始下一轮任务")
         //initParams()
-        mTaskListener?.onTaskFinished()
+        startPddTask()
+        postDelay(Runnable {
+            mTaskListener?.onTaskFinished()
+        }, 2)
     }
 
     private fun responTaskFailed(msg: String) {
         //initParams()
-        mTaskListener?.onTaskFailed(msg)
+        startPddTask()
+        postDelay(Runnable {
+            mTaskListener?.onTaskFailed(msg)
+        }, 2)
     }
 
     /**

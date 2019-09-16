@@ -233,11 +233,11 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
      */
     private fun buyGoods() {
         L.i("购买商品，并且选择商品各个参数")
+        mTaskProgress.append("4")
+        saveTaskProgress(mTaskProgress.toString())
         BuyGoods(nodeService)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    mTaskProgress.append("4")
-                    saveTaskProgress(mTaskProgress.toString())
                     responSuccess()
                 }
 
