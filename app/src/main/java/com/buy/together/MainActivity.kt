@@ -8,8 +8,11 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.support.v7.app.AppCompatActivity
-import com.accessibility.service.MyAccessibilityService
-import com.accessibility.service.listener.TaskListener
+import com.accessibility.service.MyAccessibilityService.Companion.ACTION_APP_RESTART
+import com.accessibility.service.MyAccessibilityService.Companion.ACTION_TASK_FAILED
+import com.accessibility.service.MyAccessibilityService.Companion.ACTION_TASK_RESTART
+import com.accessibility.service.MyAccessibilityService.Companion.ACTION_TASK_SUCCEED
+import com.accessibility.service.MyAccessibilityService.Companion.KEY_TASK_MSG
 import com.accessibility.service.util.Constant
 import com.buy.together.fragment.MainFragment
 import com.buy.together.receiver.NetChangeObserver
@@ -27,17 +30,13 @@ import com.utils.common.ToastUtils
 
 class MainActivity : AppCompatActivity(), MainAcView {
 
-
     private var mMainFragment: MainFragment? = null
-
     private var mTaskRunning: Boolean = false
-
     private var mMainAcViewModel: MainAcViewModel? = null
     private var mTaskReceiver: TaskReceiver? = null
 
     companion object {
-        const val ACTION_TASK_RESTART = "com.task.restart"      //发生未知错误，任务重新开始，重新请求代理和读取缓存的任务
-        const val ACTION_APP_RESTART = "com.pdd.restart"        //拼多多APP重新启动
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,11 +49,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
         Logger.addLogAdapter(DiskLogAdapter(formatStrategy))
 
         ProxyConfig.Instance.globalMode = true
-        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(Intent(this, KeepLiveService::class.java))
-        } else {
-            startService(Intent(this, KeepLiveService::class.java))
-        }*/
+
         initFragment()
 
         mMainAcViewModel = MainAcViewModel(this, this)
@@ -62,10 +57,16 @@ class MainActivity : AppCompatActivity(), MainAcView {
             addApps2Proxy()
         }
 
+        registerReceiver()
+    }
+
+    private fun registerReceiver() {
         mTaskReceiver = TaskReceiver()
         val intentFilter = IntentFilter()
         intentFilter.addAction(ACTION_TASK_RESTART)
         intentFilter.addAction(ACTION_APP_RESTART)
+        intentFilter.addAction(ACTION_TASK_SUCCEED)
+        intentFilter.addAction(ACTION_TASK_FAILED)
         registerReceiver(mTaskReceiver, intentFilter)
         // crashInJava()
         NetStateReceiver.registerNetworkStateReceiver(this)
@@ -81,8 +82,6 @@ class MainActivity : AppCompatActivity(), MainAcView {
         })
     }
 
-    }
-
     private fun initFragment() {
         val beginTransaction = supportFragmentManager.beginTransaction()
         mMainFragment = MainFragment()
@@ -95,7 +94,8 @@ class MainActivity : AppCompatActivity(), MainAcView {
     override fun onStart() {
         super.onStart()
         L.i("开始申请权限")
-        mMainAcViewModel?.requestPermission()
+        if (!mTaskRunning)
+            mMainAcViewModel?.requestPermission()
     }
 
     override fun onResume() {
@@ -126,6 +126,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
         mTaskReceiver?.apply {
             unregisterReceiver(this)
         }
+        NetStateReceiver.unRegisterNetworkStateReceiver(this)
     }
 
     override fun onPermissionGranted() {
@@ -149,24 +150,10 @@ class MainActivity : AppCompatActivity(), MainAcView {
             if (!mTaskRunning) {
                 mTaskRunning = true
                 startTask()
-                MyAccessibilityService.setTaskListener(TaskListenerImpl())
             }
         }
     }
 
-    inner class TaskListenerImpl : TaskListener {
-        override fun onTaskFinished() {
-            L.i("任务完成，更新任务状态")
-            mMainAcViewModel?.updateTask(true, "success")
-
-        }
-
-        override fun onTaskFailed(failedMsg: String) {
-            L.i("任务失败：重新开始任务.errorMsg:$failedMsg")
-            // ToastUtils.showToast(this@MainActivity, "任务失败：$failedMsg")
-            mMainAcViewModel?.updateTask(false, failedMsg)
-        }
-    }
 
     /**
      * 任务完成情况已更新
@@ -200,7 +187,6 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
     private fun startBrowse() {
         //展示弹框
-
         val launchIntentForPackage =
             this.packageManager?.getLaunchIntentForPackage(Constant.XIAOMI_BROWSER_PKG)
         if (launchIntentForPackage != null) {
@@ -224,6 +210,18 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
                     ACTION_APP_RESTART -> {
 
+                    }
+
+                    ACTION_TASK_FAILED -> {
+                        val msg = intent.getStringExtra(KEY_TASK_MSG)
+                        L.i("任务失败：重新开始任务.errorMsg:$msg")
+                        // ToastUtils.showToast(this@MainActivity, "任务失败：$failedMsg")
+                        mMainAcViewModel?.updateTask(false, msg)
+                    }
+
+                    ACTION_TASK_SUCCEED -> {
+                        L.i("任务完成，更新任务状态")
+                        mMainAcViewModel?.updateTask(true, "success")
                     }
                 }
             }
