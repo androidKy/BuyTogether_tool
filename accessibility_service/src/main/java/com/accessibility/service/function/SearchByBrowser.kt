@@ -16,16 +16,16 @@ import com.utils.common.PackageManagerUtils
  * Description:
  * Created by Quinin on 2019-08-15.
  **/
-class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService) : BaseAcService(myAccessibilityService) {
+class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService) :
+    BaseAcService(myAccessibilityService) {
 
     //540,365
     //970,140
     companion object {
         //    浏览器类型
-        const val BROWSER_A:String = "A"
-        const val BROWSER_B:String = "B"
+        const val BROWSER_A: String = "A"
+        const val BROWSER_B: String = "B"
     }
-
 
 
     override fun startService() {
@@ -53,7 +53,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
             L.i("浏览器已打开")
             checkBrowseType()
 //            skipNavigation()
-        }, 8)
+        }, 5)
         /* NodeController.Builder()
              .setNodeService(myAccessibilityService)
              .setNodeFoundListener(object : TaskListener {
@@ -73,7 +73,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
     private fun checkBrowseType() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("快如闪电", 0, 10)
+            .setNodeParams("快如闪电", 0, 6)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     browseType(BROWSER_A)
@@ -89,9 +89,9 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
     }
 
     private fun browseType(type: String) {
-        when(type){
-            BROWSER_A-> skipNavigation()
-            BROWSER_B-> openGoodUrl_TypeB()
+        when (type) {
+            BROWSER_A -> skipNavigation()
+            BROWSER_B -> openGoodUrl_TypeB()
         }
     }
 
@@ -150,7 +150,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
     private fun openGoodUrl_TypeB() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("跳过",0,true,10,true)
+            .setNodeParams("跳过", 0, true, 10, true)
             .setNodeParams("同意并使用")
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
@@ -163,6 +163,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
 //                    L.i("跳转商品链接失败:$failedMsg")
                     // B型机会进入此处通过搜索框搜索。
 //                    clickSearchBox()
+                    responFailed("跳转商品链接失败:$failedMsg")
                 }
             })
             .create()
@@ -170,42 +171,28 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
     }
 
     private fun clickSearchBox() {
+        val goodUrl = TaskDataUtil.instance.getGoodUrl()
+        if (goodUrl.isNullOrEmpty()) {
+            responFailed("商品连接为空")
+            return
+        }
         AdbScriptController.Builder()
             .setXY("550,300")
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    L.i("clickSearchBox()。。。即将输入商品 URL")
-                    inputGoodUrl()
-                }
-
-                override fun onTaskFailed(failedMsg: String) {
-                    L.i("clickSearchBox()。。。点击搜索框失败")
-                }
-
-            })
-            .create()
-            .execute()
-    }
-
-    private fun inputGoodUrl() {
-        val goodUrl = TaskDataUtil.instance.getGoodUrl()
-        AdbScriptController.Builder()
-            .setText(goodUrl!!)
+            .setText(goodUrl)
             .setXY("980,160")
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    //
-                    L.i("inputGoodUrl()")
+                    L.i("打开商品连接，准备点击按钮打开拼多多")
                     click2pdd()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
                 }
-
             })
             .create()
             .execute()
     }
+
 
     /**
      * 点击跳转到拼多多，960，300
@@ -213,14 +200,12 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
     private fun click2pdd() {
         AdbScriptController.Builder()
             .setXY("960,300", 8000)
-
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    auth2pdd()
+                    auth2pdd()  //todo 当网络缓慢时，8秒后按钮还没显示出来
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    responFailed("跳转商品链接失败：应用未获得root权限")
                 }
             })
             .create()
@@ -233,11 +218,10 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
     private fun auth2pdd() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("确定")
+            .setNodeParams("确定",0,8)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     responSucceed()
-
                 }
 
                 override fun onTaskFailed(failedMsg: String) {

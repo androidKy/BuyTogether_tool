@@ -11,6 +11,9 @@ import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.util.Constant
 import com.buy.together.fragment.MainFragment
+import com.buy.together.receiver.NetChangeObserver
+import com.buy.together.receiver.NetStateReceiver
+import com.buy.together.utils.NetUtils
 import com.orhanobut.logger.CsvFormatStrategy
 import com.orhanobut.logger.DiskLogAdapter
 import com.orhanobut.logger.Logger
@@ -55,6 +58,17 @@ class MainActivity : AppCompatActivity(), MainAcView {
         }
 
         // crashInJava()
+        NetStateReceiver.registerNetworkStateReceiver(this)
+        NetStateReceiver.registerObserver(object : NetChangeObserver {
+            override fun onNetConnected(type: NetUtils.NetType?) {
+                // L.i("网络连接正常")
+
+            }
+
+            override fun onNetDisConnect() {
+                ToastUtils.showToast(this@MainActivity, "网络发生异常")   //todo 网络异常的处理
+            }
+        })
     }
 
     fun crashInJava() {
@@ -219,6 +233,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
     override fun onDestroy() {
         super.onDestroy()
+        NetStateReceiver.unRegisterNetworkStateReceiver(this)
     }
 
 
