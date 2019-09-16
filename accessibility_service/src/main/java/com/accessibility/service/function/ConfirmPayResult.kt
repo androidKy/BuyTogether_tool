@@ -7,11 +7,9 @@ import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseAcService
 import com.accessibility.service.listener.TaskListener
-import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
 import com.safframework.log.L
-import com.utils.common.PackageManagerUtils
 import com.utils.common.SPUtils
 
 /**
@@ -139,6 +137,14 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
             .create()
             .execute()
     }
+
+    /*private fun restartTask() {
+        myAccessibilityService.setCurPageType(PageEnum.START_PAGE)
+        PackageManagerUtils.restartApplication(
+            Constant.BUY_TOGETHER_PKG,
+            "${MyAccessibilityService.PKG_PINDUODUO}.ui.activity.MainFrameActivity"
+        )
+    }*/
 
     /**
      * 输入支付¬密码

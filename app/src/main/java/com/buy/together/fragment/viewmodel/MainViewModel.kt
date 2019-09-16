@@ -421,26 +421,32 @@ class MainViewModel(val context: Context, val mainView: MainView) :
                     response?.toString()?.run {
                         L.i("request ports result: $this")
                         val proxyIpBean = Gson().fromJson(this, ProxyIPBean::class.java)
-                        if (proxyIpBean?.data?.code == 200) {
-                            //上报IP信息
-                            uploadIpInfo(proxyIpBean)
+                        when {
+                            proxyIpBean?.data?.code == 200 -> {
+                                //上报IP信息
+                                uploadIpInfo(proxyIpBean)
 
-                            //保存已申请的端口
-                            SPUtils.getInstance(Constant.SP_IP_PORTS).apply {
-                                put(Constant.KEY_IP_PORTS, this@run)
-                                put(Constant.KEY_CUR_PORT, proxyIpBean.data.port[0].toString())
+                                //保存已申请的端口
+                                SPUtils.getInstance(Constant.SP_IP_PORTS).apply {
+                                    put(Constant.KEY_IP_PORTS, this@run)
+                                    put(Constant.KEY_CUR_PORT, proxyIpBean.data.port[0].toString())
+                                }
+                                mainView.onRequestPortsResult(this)
                             }
-                            mainView.onRequestPortsResult(this)
-                        } else {  //重新请求
-                            L.i("请求代理数据出错：code = ${proxyIpBean?.data?.code}")
-                            mainView.onResponPortsFailed("请求端口数据出错：code = ${proxyIpBean?.data?.code}")
+                            proxyIpBean?.data?.code == 203 -> {
+                                L.i("请求代理数据出错：code = 203")
+                                mainView.onResponPortsFailed("请求端口数据出错：code = ${proxyIpBean.data?.code}")
+                            }
+                            else -> {  //重新请求
+                                L.i("请求代理数据出错：code = ${proxyIpBean?.data?.code}")
+                                mainView.onResponPortsFailed("请求端口数据出错：code = ${proxyIpBean?.data?.code}")
+                            }
                         }
                     }
                 }
 
                 override fun onError(anError: ANError?) {
                     L.i("申请端口失败：${anError?.errorDetail}")
-                    requestPorts("440100")
                     mainView.onResponPortsFailed("申请端口失败：${anError?.errorDetail}")
                 }
             })
@@ -599,7 +605,10 @@ class MainViewModel(val context: Context, val mainView: MainView) :
         val spUtils = SPUtils.getInstance(Constant.SP_DEVICE_PARAMS)
         taskBean.task?.device?.run {
             spUtils.apply {
-                L.i("模拟imei: $imei")
+                L.i(
+                    "模拟imei: $imei 真实imei: ${SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS)
+                        .getString(Constant.KEY_REAL_DEVICE_IMEI)}"
+                )
                 put(DeviceParams.IMEI_KEY, imei, true)
                 put(DeviceParams.IMSI_KEY, imsi, true)
                 put(DeviceParams.MAC_KEY, mac, true)

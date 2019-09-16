@@ -14,9 +14,9 @@ import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.PageEnum
 import com.accessibility.service.util.Constant
+import com.accessibility.service.util.PackageManagerUtils
 import com.accessibility.service.util.TaskDataUtil
 import com.safframework.log.L
-import com.utils.common.PackageManagerUtils
 import com.utils.common.SPUtils
 
 /**
@@ -53,14 +53,10 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
     inner class TaskStatusReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            intent?.apply {
-                if (action == ACTION_TASK_STATUS) {
+            intent?.action?.apply {
+                if (this == ACTION_TASK_STATUS) {
                     L.i("接收到任务状态改变的广播")
                     initParams()
-                } else if (action == ACTION_CONTINUE_TASK) {
-                    afterLoginSucceed()
-                } else if (action == ACTION_DEAD_SERVICE) {
-                    //doTask()
                 }
             }
         }
@@ -88,6 +84,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
         mTaskStatusReceiver?.apply {
             unregisterReceiver(this)
         }
+       // PackageManagerUtils.restartApplication(Constant.PKG_NAME, "com.buy.together.MainActivity")
     }
 
     /**
@@ -111,8 +108,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         try {
             chooseLogin()
-            //confirmPayResult()
-//                test()
             clickPermission(event)
         } catch (e: Exception) {
             L.e(e.message)
@@ -133,56 +128,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
             }
         }
     }
-
-    private fun test() {
-        if (!testFlag) {
-            NodeController.Builder()
-                .setNodeService(this)
-                .setNodeParams("快如闪电", 0, 10, true)
-                .setTaskListener(object : TaskListener {
-                    override fun onTaskFinished() {
-                        L.i("？？？")
-                    }
-
-                    override fun onTaskFailed(failedMsg: String) {
-                    }
-                })
-                .create()
-                .execute()
-        }
-
-    }
-
-    private fun confirmPayResult() {
-        NodeController.Builder()
-            .setNodeService(this)
-            .setNodeParams("个人中心", 0, true, 6)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    L.i("已找到个人中心")
-                    ConfirmPayResult(this@MyAccessibilityService)
-                        .setTaskListener(object : TaskListener {
-                            override fun onTaskFinished() {
-                                responTaskFinished()
-                            }
-
-                            override fun onTaskFailed(failedMsg: String) {
-                                responTaskFailed(failedMsg)
-                            }
-                        })
-                        .startService()
-                }
-
-                override fun onTaskFailed(failedMsg: String) {
-                    this@MyAccessibilityService.performBackClick()
-                    confirmPayResult()
-                }
-            })
-            .create()
-            .execute()
-
-    }
-
 
     /**
      * 选择登录
@@ -215,7 +160,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 findPersonal()
                 return
             }
-
 
             NodeController.Builder()
                 .setNodeService(this@MyAccessibilityService)
@@ -259,6 +203,37 @@ class MyAccessibilityService : BaseAccessibilityService() {
             .execute()
     }
 
+
+    private fun confirmPayResult() {
+        NodeController.Builder()
+            .setNodeService(this)
+            .setNodeParams("个人中心", 0, true, 6)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    L.i("已找到个人中心")
+                    ConfirmPayResult(this@MyAccessibilityService)
+                        .setTaskListener(object : TaskListener {
+                            override fun onTaskFinished() {
+                                responTaskFinished()
+                            }
+
+                            override fun onTaskFailed(failedMsg: String) {
+                                responTaskFailed(failedMsg)
+                            }
+                        })
+                        .startService()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    this@MyAccessibilityService.performBackClick()
+                    confirmPayResult()
+                }
+            })
+            .create()
+            .execute()
+
+    }
+
     private fun enterLoginFailed() {
         NodeController.Builder()
             .setNodeService(this@MyAccessibilityService)
@@ -289,6 +264,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
         })
     }
 
+
     inner class LoginListenerImpl : TaskListener {
         override fun onTaskFinished() {
             //登录完成后，判断是评论任务还是正常任务
@@ -300,8 +276,10 @@ class MyAccessibilityService : BaseAccessibilityService() {
         }
     }
 
+    /**
+     * 登录成功后的处理
+     */
     private fun afterLoginSucceed() {
-
         if (!TaskDataUtil.instance.isCommentTask()!!) {
             L.i("开始自动执行正常任务")
             SearchGoods(this@MyAccessibilityService)
@@ -403,7 +381,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
      */
     private fun initParams() {
         setCurPageType(PageEnum.START_PAGE)
-        TaskDataUtil.instance.clearData()
+        //TaskDataUtil.instance.clearData()
     }
 
 }

@@ -1,4 +1,4 @@
-package com.utils.common;
+package com.accessibility.service.util;
 
 import android.content.Context;
 import android.content.Intent;
@@ -7,6 +7,11 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+
+import com.accessibility.service.MyAccessibilityService;
+import com.utils.common.CMDUtil;
+import com.utils.common.ThreadUtils;
+import com.utils.common.Utils;
 
 import java.util.List;
 
@@ -60,7 +65,7 @@ public class PackageManagerUtils {
         });
     }
 
-    public static void startApplication(final String pkgName) {
+    public static void startXiaomiBrowser(final String pkgName) {
         ThreadUtils.executeByCached(new ThreadUtils.Task<Boolean>() {
             @Override
             public Boolean doInBackground() throws Throwable {
@@ -86,7 +91,6 @@ public class PackageManagerUtils {
             }
         });
     }
-
 
     public static void restartApplication(final String pkgName, final String activityName) {
       /*  ActivityManager mAm = (ActivityManager) Utils.getApp().getSystemService(Context.ACTIVITY_SERVICE);
@@ -122,7 +126,7 @@ public class PackageManagerUtils {
         context.startActivity(intent);*/
     }
 
-    private static void startActivity(final String pkgName, final String activityName) {
+    public static void startActivity(final String pkgName, final String activityName) {
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -138,7 +142,7 @@ public class PackageManagerUtils {
 
                     @Override
                     public void onSuccess(Boolean result) {
-                        Utils.getApp().sendBroadcast(new Intent("com.task.status"));
+                        Utils.getApp().sendBroadcast(new Intent(MyAccessibilityService.ACTION_TASK_STATUS));
                         //startActivity(pkgName);
                     }
 
@@ -160,7 +164,7 @@ public class PackageManagerUtils {
 //        // 关闭辅助点击
 //        CMDUtil.execCmd("settings put secure accessibility_enabled 0");
 //        CMDUtil.execCmd("am force-stop com.aiman.hardwarecode");
-//    }
+//    }··
 
     public boolean isPackageAvilible(Context context, String packageName) {
         final PackageManager packageManager = context.getPackageManager();

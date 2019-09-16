@@ -234,7 +234,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("搜索有安全验证,直接跳浏览器")
-                    //PackageManagerUtils.getInstance().startApplication()
+                    //PackageManagerUtils.getInstance().startXiaomiBrowser()
                     searchByBrowser()
                 }
             })
