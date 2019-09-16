@@ -26,7 +26,8 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
     private fun enterMyOrder() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("个人中心", 0, 30)
+            .setNodeParams("拒绝", 0, 4, true)
+            .setNodeParams("个人中心", 0, 4)
             .setNodeParams("我的订单")
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
@@ -53,8 +54,8 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
         }
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("待收货")
-            .setNodeParams(mallName, 0, false, 5)
+//            .setNodeParams("待收货")
+            .setNodeParams(mallName, 1, false, 5)
             .setNodeParams(
                 "确认收货",
                 0,
@@ -69,8 +70,45 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    L.i("${mallName}-商品找不到")
+                    isFindComment()
                 }
+            })
+            .create()
+            .execute()
+    }
+
+    private fun isFindComment() {
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("立即评价",0,true,10)
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+                    startComment()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("找不到立即评价，尝试去找追加评价")
+                    isAdditioncalComment()
+                }
+
+            })
+            .create()
+            .execute()
+    }
+
+    private fun isAdditioncalComment() {
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("追加评价",0,false,4)
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+                    responSucceed()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("找不到追加评价")
+                }
+
             })
             .create()
             .execute()
@@ -118,8 +156,11 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
         if (commentContent.isNullOrEmpty()) {
             commentContent = ""
         }
-//        val xScore = "680"
-        val xScore = "750"
+        // A型机坐标
+        val xScore = "680"
+
+        // B型机坐标
+//        val xScore = "750"
         AdbScriptController.Builder()
             .setXY("$xScore,465")
             .setXY("$xScore,565")
@@ -129,20 +170,26 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
             // .setXY("540,1500")      //提交评价
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    NodeController.Builder()
-                        .setNodeService(myAccessibilityService)
-                        .setNodeParams("提交评价")
-                        .setTaskListener(object : TaskListener {
-                            override fun onTaskFinished() {
-                                isCommentSucceed()
-                            }
 
-                            override fun onTaskFailed(failedMsg: String) {
-                                //responFailed("评论失败：$failedMsg")
-                            }
-                        })
-                        .create()
-                        .execute()
+                    myAccessibilityService.postDelay(Runnable {
+                        NodeController.Builder()
+                            .setNodeService(myAccessibilityService)
+                            .setNodeParams("提交评价")
+                            .setTaskListener(object : TaskListener {
+                                override fun onTaskFinished() {
+                                    L.i("成功找到提交评价")
+                                    isCommentSucceed()
+                                }
+
+                                override fun onTaskFailed(failedMsg: String) {
+                                    //responFailed("评论失败：$failedMsg")
+                                    L.i("提交评价找不到")
+                                }
+                            })
+                            .create()
+                            .execute()
+
+                    },3333)
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -177,7 +224,7 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
                 })
                 .create()
                 .execute()
-        }, 2)
+        }, 5)
 
     }
 
