@@ -345,6 +345,7 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
     /**
      * 支付宝支付
      */
+    @Synchronized
     private fun payByAlipay() {
         AliPayLogin(nodeService)
             .login(object : TaskListener {
@@ -358,7 +359,6 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
                 }
             })
     }
-
 
 
 }

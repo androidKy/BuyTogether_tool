@@ -244,9 +244,9 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
             responFailed("收货信息为空")
             return
         }
-        if (buyerName != null) {
+        /*if (buyerName != null) {
             buyerName = buyerName!!.substring(0, buyerName!!.length - 1) + "*"
-        }
+        }*/
 
 
         L.i("收货人：$buyerName 电话：$buyerPhone streetName:$streetName")
@@ -276,11 +276,6 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
             .create()
             .execute()
     }
-
-    /**
-     *  初始化填入地址 需要的信息。
-     */
-
 
     /**
      * 选择省
