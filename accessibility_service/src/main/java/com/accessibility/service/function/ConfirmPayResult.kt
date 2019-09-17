@@ -67,7 +67,8 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
     private fun confirmPayAgain() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("拼单成功", 1, false, 2)
+            .setNodeParams("拼单成功", 1, false, 2,true)
+            .setNodeParams("免拼成功",1,false,2)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("参团拼单已付款")
@@ -80,12 +81,19 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
                             myAccessibilityService.rootInActiveWindow?.findAccessibilityNodeInfosByText(
                                 "待分享"
                             )
-                        if (sharedNodes?.size!! > 1)    //支付成功
-                        {
-                            L.i("发起拼单已付款")
-                            responSucceed()
-                        } else {
-                            NodeController.Builder()
+                        when {
+                            sharedNodes?.size!! > 1    //支付成功
+                            -> {
+                                L.i("发起拼单已付款")
+                                responSucceed()
+                            }
+                            myAccessibilityService.rootInActiveWindow?.findAccessibilityNodeInfosByText(
+                                "待发货"
+                            )?.size!! > 1 -> {
+                                L.i("参团成功")
+                                responSucceed()
+                            }
+                            else -> NodeController.Builder()
                                 .setNodeService(myAccessibilityService)
                                 .setNodeParams("支付", 1, false, 2)
                                 .setTaskListener(object : TaskListener {
@@ -167,9 +175,9 @@ class ConfirmPayResult(val myAccessibilityService: MyAccessibilityService) :
                                     if (nodeHuaBei != null && nodeHuaBei.size >= 1) {
                                         NodeController.Builder()
                                             .setNodeService(this)
-                                            .setNodeParams("花呗",1,5)
-                                            .setNodeParams("账户余额",1,5)
-                                            .setTaskListener(object:TaskListener{
+                                            .setNodeParams("花呗", 1, 5)
+                                            .setNodeParams("账户余额", 1, 5)
+                                            .setTaskListener(object : TaskListener {
                                                 override fun onTaskFinished() {
                                                     isInputPswPage()
                                                 }
