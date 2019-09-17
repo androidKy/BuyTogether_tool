@@ -58,8 +58,11 @@ class MainActivity : AppCompatActivity(), MainAcView {
         }
 
         registerReceiver()
-    }
+        val imei = SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS)
+            .getString(Constant.KEY_REAL_DEVICE_IMEI)
+        L.i("真实imei：$imei")
 
+    }
     private fun registerReceiver() {
         mTaskReceiver = TaskReceiver()
         val intentFilter = IntentFilter()
@@ -77,7 +80,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
             }
 
             override fun onNetDisConnect() {
-                ToastUtils.showToast(this@MainActivity, "网络发生异常")   //todo 网络异常的处理
+                ToastUtils.showToast(this@MainActivity, "网络发生异常")
             }
         })
     }
@@ -216,7 +219,12 @@ class MainActivity : AppCompatActivity(), MainAcView {
                         val msg = intent.getStringExtra(KEY_TASK_MSG)
                         L.i("任务失败：重新开始任务.errorMsg:$msg")
                         // ToastUtils.showToast(this@MainActivity, "任务失败：$failedMsg")
-                        mMainAcViewModel?.updateTask(false, msg)
+
+
+                            mMainAcViewModel?.updateTask(false, msg)
+
+
+
                     }
 
                     ACTION_TASK_SUCCEED -> {

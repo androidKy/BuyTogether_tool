@@ -24,4 +24,5 @@ abstract class BaseAcService(myAccessibilityService: BaseAccessibilityService){
         mTaskListener?.onTaskFinished()
     }
 
+
 }

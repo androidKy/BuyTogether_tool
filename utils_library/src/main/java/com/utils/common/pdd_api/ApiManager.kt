@@ -256,6 +256,7 @@ class ApiManager {
         orderId: String,
         orderMoney: String,
         failedMark: String
+
     ) {
         checkNetwork(object : NetworkListener {
             override fun valid() {
@@ -299,13 +300,13 @@ class ApiManager {
     /**
      * 更新评论任务的状态
      */
-    fun updateCommentTaskStatus(taskId: Int, isSucceed: Boolean, remark: String) {
+    fun updateCommentTaskStatus(taskId: Int, successCode: Int, remark: String) {
         checkNetwork(object : NetworkListener {
             override fun valid() {
                 JSONObject().run {
                     put("option", "complete_comment")
                     put("task_id", taskId)
-                    put("success", isSucceed)
+                    put("success", successCode)
                     put("remark", remark)
                     put(
                         "imei",

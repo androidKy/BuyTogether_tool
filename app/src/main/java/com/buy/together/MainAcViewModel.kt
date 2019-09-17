@@ -175,6 +175,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
     /**
      * 完成一轮任务，更新任务完成情况
      */
+
     fun updateTask(isSucceed: Boolean, remark: String) {
         ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
             override fun doInBackground(): Boolean {
@@ -191,6 +192,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
                 val isCommentTask = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
                     .getBoolean(Constant.KEY_TASK_TYPE)
                 if (isCommentTask)
+//                    updateCommentTask(taskStatus,remark)
                     updateCommentTask(isSucceed, remark)
                 else updateNormalTask(isSucceed, remark)
             }
@@ -210,11 +212,15 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
     private fun updateCommentTask(isSucceed: Boolean, remark: String) {
         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
             val taskId = getInt(Constant.KEY_TASK_ID)
+            val successCode = getInt(Constant.KEY_COMMENT_SUCCESS_CODE)
             var finalRemark = remark
-            L.i("上报评论任务状态：taskId:$taskId isSucceed:$isSucceed remark:$finalRemark")
-            if (isSucceed) {
-                finalRemark = "评论成功"
-            }
+            L.i("上报评论任务状态：taskId:$taskId successCode:$successCode remark:$finalRemark")
+           when(successCode){
+               0-> finalRemark = "未签收"
+               1-> finalRemark = "评论成功"
+               2-> finalRemark = "评论失败"
+           }
+
             ApiManager()
                 .setDataListener(object : DataListener {
                     override fun onSucceed(result: String) {
@@ -236,9 +242,10 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
                     }
 
                 })
-                .updateCommentTaskStatus(taskId, isSucceed, finalRemark)
+                .updateCommentTaskStatus(taskId, successCode, finalRemark)
         }
     }
+
 
     /**
      * 更新正常任务状态

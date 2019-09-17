@@ -9,6 +9,7 @@ import com.accessibility.service.data.AccountBean
 import com.accessibility.service.data.TaskBean
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
+import com.accessibility.service.page.CommentStatus
 import com.accessibility.service.page.LoginFailedType
 import com.accessibility.service.util.Constant
 import com.accessibility.service.util.DeviceParams
@@ -218,8 +219,10 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                     val isCommentTask = TaskDataUtil.instance.isCommentTask()
                     if (!isCommentTask!!)
                         dealAccountError()
-                    else
+                    else {
+                        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).put(Constant.KEY_COMMENT_SUCCESS_CODE,CommentStatus.COMMENT_MISSION_FAILED)
                         responTaskFailed("评论任务：id=${mUserId}-${mUserName}账号已失效")
+                    }
                 }
 
                 override fun onTaskFailed(failedMsg: String) {

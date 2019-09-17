@@ -299,6 +299,14 @@ class MyAccessibilityService : BaseAccessibilityService() {
         } else {
             L.i("开始自动执行评论任务")
             CommentTaskService(this@MyAccessibilityService)
+                .setCommentStatusListener(object:CommentTaskService.CommentStatusListener{
+                    override fun responCommentStatus(status: Int) {
+                        L.i("评论任务返回值 status = $status")
+                        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                            .put(Constant.KEY_COMMENT_SUCCESS_CODE,status)
+                    }
+
+                })
                 .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {
                         mHandler.postDelayed({
