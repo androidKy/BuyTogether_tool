@@ -47,31 +47,8 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
         if (isSwitchAccount)
             login()
         else {
-//            findPayMoreWay()
             payDirectly()
-
         }
-    }
-
-    private fun findPayMoreWay() {
-        NodeController.Builder()
-            .setNodeService(myAccessibilityService)
-            .setNodeParams("更多支付方式", 1, true, 5)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    L.i("能找到更多支付方式")
-                    payDirectly()
-
-                }
-
-                override fun onTaskFailed(failedMsg: String) {
-                    L.i("找不到更多支付方式")
-                    payDirectly()
-                }
-
-            })
-            .create()
-            .execute()
     }
 
     /**
@@ -91,27 +68,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
 
                 override fun onTaskFailed(failedMsg: String) {
                     responTaskFailed("支付宝登录失败")
-                    dealOrderNumberFailed()
-                }
-            })
-            .create()
-            .execute()
-    }
-
-    /**
-     * 处理订单编号节点找不到的处理
-     */
-    private fun dealOrderNumberFailed() {
-        NodeController.Builder()
-            .setNodeService(myAccessibilityService)
-            .setNodeParams("仍然支付", 0, 5)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    payDirectly()
-                }
-
-                override fun onTaskFailed(failedMsg: String) {
-                    responTaskFailed("支付宝登录失败")
+                    //dealOrderNumberFailed()
                 }
             })
             .create()
@@ -159,6 +116,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     /**
      * 输入支付¬密码
      */
+    @Synchronized
     private fun inputPayPsw() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
@@ -232,39 +190,6 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     }
 
 
-    /**
-     *   单纯的点击后退动作。
-     */
-    /* private fun backClick() {
-         myAccessibilityService.performBackClick(3, object : AfterClickedListener {
-             override fun onClicked() {
-                 isFindSearch()
-             }
-         })
-
-     }
-
-     private fun isFindSearch() {
-         NodeController.Builder()
-             .setNodeService(myAccessibilityService)
-             .setNodeParams("搜索", 1, false, 5, true)
- //            .setNodeParams("继续逛逛",0,false,5)   这节点找不到
-             .setTaskListener(object : TaskListener {
-                 override fun onTaskFinished() {
-                     L.i("支付成功，跳转到搜索界面")
-                     responTaskSuccess()
-                 }
-
-                 override fun onTaskFailed(failedMsg: String) {
-                     L.i("支付失败，isFindSearch()...")
-                     backClick()
-
-                 }
-
-             })
-             .create()
-             .execute()
-     }*/
 
     /**
      * 根据密码找到对应的xy坐标
