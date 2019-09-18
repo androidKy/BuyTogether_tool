@@ -348,7 +348,7 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
     @Synchronized
     private fun payByAlipay() {
         AliPayLogin(nodeService)
-            .login(object : TaskListener {
+            .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     //closeAliPay()
                     responSucceed()
@@ -358,6 +358,7 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
                     responFailed(failedMsg)
                 }
             })
+            .startService()
     }
 
 

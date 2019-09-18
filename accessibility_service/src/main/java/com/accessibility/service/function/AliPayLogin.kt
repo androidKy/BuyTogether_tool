@@ -1,10 +1,9 @@
 package com.accessibility.service.function
 
-import android.text.TextUtils
-import android.util.SparseIntArray
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
+import com.accessibility.service.base.BasePayService
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.util.Constant
@@ -18,14 +17,18 @@ import java.util.regex.Pattern
  * Description:
  * Created by Quinin on 2019-07-30.
  **/
-class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
-    private var mTaskListener: TaskListener? = null
+class AliPayLogin(myAccessibilityService: MyAccessibilityService) :
+    BasePayService(myAccessibilityService) {
+
     private var mLoginFailedCount: Int = 0
     private var mUserName: String? = null
     private var mUserPsw: String? = null
 
-    fun login(taskListener: TaskListener) {
-        mTaskListener = taskListener
+    override fun startService() {
+        startPay()
+    }
+
+    private fun startPay() {
 
         val account = TaskDataUtil.instance.getAlipayAccount()
         val psw = TaskDataUtil.instance.getAliLoginPsw()
@@ -45,7 +48,7 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
             .getBoolean(Constant.KEY_ALIPAY_ACCOUNT_SWITCH)
         isSwitchAccount = false
         if (isSwitchAccount)
-            login()
+            login2()
         else {
             payDirectly()
         }
@@ -145,11 +148,16 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("已跳转到输入密码界面")
-                    adbInputPsw()
+                    try {
+                        adbInputPsw()
+                    } catch (e: Exception) {
+                        L.e(e.message,e)
+                        responTaskFailed("输入密码发生异常")
+                    }
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    L.i("找不到节点：$failedMsg")
+                    L.i("找不到节点：$failedMsg") //todo 处理短信验证码
                 }
             })
             .create()
@@ -160,98 +168,56 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
     /**
      * 通过ADB输入密码
      */
-    private fun adbInputPsw() {
+    private fun adbInputPsw(){
         //818910
         val payPsw = TaskDataUtil.instance.getAliPay_psw()
         L.i("支付宝的支付密码：$payPsw")
-        if (TextUtils.isEmpty(payPsw)) {
+        if (payPsw.isNullOrEmpty()) {
             responTaskFailed("支付宝的支付密码为空")
             return
         }
-        AdbScriptController.Builder()
-            .setXY(regularPsw(payPsw!!))
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFailed(failedMsg: String) {
-                    responTaskFailed("支付密码输入错误")
-                }
-
-                override fun onTaskFinished() {
-                    //支付成功
-                    myAccessibilityService.performBackClick(5, object : AfterClickedListener {
-                        override fun onClicked() {
-                            L.i("密码已输入，准备重启PDD")
-                            responTaskSuccess()
-                        }
-                    })
-                }
-            })
-            .create()
-            .execute()
-    }
-
-
-
-    /**
-     * 根据密码找到对应的xy坐标
-     */
-    private fun regularPsw(payPsw: String): ArrayList<String> {
-        val payPswXYList: ArrayList<String> = ArrayList<String>()
-        try {
-            val itemWidth =
-                SPUtils.getInstance(myAccessibilityService, Constant.SP_DEVICE_PARAMS).getInt(
-                    Constant.KEY_SCREEN_WIDTH,
-                    1080
-                ) / 3
-            //val itemHeight = 140
-            //val itemStartY = 1135
-            val itemHeight = 150
-            val itemStartY = 1280
-
-
-            val xNumberKey = SparseIntArray()
-            xNumberKey.put(1, itemWidth / 2)
-            xNumberKey.put(2, itemWidth + itemWidth / 2)
-            xNumberKey.put(3, itemWidth * 2 + itemWidth / 2)
-            xNumberKey.put(4, xNumberKey[1])
-            xNumberKey.put(5, xNumberKey[2])
-            xNumberKey.put(6, xNumberKey[3])
-            xNumberKey.put(7, xNumberKey[1])
-            xNumberKey.put(8, xNumberKey[2])
-            xNumberKey.put(9, xNumberKey[3])
-            xNumberKey.put(0, xNumberKey[2])
-
-            val yNumberKey = SparseIntArray()
-            yNumberKey.put(1, itemStartY + itemHeight / 2)
-            yNumberKey.put(2, itemStartY + itemHeight / 2)
-            yNumberKey.put(3, itemStartY + itemHeight / 2)
-            yNumberKey.put(4, itemStartY + itemHeight + itemHeight / 2)
-            yNumberKey.put(5, itemStartY + itemHeight + itemHeight / 2)
-            yNumberKey.put(6, itemStartY + itemHeight + itemHeight / 2)
-            yNumberKey.put(7, itemStartY + itemHeight * 2 + itemHeight / 2)
-            yNumberKey.put(8, itemStartY + itemHeight * 2 + itemHeight / 2)
-            yNumberKey.put(9, itemStartY + itemHeight * 2 + itemHeight / 2)
-            yNumberKey.put(0, itemStartY + itemHeight * 3 + itemHeight / 2)
-
-            val payPswCharArray = payPsw.toCharArray()
-
-            for (i in 0 until payPswCharArray.size) {
-                val pswInt = payPswCharArray[i].toString().toInt()
-                val pswXY = "${xNumberKey[pswInt]},${yNumberKey[pswInt]}"
-                L.i("$pswInt 坐标：$pswXY")
-                payPswXYList.add(pswXY)
+        val payNode =
+            myAccessibilityService.rootInActiveWindow?.findAccessibilityNodeInfosByText("付款")
+        if (payNode != null) {
+            val pswXyList = ArrayList<String>()
+            if (payNode.size > 0) {
+                L.i("正在输入公司账号的密码")
+                pswXyList.addAll(regularPswCompany())
+            } else {
+                L.i("正在输入个人账号的密码")
+                pswXyList.addAll(regularPsw(payPsw))
             }
-        } catch (e: Exception) {
-            L.e(e.message, e)
-        }
 
-        return payPswXYList
+            AdbScriptController.Builder()
+                .setXY(pswXyList)
+                .setTaskListener(object : TaskListener {
+                    override fun onTaskFailed(failedMsg: String) {
+                        responTaskFailed("支付密码输入错误")
+                    }
+
+                    override fun onTaskFinished() {
+                        //支付成功
+                        myAccessibilityService.performBackClick(5, object : AfterClickedListener {
+                            override fun onClicked() {
+                                L.i("密码已输入，准备重启PDD")
+                                responTaskSuccess()
+                            }
+                        })
+                    }
+                })
+                .create()
+                .execute()
+        } else {
+            L.i("rootInActiveWindow is null")
+            responTaskFailed("rootInActiveWindow is null")
+        }
     }
 
 
     /**
      * 下发的支付宝账号和已登录的不一致
      */
-    fun login() {
+    fun login2() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
             .setNodeParams("允许")
@@ -356,11 +322,11 @@ class AliPayLogin(val myAccessibilityService: MyAccessibilityService) {
 
     fun responTaskSuccess() {
         mLoginFailedCount = 0
-        mTaskListener?.onTaskFinished()
+        responSucceed()
     }
 
     fun responTaskFailed(msg: String) {
         mLoginFailedCount = 0
-        mTaskListener?.onTaskFailed(msg)
+        responFailed(msg)
     }
 }
