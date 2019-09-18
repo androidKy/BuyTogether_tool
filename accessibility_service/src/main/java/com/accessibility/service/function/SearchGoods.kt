@@ -12,7 +12,6 @@ import com.accessibility.service.page.SearchType
 import com.accessibility.service.util.AdbScrollUtils
 import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
-import com.accessibility.service.util.WidgetConstant
 import com.safframework.log.L
 import com.utils.common.SPUtils
 
@@ -26,7 +25,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
     private var mMallName: String? = null    //商品的店铺名称
     private var mKeyWordList: ArrayList<String> = ArrayList()   //搜索商品的关键字列表
     private var mCurKeyWord: String? = null //当前正在查找的关键字
-    private var mIsVerifySaler: Boolean = false //是否校验过统一卖家，如果是，则先上滑动再继续查找，否则不先上滑
+    private var mIsVerifySaler: Boolean = false //是否校验过同一卖家，如果是，则先上滑动再继续查找，否则不先上滑
     private var mStartTime: Long = 0 //搜索开始时间
 
     companion object {
@@ -151,23 +150,20 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                 override fun onTaskFinished() {
                     val taskFinishCount = TaskDataUtil.instance.getTaskFinishedCount()
                     var searchType =
-                        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                        SPUtils.getInstance(Constant.SP_SEARCH_TYPE_FILE)
                             .getInt(Constant.KEY_CUR_SEARCH_TYPE)
-
-                    inputKeyword()
+                    L.i("搜索方式：$searchType 任务完成的数量：$taskFinishCount")
+                    //inputKeyword()
                     //searchByBrowser()
-/*
                     if (taskFinishCount != null && taskFinishCount > 0 && searchType > 0) {
-                        if (taskFinishCount != null && taskFinishCount > 0 && searchType > 0) {
-                            if (searchType == SearchType.MALLNAME) {
-                                searchByMallName()
-                            } else if (searchType == SearchType.BROWSER) {
-                                searchByBrowser()
-                            }
-                        } else {
-                            inputKeyword()
+                        if (searchType == SearchType.MALLNAME) {
+                            searchByMallName()
+                        } else if (searchType == SearchType.BROWSER) {
+                            searchByBrowser()
                         }
-                    }*/
+                    } else {
+                        inputKeyword()
+                    }
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -198,24 +194,39 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
         }
         mCurKeyWord = keyWord
 
-        NodeController.Builder()
-            .setNodeService(nodeService)
-            .setNodeParams(WidgetConstant.EDITTEXT, 3, false, keyWord)
-            .setNodeParams("搜索", 0, 3)
+        AdbScriptController.Builder()
+            .setXY(XY_SEARCH_RESULT_EDITTEXT)
+            .setText(keyWord)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    //confirmGoods(goodName, searchPrice, mallName)
-                    L.i("正在根据关键字[$keyWord]搜索商品")
-                    dealSecureCheck()
+                    NodeController.Builder()
+                        .setNodeService(nodeService)
+                        //.setNodeParams(WidgetConstant.EDITTEXT, 3, false, keyWord)
+                        .setNodeParams("搜索", 0, 3)
+                        .setTaskListener(object : TaskListener {
+                            override fun onTaskFinished() {
+                                //confirmGoods(goodName, searchPrice, mallName)
+                                L.i("正在根据关键字[$keyWord]搜索商品")
+                                dealSecureCheck()
+                            }
+
+                            override fun onTaskFailed(failedMsg: String) {
+                                responFailed("没找到搜索按钮")
+                            }
+                        })
+                        .create()
+                        .execute()
+
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    responFailed("没找到搜索按钮")
+
                 }
             })
             .create()
             .execute()
     }
+
 
     /**
      * 处理安全验证的问题
@@ -250,7 +261,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("根据店铺找到商品")
-                    SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                    SPUtils.getInstance(Constant.SP_SEARCH_TYPE_FILE)
                         .put(Constant.KEY_CUR_SEARCH_TYPE, SearchType.MALLNAME)
                     responSucceed()
                 }
@@ -272,7 +283,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("浏览器根据链接跳转成功")
-                    SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                    SPUtils.getInstance(Constant.SP_SEARCH_TYPE_FILE)
                         .put(Constant.KEY_CUR_SEARCH_TYPE, SearchType.BROWSER)
                     responSucceed()
                 }
@@ -294,7 +305,8 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
         if (searchIntervalTime / 1000 > 30)   //搜索时间超过半分钟,每个关键字搜索时间为半分钟
         {
             //mStartTime = currentSearchTime
-            inputKeyword()
+            //inputKeyword()
+            retrySearch()
             return
         }
 
@@ -321,10 +333,10 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
      * 开始查找
      */
     private fun startSearch() {
-        val searchTime = (8..30).random().toLong()
+        val searchTime = (8..18).random().toLong()
         AdbScrollUtils.instantce
             .setNodeService(nodeService)
-            .setFindText(mSearchPrice!!)
+            .setFindText(mGoodName!!)
             .setScrollTotalTime(searchTime * 1000)
             .setScrollSpeed(1000)
             .setStartXY("540,1700")
@@ -340,7 +352,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                     }
                 }
             })
-            .startScroll()
+            .startSearchGood()
     }
 
     /**
@@ -431,7 +443,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
             .setNodeParams(mGoodName!!, 1, false, 10)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                    SPUtils.getInstance(Constant.SP_SEARCH_TYPE_FILE)
                         .put(Constant.KEY_CUR_SEARCH_TYPE, SearchType.KEYWORD)
                     responSucceed()
                 }

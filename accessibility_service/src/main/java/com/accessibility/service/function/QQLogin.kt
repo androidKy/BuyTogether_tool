@@ -262,7 +262,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
 //            .setNodeParams("登录",0,false,5)
-            .setNodeParams("个人中心", 0, false, 15)    //时间长一点，防止网络卡顿
+            .setNodeParams("个人中心", 0, false, 18)    //时间长一点，防止网络卡顿
             .setTaskListener(object : TaskListener {
 
                 override fun onTaskFinished() {
@@ -301,17 +301,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
      *  处理页面返回 “添加账号”
      */
     private fun dealAddAccount() {
-        myAccessibilityService
-            .performBackClick(5, object : AfterClickedListener {
-                override fun onClicked() {
-                    myAccessibilityService.performBackClick(5, object : AfterClickedListener {
-                        override fun onClicked() {
-                            retryGetQQ()
-                        }
-                    })
-                }
-
-            })
+        retryGetQQ()
     }
 
     private fun closeQQ_TIM() {

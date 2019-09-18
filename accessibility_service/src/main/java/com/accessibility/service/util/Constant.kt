@@ -20,6 +20,8 @@ class Constant {
         const val SP_REAL_DEVICE_PARAMS = "real_device_params_sp"
         const val KEY_REAL_DEVICE_IMEI = "key_real_imei"
 
+        const val SP_SEARCH_TYPE_FILE = "search_type_sp"
+
 
         const val KEY_TASK_DATA = "key_task_data"
         const val KEY_TASK_ID = "key_task_id"

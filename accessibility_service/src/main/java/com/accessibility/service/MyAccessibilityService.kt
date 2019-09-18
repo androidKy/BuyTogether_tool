@@ -37,6 +37,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
         const val PKG_QQ = "com.tencent.mobileqq"
         const val ACTION_TASK_STATUS: String = "com.task.status"
 
+        const val ACTION_EXCEPTION_RESTART = "action_exception_restart" //任务APP发生异常，重新启动任务APP
         const val ACTION_TASK_RESTART = "com.task.restart"      //发生未知错误，任务重新开始，重新请求代理和读取缓存的任务
         const val ACTION_APP_RESTART = "com.pdd.restart"        //拼多多APP重新启动
         const val ACTION_TASK_FAILED = "com.task.failed" //任务失败更新任务状态

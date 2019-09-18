@@ -74,7 +74,9 @@ class SearchByMallName(val myAccessibilityService: MyAccessibilityService) : Bas
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("找到店铺:$mallName")
-                    searchGood()
+                    myAccessibilityService.postDelay(Runnable {
+                        searchGood()
+                    },2)
                 }
 
                 override fun onTaskFailed(failedMsg: String) {

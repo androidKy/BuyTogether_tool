@@ -1,7 +1,9 @@
 package com.buy.together.fragment
 
+import android.content.Intent
 import android.text.TextUtils
 import android.widget.FrameLayout
+import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.data.TaskBean
 import com.accessibility.service.util.Constant
 import com.buy.together.BuildConfig
@@ -338,6 +340,8 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     private fun startPdd() {
         //展示弹框
         mContainer?.postDelayed({
+            this@MainFragment.context?.sendBroadcast(Intent(MyAccessibilityService.ACTION_TASK_STATUS))
+
             val launchIntentForPackage =
                 context?.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
             if (launchIntentForPackage != null) {

@@ -66,8 +66,7 @@ class ConfirmPayResult(myAccessibilityService: MyAccessibilityService) :
     private fun confirmPayAgain() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("拼单成功", 1, false, 2,true)
-            .setNodeParams("免拼成功",1,false,2)
+            .setNodeParams("成功", 1, false, 2)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("参团拼单已付款")
@@ -219,7 +218,7 @@ class ConfirmPayResult(myAccessibilityService: MyAccessibilityService) :
                     try {
                         adbInputPsw()
                     } catch (e: Exception) {
-                        L.e(e.message,e)
+                        L.e(e.message, e)
                         responTaskFailed("输入密码发生异常")
                     }
                 }
@@ -247,7 +246,7 @@ class ConfirmPayResult(myAccessibilityService: MyAccessibilityService) :
         }
         val payNode =
             myAccessibilityService.rootInActiveWindow?.findAccessibilityNodeInfosByText("付款")
-        if (!payNode.isNullOrEmpty()) {
+        if (payNode != null) {
             val pswXyList = ArrayList<String>()
             if (payNode.size > 0) {
                 L.i("正在输入公司账号的密码")
@@ -276,6 +275,9 @@ class ConfirmPayResult(myAccessibilityService: MyAccessibilityService) :
                 })
                 .create()
                 .execute()
+        }else{
+            L.i("rootInActiveWindow is null")
+            responTaskFailed("rootInActiveWindow is null")
         }
     }
 

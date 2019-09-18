@@ -90,16 +90,16 @@ class LoginFailed(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
     private fun isFindAddAccount() {
         NodeController.Builder()
             .setNodeService(nodeService)
-            .setNodeParams("添加账号",0,false,10)
-            .setTaskListener(object :TaskListener{
+            .setNodeParams("添加账号", 0, false, 10)
+            .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     loginFailedType = LoginFailedType.ADD_ACCOUNT
                     mTypeListener?.onResponType(loginFailedType!!)
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
+                    responFailed(failedMsg)
                 }
-
             })
             .create()
             .execute()
