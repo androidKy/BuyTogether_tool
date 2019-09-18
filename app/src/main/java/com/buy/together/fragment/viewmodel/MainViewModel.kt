@@ -9,6 +9,7 @@ import com.accessibility.service.data.CommentBean
 import com.accessibility.service.data.TaskBean
 import com.accessibility.service.function.ClearDataService
 import com.accessibility.service.listener.TaskListener
+import com.accessibility.service.page.CommentStatus
 import com.accessibility.service.util.Constant
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
@@ -549,7 +550,7 @@ class MainViewModel(val context: Context, val mainView: MainView) :
                             mainView.onFailed(errorMsg)
                         }
                     })
-                    .updateCommentTaskStatus(taskId, false, "$cityName 没有相应的代理IP")
+                    .updateCommentTaskStatus(taskId, CommentStatus.COMMENT_MISSION_FAILED, "$cityName 没有相应的代理IP")
             }
         }
     }
