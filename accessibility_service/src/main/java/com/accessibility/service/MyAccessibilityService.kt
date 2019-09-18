@@ -110,10 +110,34 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         try {
+//            test()
             chooseLogin()
             clickPermission(event)
         } catch (e: Exception) {
             L.e(e.message)
+        }
+    }
+
+    private fun test() {
+        if(!testFlag) {
+            testFlag = true
+//            NodeController.Builder()
+//                .setNodeService(this)
+//                .setNodeParams("追加评价",0,false,10,true)
+//                .setNodeParams("已评价",0,false,10)
+//                .setTaskListener(object :TaskListener{
+//                    override fun onTaskFinished() {
+//                        L.i("???")
+//                    }
+//
+//                    override fun onTaskFailed(failedMsg: String) {
+//                        L.i("...")
+//                    }
+//
+//                })
+//                .create()
+//                .execute()
+
         }
     }
 

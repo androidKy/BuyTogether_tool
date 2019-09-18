@@ -149,6 +149,8 @@ class MainActivity : AppCompatActivity(), MainAcView {
      */
     @Synchronized
     private fun startTask() {
+//        startPdd()
+
         mMainFragment?.apply {
             if (!mTaskRunning) {
                 mTaskRunning = true

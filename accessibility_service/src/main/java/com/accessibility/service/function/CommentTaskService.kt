@@ -99,14 +99,12 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) : B
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     startComment()
-//                    responSucceed()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("找不到立即评价，尝试去找追加评价")
 
                     isAdditioncalComment()
-//                    responSucceed()
                 }
 
             })
@@ -170,6 +168,9 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) : B
             .execute()
     }
 
+    /**
+     *  不进行评论，单纯确认收货
+     */
     private fun noComment() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
@@ -177,7 +178,8 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) : B
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("找到提交评价，确认已收货")
-//                    responSucceed()
+                    mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_MISSION_SUCCESS)
+                    responSucceed()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -238,7 +240,6 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) : B
                 .setNodeParams("提交评价", 0, 6)
                 .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {
-                        L.i("评论失败")
                         startComment()
                     }
 
