@@ -121,22 +121,22 @@ class MyAccessibilityService : BaseAccessibilityService() {
     private fun test() {
         if(!testFlag) {
             testFlag = true
-//            NodeController.Builder()
-//                .setNodeService(this)
-//                .setNodeParams("追加评价",0,false,10,true)
-//                .setNodeParams("已评价",0,false,10)
-//                .setTaskListener(object :TaskListener{
-//                    override fun onTaskFinished() {
-//                        L.i("???")
-//                    }
-//
-//                    override fun onTaskFailed(failedMsg: String) {
-//                        L.i("...")
-//                    }
-//
-//                })
-//                .create()
-//                .execute()
+            NodeController.Builder()
+                .setNodeService(this)
+                .setNodeParams("交易已取消",0,false,10,true)
+                .setNodeParams("再次购买",0,false,10)
+                .setTaskListener(object :TaskListener{
+                    override fun onTaskFinished() {
+                        L.i("???")
+                    }
+
+                    override fun onTaskFailed(failedMsg: String) {
+                        L.i("...")
+                    }
+
+                })
+                .create()
+                .execute()
 
         }
     }
