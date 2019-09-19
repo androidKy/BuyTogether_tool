@@ -79,7 +79,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
 
                 if (packageName == context.packageName || packageName == Constant.BUY_TOGETHER_PKG
                     || packageName == Constant.QQ_TIM_PKG || packageName == Constant.QQ_LIATE_PKG
-                    || packageName == "com.android.browser"
+                   // || packageName == "com.android.browser"
                 ) {
                     AppProxyManager.getInstance().setAppInfo(this)
                 }
