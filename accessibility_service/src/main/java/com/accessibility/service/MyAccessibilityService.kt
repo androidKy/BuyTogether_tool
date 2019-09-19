@@ -273,7 +273,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
     inner class LoginListenerImpl : TaskListener {
         override fun onTaskFinished() {
             //登录完成后，判断是评论任务还是正常任务
-            afterLoginSucceed()
+            //afterLoginSucceed()
+            findPersonal()
         }
 
         override fun onTaskFailed(failedMsg: String) {

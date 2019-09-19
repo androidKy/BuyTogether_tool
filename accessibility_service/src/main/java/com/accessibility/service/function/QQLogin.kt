@@ -264,37 +264,57 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
 //            .setNodeParams("登录",0,false,5)
             .setNodeParams("个人中心", 0, false, 18)    //时间长一点，防止网络卡顿
             .setTaskListener(object : TaskListener {
-
                 override fun onTaskFinished() {
-                    SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).put(Constant.KEY_IS_LOGINED, true)
-                    saveAccountName()
-                    //closeQQ_TIM()
-                    updateAccount(1)
-                    myAccessibilityService.setIsLogined(true)
-                    mTaskListener?.onTaskFinished()
+                    L.i("已找到个人中心")
+                    loginSucceedDeal()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    myAccessibilityService.performBackClick()
                     L.i("找不到个人中心。。。")
-                    LoginFailed(myAccessibilityService)
-                        .setTypeListener(object : LoginFailed.TypeListener {
-                            override fun onResponType(failedType: Int) {
-                                L.i("LoginFailed = $failedType")
-                                when (failedType) {
+                    myAccessibilityService.performBackClick(1,object:AfterClickedListener{
+                        override fun onClicked() {
+                            NodeController.Builder()
+                                .setNodeService(myAccessibilityService)
+                                .setNodeParams("个人中心", 0, false, 6)
+                                .setTaskListener(object : TaskListener {
+                                    override fun onTaskFinished() {
+                                        L.i("已找到个人中心")
+                                        loginSucceedDeal()
+                                    }
 
-                                    LoginFailedType.DROP_LINE -> dealDropLine()
-                                    LoginFailedType.UNVAILD -> isUnvalid()
-                                    LoginFailedType.ADD_ACCOUNT -> dealAddAccount()
-                                }
-                            }
-                        })
-                        .startService()
+                                    override fun onTaskFailed(failedMsg: String) {
+                                        LoginFailed(myAccessibilityService)
+                                            .setTypeListener(object : LoginFailed.TypeListener {
+                                                override fun onResponType(failedType: Int) {
+                                                    L.i("LoginFailed = $failedType")
+                                                    when (failedType) {
+
+                                                        LoginFailedType.DROP_LINE -> dealDropLine()
+                                                        LoginFailedType.UNVAILD -> isUnvalid()
+                                                        LoginFailedType.ADD_ACCOUNT -> dealAddAccount()
+                                                    }
+                                                }
+                                            })
+                                            .startService()
+                                    }
+                                })
+                                .create()
+                                .execute()
+                        }
+                    })
                 }
             })
             .create()
             .execute()
+    }
 
+    private fun loginSucceedDeal(){
+        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).put(Constant.KEY_IS_LOGINED, true)
+        saveAccountName()
+        //closeQQ_TIM()
+        updateAccount(1)
+        myAccessibilityService.setIsLogined(true)
+        mTaskListener?.onTaskFinished()
     }
 
     /**
