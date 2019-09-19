@@ -14,24 +14,24 @@ import com.safframework.log.L
  * Description:评论任务
  * Created by Quinin on 2019-08-12.
  **/
-class CommentTaskService(val myAccessibilityService: MyAccessibilityService) : BaseAcService(myAccessibilityService) {
+class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
+    BaseAcService(myAccessibilityService) {
 
 
-    var mCommentStatusListener:CommentStatusListener ?= null
+    var mCommentStatusListener: CommentStatusListener? = null
 
     override fun startService() {
         enterMyOrder()
     }
 
-    interface CommentStatusListener{
-        fun responCommentStatus(status :Int)
+    interface CommentStatusListener {
+        fun responCommentStatus(status: Int)
     }
-    fun setCommentStatusListener(listener:CommentStatusListener):CommentTaskService{
+
+    fun setCommentStatusListener(listener: CommentStatusListener): CommentTaskService {
         mCommentStatusListener = listener
         return this
     }
-
-
 
 
     /**
@@ -138,7 +138,7 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) : B
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("包裹未签收")
-                   mCommentStatusListener?.responCommentStatus(CommentStatus.NOT_SIGNED)
+                    mCommentStatusListener?.responCommentStatus(CommentStatus.NOT_SIGNED)
 
                     responFailed("包裹未签收")
                 }
@@ -199,30 +199,45 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) : B
         if (commentContent.isNullOrEmpty()) {
             commentContent = ""
         }
-        // A型机坐标
-        val xScore = "680"
-
-        // B型机坐标
-//        val xScore = "750"
-        AdbScriptController.Builder()
-            .setXY("$xScore,465")
-            .setXY("$xScore,565")
-            .setXY("$xScore,665")
-            .setXY("540,850")      //评价输入框的XY
-            .setText(commentContent)
-            .setXY("540,1500")      //提交评价
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("提交评价", 0, false, 10)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
+                    L.i("已跳转到评价界面")
+                    // A型机坐标
+                    val xScore = "680"
+                    // B型机坐标
+                    //        val xScore = "750"
+                    AdbScriptController.Builder()
+                        .setXY("$xScore,465")
+                        .setXY("$xScore,565")
+                        .setXY("$xScore,665")
+                        .setXY("540,850")      //评价输入框的XY
+                        .setText(commentContent)
+                        .setXY("540,1500")      //提交评价
+                        .setTaskListener(object : TaskListener {
+                            override fun onTaskFinished() {
 
-                    L.i("成功提交评价")
-                    isCommentSucceed()
+                                L.i("成功提交评价")
+                                isCommentSucceed()
 
 
+                            }
+
+                            override fun onTaskFailed(failedMsg: String) {
+                                mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_MISSION_FAILED)
+                                responFailed("评论失败：$failedMsg")
+                            }
+
+                        })
+                        .create()
+                        .execute()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_MISSION_FAILED)
-                    responFailed("评论失败：$failedMsg")
+                    L.i("未跳转到评价界面")
+                    confirmSigned()
                 }
 
             })

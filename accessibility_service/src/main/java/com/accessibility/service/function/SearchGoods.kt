@@ -333,10 +333,17 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
      * 开始查找
      */
     private fun startSearch() {
+        var mHalfGoodName = ""
+        mGoodName?.apply {
+            mHalfGoodName = if (this.length > 10) {
+                this.substring(0, 9)
+            } else mSearchPrice!!
+        }
+
         val searchTime = (8..18).random().toLong()
         AdbScrollUtils.instantce
             .setNodeService(nodeService)
-            .setFindText(mGoodName!!)
+            .setFindText(mHalfGoodName)
             .setScrollTotalTime(searchTime * 1000)
             .setScrollSpeed(1000)
             .setStartXY("540,1700")
