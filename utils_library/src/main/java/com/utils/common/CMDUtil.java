@@ -213,7 +213,7 @@ public class CMDUtil {
                 processDestroy(process);
             }
         };
-        thread.setDaemon(true);
+        //thread.setDaemon(true);
         thread.start();
     }
 }

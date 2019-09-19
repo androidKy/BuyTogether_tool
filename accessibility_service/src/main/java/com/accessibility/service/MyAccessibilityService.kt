@@ -37,6 +37,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
         const val PKG_QQ = "com.tencent.mobileqq"
         const val ACTION_TASK_STATUS: String = "com.task.status"
 
+        const val ACTION_EXCEPTION_RESTART = "action_exception_restart" //任务APP发生异常，重新启动任务APP
         const val ACTION_TASK_RESTART = "com.task.restart"      //发生未知错误，任务重新开始，重新请求代理和读取缓存的任务
         const val ACTION_APP_RESTART = "com.pdd.restart"        //拼多多APP重新启动
         const val ACTION_TASK_FAILED = "com.task.failed" //任务失败更新任务状态
@@ -110,36 +111,14 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         try {
-//            test()
-            chooseLogin()
             clickPermission(event)
+            chooseLogin()
+            //            test()
         } catch (e: Exception) {
             L.e(e.message)
         }
     }
 
-    private fun test() {
-        if(!testFlag) {
-            testFlag = true
-            NodeController.Builder()
-                .setNodeService(this)
-                .setNodeParams("交易已取消",0,false,10,true)
-                .setNodeParams("再次购买",0,false,10)
-                .setTaskListener(object :TaskListener{
-                    override fun onTaskFinished() {
-                        L.i("???")
-                    }
-
-                    override fun onTaskFailed(failedMsg: String) {
-                        L.i("...")
-                    }
-
-                })
-                .create()
-                .execute()
-
-        }
-    }
 
     private fun clickPermission(event: AccessibilityEvent?) {
         event?.apply {
@@ -153,6 +132,29 @@ class MyAccessibilityService : BaseAccessibilityService() {
             findViewByFullText("好的")?.let {
                 performViewClick(it)
             }
+        }
+    }
+
+    private fun test() {
+        if(!testFlag) {
+            testFlag = true
+//            NodeController.Builder()
+//                .setNodeService(this)
+//                .setNodeParams("追加评价",0,false,10,true)
+//                .setNodeParams("已评价",0,false,10)
+//                .setTaskListener(object :TaskListener{
+//                    override fun onTaskFinished() {
+//                        L.i("???")
+//                    }
+//
+//                    override fun onTaskFailed(failedMsg: String) {
+//                        L.i("...")
+//                    }
+//
+//                })
+//                .create()
+//                .execute()
+
         }
     }
 

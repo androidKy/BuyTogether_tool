@@ -98,10 +98,8 @@ class LoginFailed(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    // 有时会跳出某些 广告界面。
-//                    dealAdPage()
+                    responFailed(failedMsg)
                 }
-
             })
             .create()
             .execute()

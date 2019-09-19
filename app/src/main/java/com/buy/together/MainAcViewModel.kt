@@ -10,7 +10,6 @@ import android.provider.Settings
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.util.Constant
-import com.accessibility.service.util.UpdateSPManager
 import com.buy.together.base.BaseViewModel
 import com.proxy.service.core.AppInfo
 import com.proxy.service.core.AppProxyManager
@@ -228,7 +227,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
                             val jsonObj = JSONObject(result)
                             val code = jsonObj.getInt("code")
                             if (code == 200) {
-                                SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).clear()
+                                SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).clear(true)
                             }
                         } catch (e: Exception) {
                             L.e(e.message, e)
@@ -279,8 +278,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
                             val jsonObj = JSONObject(result)
                             val code = jsonObj.getInt("code")
                             if (code == 200) {
-                                UpdateSPManager(context).updateTaskStatus(1)
-                                SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).clear()
+                                SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).clear(true)
                             } else {
                                 L.i("任务更新失败：code:$code")
                             }

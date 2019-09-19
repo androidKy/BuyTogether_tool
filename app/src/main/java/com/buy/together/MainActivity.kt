@@ -9,11 +9,13 @@ import android.os.Handler
 import android.os.Looper
 import android.support.v7.app.AppCompatActivity
 import com.accessibility.service.MyAccessibilityService.Companion.ACTION_APP_RESTART
+import com.accessibility.service.MyAccessibilityService.Companion.ACTION_EXCEPTION_RESTART
 import com.accessibility.service.MyAccessibilityService.Companion.ACTION_TASK_FAILED
 import com.accessibility.service.MyAccessibilityService.Companion.ACTION_TASK_RESTART
 import com.accessibility.service.MyAccessibilityService.Companion.ACTION_TASK_SUCCEED
 import com.accessibility.service.MyAccessibilityService.Companion.KEY_TASK_MSG
 import com.accessibility.service.util.Constant
+import com.accessibility.service.util.PackageManagerUtils
 import com.buy.together.fragment.MainFragment
 import com.buy.together.receiver.NetChangeObserver
 import com.buy.together.receiver.NetStateReceiver
@@ -63,6 +65,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
         L.i("真实imei：$imei")
 
     }
+
     private fun registerReceiver() {
         mTaskReceiver = TaskReceiver()
         val intentFilter = IntentFilter()
@@ -70,6 +73,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
         intentFilter.addAction(ACTION_APP_RESTART)
         intentFilter.addAction(ACTION_TASK_SUCCEED)
         intentFilter.addAction(ACTION_TASK_FAILED)
+        intentFilter.addAction(ACTION_EXCEPTION_RESTART)
         registerReceiver(mTaskReceiver, intentFilter)
         // crashInJava()
         NetStateReceiver.registerNetworkStateReceiver(this)
@@ -81,6 +85,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
             override fun onNetDisConnect() {
                 ToastUtils.showToast(this@MainActivity, "网络发生异常")
+                sendBroadcast(Intent(ACTION_TASK_RESTART))
             }
         })
     }
@@ -208,7 +213,15 @@ class MainActivity : AppCompatActivity(), MainAcView {
         override fun onReceive(context: Context?, intent: Intent?) {
             intent?.action?.apply {
                 when (this) {
+                    ACTION_EXCEPTION_RESTART -> {
+                        restartTaskApp()
+                    }
+
                     ACTION_TASK_RESTART -> {
+                        PackageManagerUtils.startActivity(
+                            this@MainActivity.packageName,
+                            "com.buy.together.MainActivity"
+                        )
                         mTaskRunning = false
                         mMainAcViewModel?.checkAccessibilityService()
                     }
@@ -221,12 +234,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
                         val msg = intent.getStringExtra(KEY_TASK_MSG)
                         L.i("任务失败：重新开始任务.errorMsg:$msg")
                         // ToastUtils.showToast(this@MainActivity, "任务失败：$failedMsg")
-
-
-                            mMainAcViewModel?.updateTask(false, msg)
-
-
-
+                        mMainAcViewModel?.updateTask(false, msg)
                     }
 
                     ACTION_TASK_SUCCEED -> {
@@ -237,5 +245,15 @@ class MainActivity : AppCompatActivity(), MainAcView {
             }
 
         }
+    }
+
+    /**
+     * 重新启动任务App
+     */
+    fun restartTaskApp() {
+        PackageManagerUtils.restartApplication(
+            Constant.PKG_NAME,
+            "com.buy.together.MainActivity"
+        )
     }
 }

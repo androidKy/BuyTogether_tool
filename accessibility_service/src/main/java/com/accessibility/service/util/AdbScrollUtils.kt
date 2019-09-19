@@ -143,6 +143,41 @@ class AdbScrollUtils private constructor() {
         return mNodeService?.findViewByFullText(mFindText)
     }
 
+    fun startSearchGood() {
+        if (mFindText.isNotEmpty() && mNodeService == null) {
+            responFailed("没有设置节点服务")
+            return
+        }
+        if (mScrollTotalTime <= 0)   //滑动时间结束
+        {
+            responFailed("滑动时间结束,$mFindText was not found.")
+            return
+        }
+        mScrollTotalTime -= mScrollSpeed
+        L.i("mScrollTotalTime: $mScrollTotalTime")
+
+        //不设置节点text的时候，表示不查找text
+        if (TextUtils.isEmpty(mFindText)) {
+            mHandler.sendEmptyMessageDelayed(MSG_ADB_SCROLL, mScrollSpeed)
+            return
+        }
+
+        val resultInfo = findHalfNode()
+        if (resultInfo == null) {
+            mHandler.sendEmptyMessageDelayed(MSG_ADB_SCROLL, mScrollSpeed)
+        } else {
+            responSucceed(resultInfo)
+        }
+    }
+
+    private fun findHalfNode(): AccessibilityNodeInfo? {
+
+        /* if (nodeResult == null) {
+            nodeResult = mNodeService?.findViewById(mFindText)
+        }*/
+        return mNodeService?.findViewByFullText(mFindText)
+    }
+
 
     private fun initData() {
         mHandler.removeMessages(MSG_ADB_SCROLL)

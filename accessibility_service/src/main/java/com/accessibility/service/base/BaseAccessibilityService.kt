@@ -2,12 +2,14 @@ package com.accessibility.service.base
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.text.TextUtils
 import android.view.accessibility.AccessibilityNodeInfo
+import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.data.TaskBean
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.NodeFoundListener
@@ -165,10 +167,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
             L.i("半查找节点无障碍服务崩溃：${e.message}")
             PackageManagerUtils.killApplication(Constant.BUY_TOGETHER_PKG)
             PackageManagerUtils.killApplication(Constant.ALI_PAY_PKG)
-            PackageManagerUtils.restartApplication(
-                Constant.PKG_NAME,
-                "com.buy.together.MainActivity"
-            )
+            sendBroadcast(Intent(MyAccessibilityService.ACTION_EXCEPTION_RESTART))
         }
         //L.i("$text not found")
         return null
@@ -215,10 +214,9 @@ abstract class BaseAccessibilityService : AccessibilityService() {
             }
         } catch (e: Exception) {
             L.i("全查找节点无障碍服务崩溃：${e.message}")
-            PackageManagerUtils.restartApplication(
-                Constant.PKG_NAME,
-                "com.buy.together.MainActivity"
-            )
+            PackageManagerUtils.killApplication(Constant.BUY_TOGETHER_PKG)
+            PackageManagerUtils.killApplication(Constant.ALI_PAY_PKG)
+            sendBroadcast(Intent(MyAccessibilityService.ACTION_EXCEPTION_RESTART))
         }
 
         //L.i("$text not found")

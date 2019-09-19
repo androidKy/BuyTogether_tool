@@ -204,7 +204,6 @@ class MainViewModel(val context: Context, val mainView: MainView) :
         saveDeviceParams(taskBean)
         //保存任务状态,此时任务开始，未完成
         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
-            put(Constant.KEY_TASK_STATUS, 0)
             put(Constant.KEY_TASK_TYPE, mIsCommentTask)
         }
     }

@@ -79,7 +79,8 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
                 })
                 .getSingleNodeByClassName(nodeService, WidgetConstant.RECYCLERVIEW)
         } catch (e: Exception) {
-            L.i("无障碍服务崩溃：${e.message}")
+            L.i("无障碍服务崩溃：${e.message}") //todo 浏览跳转回来崩溃
+            scanGoods()
         }
     }
 

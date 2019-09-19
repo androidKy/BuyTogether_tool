@@ -6,6 +6,7 @@ package com.buy.together.utils;
  **/
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -29,6 +30,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static com.accessibility.service.MyAccessibilityService.ACTION_EXCEPTION_RESTART;
 
 /**
  * @作者: lijingbo
@@ -94,7 +97,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
                     collectErrorInfo();
                     saveErrorInfo(e);
                     Looper.prepare();
-                    //mContext.sendBroadcast(); //todo 发送广播重新开始任务
+                    mContext.sendBroadcast(new Intent(ACTION_EXCEPTION_RESTART));
                     Toast.makeText(mContext, "UnCrashException", Toast.LENGTH_SHORT).show();
                     Looper.loop();
                 }

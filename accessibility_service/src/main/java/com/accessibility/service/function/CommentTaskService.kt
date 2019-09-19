@@ -17,21 +17,20 @@ import com.safframework.log.L
 class CommentTaskService(val myAccessibilityService: MyAccessibilityService) : BaseAcService(myAccessibilityService) {
 
 
-    var mCommentStatusListener:CommentStatusListener ?= null
+    var mCommentStatusListener: CommentStatusListener? = null
 
     override fun startService() {
         enterMyOrder()
     }
 
-    interface CommentStatusListener{
-        fun responCommentStatus(status :Int)
+    interface CommentStatusListener {
+        fun responCommentStatus(status: Int)
     }
-    fun setCommentStatusListener(listener:CommentStatusListener):CommentTaskService{
+
+    fun setCommentStatusListener(listener: CommentStatusListener): CommentTaskService {
         mCommentStatusListener = listener
         return this
     }
-
-
 
 
     /**
@@ -124,31 +123,6 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) : B
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("找不到追加评价")
-                        isTransactionCancelled()
-                }
-
-            })
-            .create()
-            .execute()
-    }
-
-    /**
-     *   交易已取消的订单
-     */
-    private fun isTransactionCancelled() {
-        NodeController.Builder()
-            .setNodeService(myAccessibilityService)
-            .setNodeParams("交易已取消",0,false,4,true)
-            .setNodeParams("删除订单",0,true,4,true)
-            .setNodeParams("确定",0,true,4,true)
-            .setTaskListener(object :TaskListener{
-                override fun onTaskFinished() {
-                    mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_MISSION_SUCCESS)
-                    responSucceed()
-                }
-
-                override fun onTaskFailed(failedMsg: String) {4
-                    L.i("找不到交易已取消")
                 }
 
             })
@@ -172,12 +146,11 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) : B
                     L.i("包裹已签收")
                     NodeController.Builder()
                         .setNodeService(myAccessibilityService)
-                        .setNodeParams("确认收货", 1, 5)
+                        .setNodeParams("确认收货", 1, 3)
                         .setTaskListener(object : TaskListener {
                             override fun onTaskFinished() {
                                 L.i("开始评论")
                                 startComment()
-                                // todo 暂时收货
 //                                noComment()
                             }
 
@@ -225,33 +198,47 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) : B
         if (commentContent.isNullOrEmpty()) {
             commentContent = ""
         }
-        // A型机坐标
-        var xScore = "680"
-
-        // B型机坐标
-//        var xScore = "750"
-        AdbScriptController.Builder()
-            .setXY("$xScore,465")
-            .setXY("$xScore,565")
-            .setXY("$xScore,665")
-            .setXY("540,850")      //评价输入框的XY
-            .setText(commentContent)
-//            .setXY("540,1500")      //提交评价
-
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("提交评价", 0, false, 10)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
+                    L.i("已跳转到评价界面")
+                    // A型机坐标
+                    val xScore = "680"
+                    // B型机坐标
+                    //        val xScore = "750"
+                    AdbScriptController.Builder()
+                        .setXY("$xScore,465")
+                        .setXY("$xScore,565")
+                        .setXY("$xScore,665")
+                        .setXY("540,850")      //评价输入框的XY
+                        .setText(commentContent)
+                        .setXY("540,1500")      //提交评价
+                        .setTaskListener(object : TaskListener {
+                            override fun onTaskFinished() {
 
-                    L.i("成功提交评价")
-//                    isCommentSucceed()
-                    // todo 人工进行操作
-                    deadLoop()
+                                L.i("成功提交评价")
+                                //                    isCommentSucceed()
+                                // todo 人工进行操作
+                                deadLoop()
 
 
+                            }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_MISSION_FAILED)
+                    responFailed("评论失败：$failedMsg")
+                }
+
+                        })
+                        .create()
+                        .execute()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-//                    mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_MISSION_FAILED)
-//                    responFailed("评论失败：$failedMsg")
+                    L.i("未跳转到评价界面")
+                    confirmSigned()
                 }
 
             })
