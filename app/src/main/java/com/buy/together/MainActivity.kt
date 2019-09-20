@@ -66,6 +66,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
     }
 
+
     private fun registerReceiver() {
         mTaskReceiver = TaskReceiver()
         val intentFilter = IntentFilter()
@@ -79,12 +80,12 @@ class MainActivity : AppCompatActivity(), MainAcView {
         NetStateReceiver.registerNetworkStateReceiver(this)
         NetStateReceiver.registerObserver(object : NetChangeObserver {
             override fun onNetConnected(type: NetUtils.NetType?) {
-                // L.i("网络连接正常")
-
+                L.i("网络连接正常")
             }
 
             override fun onNetDisConnect() {
                 ToastUtils.showToast(this@MainActivity, "网络发生异常")
+                L.i("网络发生异常")
                 sendBroadcast(Intent(ACTION_TASK_RESTART))
             }
         })
@@ -135,6 +136,8 @@ class MainActivity : AppCompatActivity(), MainAcView {
             unregisterReceiver(this)
         }
         NetStateReceiver.unRegisterNetworkStateReceiver(this)
+
+        mMainAcViewModel?.disableAccessibilityService()
     }
 
     override fun onPermissionGranted() {
@@ -155,7 +158,6 @@ class MainActivity : AppCompatActivity(), MainAcView {
     @Synchronized
     private fun startTask() {
 //        startPdd()
-
         mMainFragment?.apply {
             if (!mTaskRunning) {
                 mTaskRunning = true
@@ -218,12 +220,13 @@ class MainActivity : AppCompatActivity(), MainAcView {
                     }
 
                     ACTION_TASK_RESTART -> {
-                        PackageManagerUtils.startActivity(
+                        restartTaskApp()
+                       /* PackageManagerUtils.startActivity(
                             this@MainActivity.packageName,
                             "com.buy.together.MainActivity"
                         )
                         mTaskRunning = false
-                        mMainAcViewModel?.checkAccessibilityService()
+                        mMainAcViewModel?.checkAccessibilityService()*/
                     }
 
                     ACTION_APP_RESTART -> {

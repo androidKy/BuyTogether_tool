@@ -27,6 +27,8 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
         const val BROWSER_B: String = "B"
     }
 
+    private var mFailedCount: Int = 0
+
 
     override fun startService() {
         //复制文本内容到剪贴板，然后打开浏览器
@@ -202,7 +204,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
             .setXY("960,300", 8000)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    auth2pdd()  //todo 当网络缓慢时，8秒后按钮还没显示出来
+                    auth2pdd()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -218,20 +220,45 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
     private fun auth2pdd() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("确定",0,8)
+            .setNodeParams("确定", 0, 8)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     responSucceed()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    L.i("浏览器授权跳转失败：$failedMsg")
-                    responFailed("浏览器授权跳转失败：$failedMsg")
+                    mFailedCount++
+                    L.i("浏览器授权跳转失败次数：$mFailedCount")
+                    if (mFailedCount <= 3)
+                        reInputUrl()
+                    else responFailed("浏览跳转失败")
                 }
             })
             .create()
             .execute()
     }
 
+    private fun reInputUrl(){
+        val goodUrl = TaskDataUtil.instance.getGoodUrl()
+        if (goodUrl.isNullOrEmpty()) {
+            responFailed("商品连接为空")
+            return
+        }
+        AdbScriptController.Builder()
+            .setXY("540,160")
+            .setText(goodUrl)
+            .setXY("980,160")
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    L.i("打开商品连接，准备点击按钮打开拼多多")
+                    click2pdd()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                }
+            })
+            .create()
+            .execute()
+    }
 
 }

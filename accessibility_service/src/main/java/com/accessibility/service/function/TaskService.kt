@@ -1,5 +1,6 @@
 package com.accessibility.service.function
 
+import android.content.Intent
 import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.auto.NodeController
@@ -23,6 +24,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
     private var mScreenHeight: Int = 0
     private var mTaskProgress: StringBuilder = StringBuilder()
     private var mScanGoodTime: Int = 0
+    private var mExceptionHappened: Boolean = false
 
     fun setScreenDensity(width: Int, height: Int): TaskService {
         mScreenWidth = width
@@ -79,8 +81,11 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
                 })
                 .getSingleNodeByClassName(nodeService, WidgetConstant.RECYCLERVIEW)
         } catch (e: Exception) {
-            L.i("无障碍服务崩溃：${e.message}") //todo 浏览跳转回来崩溃
-            scanGoods()
+            if (!mExceptionHappened){
+                L.i("无障碍服务崩溃：${e.message}")
+                mExceptionHappened = true
+                nodeService.sendBroadcast(Intent(MyAccessibilityService.ACTION_EXCEPTION_RESTART))
+            }
         }
     }
 

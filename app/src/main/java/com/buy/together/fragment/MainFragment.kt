@@ -22,7 +22,6 @@ import com.safframework.log.L
 import com.utils.common.SPUtils
 import com.utils.common.ThreadUtils
 import com.utils.common.ToastUtils
-import com.vilyever.socketclient.SocketClient
 
 
 /**
@@ -126,15 +125,20 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
             mVpnFailedConnectCount = 0
             activity?.apply {
                 //mIsCommentTask = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getBoolean(Constant.KEY_TASK_TYPE)
-                LocalVpnManager.getInstance().stopVpnService(activity)
-                mViewModel?.getTask(mIsCommentTask)
+                //开始任务之前去检测是否有更新
+                mViewModel?.checkUpdate()
             }
         } else {
             L.i("onResume()还没执行")
             mContainer?.postDelayed({
                 startTask()
-            }, 500)
+            }, 1000)
         }
+    }
+
+    override fun onResponVersionUpdate(){
+       LocalVpnManager.getInstance().stopVpnService(activity)
+       mViewModel?.getTask(mIsCommentTask)
     }
 
     override fun onResponTask(taskBean: TaskBean) {
@@ -302,15 +306,6 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         }
     }
 
-    /**
-     * VPN连接成功后，把Socket保护起来
-     */
-    private fun protectSocket() {
-        mContainer?.postDelayed({
-            val result = LocalVpnService.mInstance.protect(SocketClient().runningSocket)
-            L.i("protect socket result: $result")
-        }, 3000)
-    }
 
     override fun onLogReceived(logString: String) {
         L.i("LocalVpnService onLogReceived: $logString")

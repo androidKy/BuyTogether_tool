@@ -157,7 +157,8 @@ class AliPayLogin(myAccessibilityService: MyAccessibilityService) :
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    L.i("找不到节点：$failedMsg") //todo 处理短信验证码
+                    L.i("找不到节点：$failedMsg")
+                    responTaskFailed("没有跳转到输入密码的界面")
                 }
             })
             .create()
@@ -196,7 +197,7 @@ class AliPayLogin(myAccessibilityService: MyAccessibilityService) :
                     }
 
                     override fun onTaskFinished() {
-                        //支付成功
+                        //支付成功  todo 金额过大时，需要处理短信验证码
                         myAccessibilityService.performBackClick(5, object : AfterClickedListener {
                             override fun onClicked() {
                                 L.i("密码已输入，准备重启PDD")

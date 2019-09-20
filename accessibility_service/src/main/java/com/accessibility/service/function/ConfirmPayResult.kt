@@ -268,7 +268,8 @@ class ConfirmPayResult(myAccessibilityService: MyAccessibilityService) :
                         myAccessibilityService.performBackClick(5, object : AfterClickedListener {
                             override fun onClicked() {
                                 L.i("密码已输入，准备重启PDD")
-                                responTaskSuccess()
+                                //responTaskSuccess() 不能够直接返回支付成功的结果，需要重新打开Pdd去检查
+                                reconfirmPayResult()
                             }
                         })
                     }
@@ -282,9 +283,9 @@ class ConfirmPayResult(myAccessibilityService: MyAccessibilityService) :
     }
 
     /**
-     * 输入密码后，重启拼多多
+     * 输入密码后，重新确认是否支付成功
      */
-    private fun restartPddAfterPsw() {
+    private fun reconfirmPayResult() {
         myAccessibilityService.apply {
             startPddTask()
             postDelay(Runnable {
