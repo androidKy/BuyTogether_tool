@@ -175,7 +175,7 @@ class AdbScrollUtils private constructor() {
         /* if (nodeResult == null) {
             nodeResult = mNodeService?.findViewById(mFindText)
         }*/
-        return mNodeService?.findViewByFullText(mFindText)
+        return mNodeService?.findViewByText(mFindText)
     }
 
 
