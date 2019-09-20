@@ -11,6 +11,7 @@ import com.accessibility.service.function.ClearDataService
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.CommentStatus
 import com.accessibility.service.util.Constant
+import com.accessibility.service.util.PackageManagerUtils
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
@@ -25,6 +26,7 @@ import com.buy.together.hook.sp.DeviceParams
 import com.buy.together.utils.ParseDataUtil
 import com.google.gson.Gson
 import com.safframework.log.L
+import com.tinkerpatch.sdk.TinkerPatch
 import com.utils.common.*
 import com.utils.common.pdd_api.ApiManager
 import com.utils.common.pdd_api.DataListener
@@ -46,6 +48,7 @@ class MainViewModel(val context: Context, val mainView: MainView) :
 
     private val mSubscribeList = ArrayList<Disposable>()
     private var mIsCommentTask = false
+    private var mGetProxyFailedCount = 0
     //private var mIsFromCache = false
 
     /**
@@ -305,7 +308,6 @@ class MainViewModel(val context: Context, val mainView: MainView) :
                 override fun onResponse(response: JSONObject?) {
                     response?.run {
                         val strResult = toString()
-                        L.i("threadID = ${ThreadUtils.isMainThread()} \ngetCityListFromNet result: $strResult")
                         //保存城市列表，隔一天再重新获取
                         SPUtils.getInstance(Constant.SP_CITY_LIST).apply {
                             put(Constant.KEY_CITY_DATA, strResult)
@@ -423,6 +425,7 @@ class MainViewModel(val context: Context, val mainView: MainView) :
                         val proxyIpBean = Gson().fromJson(this, ProxyIPBean::class.java)
                         when {
                             proxyIpBean?.data?.code == 200 -> {
+                                mGetProxyFailedCount = 0
                                 //上报IP信息
                                 uploadIpInfo(proxyIpBean)
 
@@ -433,13 +436,19 @@ class MainViewModel(val context: Context, val mainView: MainView) :
                                 }
                                 mainView.onRequestPortsResult(this)
                             }
-                            proxyIpBean?.data?.code == 203 -> {
-                                L.i("请求代理数据出错：code = 203")
-                                mainView.onResponPortsFailed("请求端口数据出错：code = ${proxyIpBean.data?.code}")
-                            }
+                         /*   proxyIpBean?.data?.code == 203 -> {
+
+                            }*/
                             else -> {  //重新请求
-                                L.i("请求代理数据出错：code = ${proxyIpBean?.data?.code}")
-                                mainView.onResponPortsFailed("请求端口数据出错：code = ${proxyIpBean?.data?.code}")
+                                mGetProxyFailedCount++
+                                L.i("请求代理数据出错：code = ${proxyIpBean?.data?.code}" +
+                                        " mGetProxyFailedCount=$mGetProxyFailedCount")
+                                if (mGetProxyFailedCount <= 3) {
+                                    requestPorts(cityId)
+                                } else{
+                                    mGetProxyFailedCount = 0
+                                    mainView.onResponPortsFailed("请求端口数据出错：code = ${proxyIpBean.data?.code}")
+                                }
                             }
                         }
                     }
@@ -549,7 +558,11 @@ class MainViewModel(val context: Context, val mainView: MainView) :
                             mainView.onFailed(errorMsg)
                         }
                     })
-                    .updateCommentTaskStatus(taskId, CommentStatus.COMMENT_MISSION_FAILED, "$cityName 没有相应的代理IP")
+                    .updateCommentTaskStatus(
+                        taskId,
+                        CommentStatus.COMMENT_MISSION_FAILED,
+                        "$cityName 没有相应的代理IP"
+                    )
             }
         }
     }
@@ -702,5 +715,29 @@ class MainViewModel(val context: Context, val mainView: MainView) :
             val textView = tipLayoutView.findViewById(R.id.tv_tip) as TextView
             textView.text = tip
         }
+    }
+
+
+    /**
+     * 检查是否有更新
+     */
+    fun checkUpdate() {
+        L.i("当前补丁版本号: ${TinkerPatch.with().patchVersion}")
+        TinkerPatch.with()
+            .setPatchResultCallback { patchResult ->
+                val result = patchResult.isSuccess
+                val resultStr = if (patchResult.isSuccess) "成功" else "失败"
+                L.i("热更新结果: $resultStr 当前补丁版本号: ${TinkerPatch.with().patchVersion}")
+                ToastUtils.showToast(context, "热更新：$resultStr")
+                //todo 上报热更新结果给后台
+                if (result) {
+                    PackageManagerUtils.restartApplication(
+                        context.packageName,
+                        "com.buy.together.MainActivity"
+                    )
+                }
+            }
+            .fetchPatchUpdate(true)
+        mainView.onResponVersionUpdate()
     }
 }

@@ -21,10 +21,10 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
     val buyerPhone = taskDataUtil.getBuyer_phone()
     var streetName = taskDataUtil.getStreet()
 
-    // 超出配送范围时，填入一个浙江省，杭州市，西湖区，保证可以配送
-    var fakeProvince: String = "浙江省"
-    var fakeCity: String = "杭州市"
-    var fakeDistrict: String = "西湖区"
+    // 超出配送范围时，保证可以配送
+    var fakeProvince: String = "广东省"
+    var fakeCity: String = "广州市"
+    var fakeDistrict: String = "天河区"
 
 
     var mTaskFinishedListener: TaskListener? = null
@@ -54,7 +54,6 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
                     L.i("地址已存在")
                     //chooseExistAddress()
 //                    responSuccess()
-                    // todo 地址已存在，先判断是否在配送范围，再验证是否相同收件人
                     if (buyerName != null) {
                         verifySameAddressee()
                     }
@@ -62,36 +61,6 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
             })
             .create()
             .execute()
-
-        /* AdbScriptController.Builder()
-             .setXY(ADB_XY.PAY_NOW.add_address, 3000L)
-             .setNodeFoundListener(object : TaskListener {
-                 override fun onTaskFinished() {
-                     NodeController.Builder()
-                         .setNodeService(nodeService)
-                         .setNodeParams("收货地址", 0, false, 3)
-                         .setNodeFoundListener(object : TaskListener {
-                             override fun onTaskFinished() {
-
-                             }
-
-                             override fun onTaskFailed(failedMsg: String) {
-
-                             }
-                         })
-                         .create()
-                         .execute()
-                 }
-
-                 override fun onTaskFailed(failedMsg: String) {
-                     //支付失败
-                     L.i("$failedMsg was not found.")
-                     responFailed("输入收货地址时，应用未获得root权限")
-                     //payByOther()
-                 }
-             })
-             .create()
-             .execute()*/
     }
 
     /**
@@ -125,16 +94,29 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
     private fun verifyAvailableArea() {
         NodeController.Builder()
             .setNodeService(nodeService)
-            .setNodeParams("不支持", 1, true, 5)
-            .setNodeParams("编辑", 0, true, 10)
-            .setNodeParams("市", 1, true, 10)
+            .setNodeParams("不支持", 1, 3)    //处理地址超出配送范围
+            .setNodeParams("编辑", 0, 3)
+            .setNodeParams("市", 1, 3)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     fillFakeAddressInfo()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    responSuccess()
+                    NodeController.Builder()
+                        .setNodeService(nodeService)
+                        .setNodeParams("路途遥远", 1, 3)    //处理收货地址太远，需要加收运费的问题
+                        .setTaskListener(object : TaskListener {
+                            override fun onTaskFinished() {
+                                fillFakeAddressInfo()
+                            }
+
+                            override fun onTaskFailed(failedMsg: String) {
+                                responSuccess()
+                            }
+                        })
+                        .create()
+                        .execute()
                 }
 
             })
@@ -168,7 +150,7 @@ class FillAddressService constructor(private val nodeService: MyAccessibilitySer
     private fun reFillAddress() {
         NodeController.Builder()
             .setNodeService(nodeService)
-            .setNodeParams("市", 1, true, 10, true)  //todo 再次判断是否有相同名字的收货人，如果有直接选择
+            .setNodeParams("市", 1, true, 10, true)
             .setNodeParams("添加收货地址", 0, true, 10)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {

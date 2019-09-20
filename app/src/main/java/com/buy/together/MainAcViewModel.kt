@@ -29,6 +29,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
     fun requestPermission() {
         val permissionArray = arrayListOf(
             Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.READ_SMS,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.INTERNET
@@ -79,7 +80,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
 
                 if (packageName == context.packageName || packageName == Constant.BUY_TOGETHER_PKG
                     || packageName == Constant.QQ_TIM_PKG || packageName == Constant.QQ_LIATE_PKG
-                   // || packageName == "com.android.browser"
+                // || packageName == "com.android.browser"
                 ) {
                     AppProxyManager.getInstance().setAppInfo(this)
                 }
@@ -117,7 +118,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
     /**
      * 检查无障碍服务是否开启
      */
-    fun checkAccessibilityService(){
+    fun checkAccessibilityService() {
         L.i("检测无障碍服务是否开启")
         if (!BaseAccessibilityService.isAccessibilitySettingsOn(
                 context,
@@ -180,7 +181,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
             override fun doInBackground(): Boolean {
                 CmdListUtil.getInstance().apply {
                     val cmdStr = "am force-stop ${Constant.ALI_PAY_PKG};" +
-                            "am force-stop ${Constant.BUY_TOGETHER_PKG};"+
+                            "am force-stop ${Constant.BUY_TOGETHER_PKG};" +
                             "am force-stop ${Constant.XIAOMI_BROWSER_PKG};"
                     execCmd(cmdStr)
                     return true
@@ -214,11 +215,11 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
             val successCode = getInt(Constant.KEY_COMMENT_SUCCESS_CODE)
             var finalRemark = remark
             L.i("上报评论任务状态：taskId:$taskId successCode:$successCode remark:$finalRemark")
-           when(successCode){
-               0-> finalRemark = "未签收"
-               1-> finalRemark = "评论成功"
-               2-> finalRemark = "评论失败"
-           }
+            when (successCode) {
+                0 -> finalRemark = "未签收"
+                1 -> finalRemark = "评论成功"
+                2 -> finalRemark = "评论失败"
+            }
 
             ApiManager()
                 .setDataListener(object : DataListener {
@@ -313,4 +314,51 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
     private fun sendTaskStatusReceiver() {
         context.sendBroadcast(Intent(MyAccessibilityService.ACTION_TASK_STATUS))
     }
+
+    /**
+     * 关闭无障碍服务
+     */
+    fun disableAccessibilityService() {
+        ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
+            override fun onSuccess(result: Boolean?) {
+                if (result!!) {
+                    Settings.Secure.putString(
+                        Utils.getApp().contentResolver,
+                        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                        Utils.getApp().packageName + "/com.accessibility.service.MyAccessibilityService"
+                    )
+                    Settings.Secure.putInt(
+                        Utils.getApp().contentResolver,
+                        Settings.Secure.ACCESSIBILITY_ENABLED, 0
+                    )
+                    // checkAccessibilityService()
+                }
+            }
+
+            override fun onCancel() {
+
+            }
+
+            override fun onFail(t: Throwable?) {
+
+            }
+
+            override fun doInBackground(): Boolean {
+                val result = CMDUtil().execCmd(
+                    "pm grant ${context.packageName} android.permission.WRITE_SECURE_SETTINGS;"
+                )
+                /* "settings put secure enabled_accessibility_services ${Constant.BUY_TOGETHER_PKG}/com.accessibility.service.MyAccessibilityService;" +
+                 "settings put secure accessibility_enabled 1;"
+     )*/
+                L.i("用adb命令开启无障碍:$result")
+                if (result.contains("Success")) {
+                    return true
+                }
+
+                return true
+
+            }
+        })
+    }
+
 }
