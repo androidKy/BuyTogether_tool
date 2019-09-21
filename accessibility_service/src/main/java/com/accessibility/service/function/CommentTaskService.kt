@@ -115,6 +115,7 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
     private fun isAdditioncalComment() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
+            .setNodeParams("已评价",0,false,3,true)
             .setNodeParams("追加评价", 0, false, 4)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
@@ -218,11 +219,8 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
                         .setXY("540,1500")      //提交评价
                         .setTaskListener(object : TaskListener {
                             override fun onTaskFinished() {
-
                                 L.i("成功提交评价")
                                 isCommentSucceed()
-
-
                             }
 
                             override fun onTaskFailed(failedMsg: String) {
