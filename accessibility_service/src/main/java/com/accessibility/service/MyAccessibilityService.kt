@@ -43,12 +43,12 @@ class MyAccessibilityService : BaseAccessibilityService() {
         const val ACTION_TASK_FAILED = "com.task.failed" //任务失败更新任务状态
         const val ACTION_TASK_SUCCEED = "com.task.succeed"  //任务成功更新任务状态
         const val KEY_TASK_MSG = "key__task_msg" //任务更新的备注
-       /* var mTaskListener: TaskListener? = null
+        /* var mTaskListener: TaskListener? = null
 
-        fun setTaskListener(taskListener: TaskListener) {
-            mTaskListener = taskListener
-        }
-*/
+         fun setTaskListener(taskListener: TaskListener) {
+             mTaskListener = taskListener
+         }
+ */
     }
 
     override fun onInterrupt() {
@@ -88,7 +88,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
         mTaskStatusReceiver?.apply {
             unregisterReceiver(this)
         }
-       // PackageManagerUtils.restartApplication(Constant.PKG_NAME, "com.buy.together.MainActivity")
+        // PackageManagerUtils.restartApplication(Constant.PKG_NAME, "com.buy.together.MainActivity")
     }
 
     /**
@@ -208,11 +208,13 @@ class MyAccessibilityService : BaseAccessibilityService() {
             .execute()
     }
 
-
+    /**
+     * 确认支付是否成功
+     */
     private fun confirmPayResult() {
         NodeController.Builder()
             .setNodeService(this)
-            .setNodeParams("个人中心", 0, true, 6)
+            .setNodeParams("个人中心", 0, true, 4)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("已找到个人中心")
@@ -302,11 +304,11 @@ class MyAccessibilityService : BaseAccessibilityService() {
         } else {
             L.i("开始自动执行评论任务")
             CommentTaskService(this@MyAccessibilityService)
-                .setCommentStatusListener(object:CommentTaskService.CommentStatusListener{
+                .setCommentStatusListener(object : CommentTaskService.CommentStatusListener {
                     override fun responCommentStatus(status: Int) {
                         L.i("评论任务返回值 status = $status")
                         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
-                            .put(Constant.KEY_COMMENT_SUCCESS_CODE,status)
+                            .put(Constant.KEY_COMMENT_SUCCESS_CODE, status)
                     }
 
                 })
@@ -364,10 +366,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
             setCurPageType(PageEnum.START_PAGE)
 
             PackageManagerUtils.killApplication(Constant.ALI_PAY_PKG)
-            PackageManagerUtils.restartApplication(
-                PKG_PINDUODUO,
-                "${PKG_PINDUODUO}.ui.activity.MainFrameActivity"
-            )
+            PackageManagerUtils.restartAppByPkgName(PKG_PINDUODUO)
         }, 5)
 
     }
@@ -387,9 +386,9 @@ class MyAccessibilityService : BaseAccessibilityService() {
         //initParams()
         startPddTask()
         postDelay(Runnable {
-           // mTaskListener?.onTaskFailed(msg)
+            // mTaskListener?.onTaskFailed(msg)
             val intent = Intent(ACTION_TASK_FAILED)
-            intent.putExtra(KEY_TASK_MSG,msg)
+            intent.putExtra(KEY_TASK_MSG, msg)
             sendBroadcast(intent)
         }, 2)
     }

@@ -221,12 +221,12 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
                     ACTION_TASK_RESTART -> {
                         restartTaskApp()
-                       /* PackageManagerUtils.startActivity(
-                            this@MainActivity.packageName,
-                            "com.buy.together.MainActivity"
-                        )
-                        mTaskRunning = false
-                        mMainAcViewModel?.checkAccessibilityService()*/
+                        /* PackageManagerUtils.startActivity(
+                             this@MainActivity.packageName,
+                             "com.buy.together.MainActivity"
+                         )
+                         mTaskRunning = false
+                         mMainAcViewModel?.checkAccessibilityService()*/
                     }
 
                     ACTION_APP_RESTART -> {
@@ -254,9 +254,6 @@ class MainActivity : AppCompatActivity(), MainAcView {
      * 重新启动任务App
      */
     fun restartTaskApp() {
-        PackageManagerUtils.restartApplication(
-            Constant.PKG_NAME,
-            "com.buy.together.MainActivity"
-        )
+        PackageManagerUtils.restartAppByPkgName(Constant.PKG_NAME)
     }
 }

@@ -1,6 +1,5 @@
 package com.accessibility.service.function
 
-import android.content.Intent
 import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.auto.NodeController
@@ -61,32 +60,54 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
         mScanGoodTime = (8..20).random()
 
         try {
-            NodeUtils.instance
-                .setNodeFoundListener(object : NodeFoundListener {
-                    override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
-                        if (nodeInfo == null) {
-                            L.i("scanGoods()... nodeInfo为空")
-                            scanGoods()
-                            return
-                        }
+            val goodName = TaskDataUtil.instance.getGoods_name()
+            NodeController.Builder()
+                .setNodeService(nodeService)
+                .setNodeParams(goodName!!,1,5)
+                .setTaskListener(object:TaskListener{
+                    override fun onTaskFinished() {
+                        L.i("已跳转到商品详情，开始滑动")
+                        startScroll()
+                    }
 
-                        nodeInfo?.apply {
-                            L.i("recyclerView was found: ${nodeInfo.className}")
-                            ScrollUtils(nodeService, nodeInfo)
-                                .setForwardTotalTime(mScanGoodTime)
-                                .setScrollListener(ForwardListenerImpl())
-                                .scrollForward()
-                        }
+                    override fun onTaskFailed(failedMsg: String) {
+                        L.i("跳转不到商品详情")
+                        responFailed("跳转不到商品详情")
                     }
                 })
-                .getSingleNodeByClassName(nodeService, WidgetConstant.RECYCLERVIEW)
+                .create()
+                .execute()
+
         } catch (e: Exception) {
             if (!mExceptionHappened){
                 L.i("无障碍服务崩溃：${e.message}")
                 mExceptionHappened = true
-                nodeService.sendBroadcast(Intent(MyAccessibilityService.ACTION_EXCEPTION_RESTART))
+                //nodeService.sendBroadcast(Intent(MyAccessibilityService.ACTION_EXCEPTION_RESTART))
+                responFailed("无障碍服务崩溃: ${e.message}")
             }
         }
+    }
+
+    private fun startScroll(){
+        NodeUtils.instance
+            .setNodeFoundListener(object : NodeFoundListener {
+                override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
+                    if (nodeInfo == null) {
+                        L.i("scanGoods()... nodeInfo为空")
+                        scanGoods()
+                        return
+                    }
+
+                    nodeInfo?.apply {
+                        L.i("recyclerView was found: ${nodeInfo.className}")
+                        ScrollUtils(nodeService, nodeInfo)
+                            .setForwardTotalTime(mScanGoodTime)
+                            .setScrollListener(ForwardListenerImpl())
+                            .scrollForward()
+                    }
+                }
+            })
+            .getSingleNodeByClassName(nodeService, WidgetConstant.RECYCLERVIEW)
     }
 
     inner class ForwardListenerImpl : ScrollUtils.ScrollListener {

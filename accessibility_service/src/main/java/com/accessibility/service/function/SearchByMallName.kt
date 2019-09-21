@@ -13,7 +13,8 @@ import com.safframework.log.L
  * Description:根据搜索店铺找到商品
  * Created by Quinin on 2019-08-15.
  **/
-class SearchByMallName(val myAccessibilityService: MyAccessibilityService) : BaseAcService(myAccessibilityService) {
+class SearchByMallName(val myAccessibilityService: MyAccessibilityService) :
+    BaseAcService(myAccessibilityService) {
 
     override fun startService() {
         val mallName = TaskDataUtil.instance.getMall_name()
@@ -70,13 +71,11 @@ class SearchByMallName(val myAccessibilityService: MyAccessibilityService) : Bas
     private fun findMall(mallName: String) {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams(mallName, 0, true, true, 5, false)
+            .setNodeParams(mallName, 0, 5)
+            //.setNodeParams(mallName, 0,false,5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    L.i("找到店铺:$mallName")
-                    myAccessibilityService.postDelay(Runnable {
-                        searchGood()
-                    },2)
+                    searchGood()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -92,25 +91,45 @@ class SearchByMallName(val myAccessibilityService: MyAccessibilityService) : Bas
      */
     private fun searchGood() {
         val goodName = TaskDataUtil.instance.getGoods_name()
-        if (goodName.isNullOrEmpty()) {
+        val mallName = TaskDataUtil.instance.getMall_name()
+        if (goodName.isNullOrEmpty() || mallName.isNullOrEmpty()) {
             responFailed("商品名字为空")
             return
         }
-        AdbScriptController.Builder()
-            .setXY("895,135")   //搜索入口
-            .setText(goodName)  //搜索输入框
-            .setXY("990,150")   //搜索按钮坐标
-            .setTaskListener(object : TaskListener {
+
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("客服",1,false,5)
+            .setNodeParams(mallName,1,false,5)
+            .setTaskListener(object:TaskListener{
                 override fun onTaskFinished() {
-                    findGood(goodName)
+                    L.i("找到店铺")
+                    AdbScriptController.Builder()
+                        .setXY("895,135")   //搜索入口
+                        .setText(goodName)  //搜索输入框
+                        .setXY("990,150")   //搜索按钮坐标
+                        .setTaskListener(object : TaskListener {
+                            override fun onTaskFinished() {
+                                myAccessibilityService.postDelay(Runnable {
+                                    findGood(goodName)
+                                },2)
+                            }
+
+                            override fun onTaskFailed(failedMsg: String) {
+                                responFailed("根据店铺搜索商品：应用未获得root权限")
+                            }
+                        })
+                        .create()
+                        .execute()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    responFailed("根据店铺搜索商品：应用未获得root权限")
+                    responFailed("没跳转到商铺")
                 }
             })
             .create()
             .execute()
+
     }
 
     /**
@@ -118,10 +137,21 @@ class SearchByMallName(val myAccessibilityService: MyAccessibilityService) : Bas
      */
     private fun findGood(goodName: String) {
         val goodPrice = TaskDataUtil.instance.getSearchPrice()
+        if(goodPrice.isNullOrEmpty())
+        {
+            responFailed("商品搜索价格为空")
+            return
+        }
+      /*  var mHalfGoodName = ""
+        goodName.apply {
+            mHalfGoodName = if (this.length > 11) {
+                this.substring(0, 10)
+            } else goodPrice!!
+        }*/
 
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams(goodPrice!!,1)
+            .setNodeParams(goodPrice, 1,5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     responSucceed()
