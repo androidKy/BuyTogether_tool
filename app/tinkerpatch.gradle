@@ -3,7 +3,7 @@ apply plugin: 'tinkerpatch-support'
 /**
  */
 def bakPath = file("${buildDir}/bakApk/")
-def baseInfo = "app-1.0.0-0920-12-19-27"
+def baseInfo = "app-1.0.1-0920-17-38-54"
 def variantName = "normaltask-release"
 
 /**

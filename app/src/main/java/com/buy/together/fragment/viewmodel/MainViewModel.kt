@@ -703,7 +703,6 @@ class MainViewModel(val context: Context, val mainView: MainView) :
             }
         }
     }
-
     /**
      * 显示提示
      */
@@ -731,10 +730,7 @@ class MainViewModel(val context: Context, val mainView: MainView) :
                 ToastUtils.showToast(context, "热更新：$resultStr")
                 //todo 上报热更新结果给后台
                 if (result) {
-                    PackageManagerUtils.restartApplication(
-                        context.packageName,
-                        "com.buy.together.MainActivity"
-                    )
+                    PackageManagerUtils.restartAppByPkgName(Constant.PKG_NAME)
                 }
             }
             .fetchPatchUpdate(true)

@@ -151,7 +151,7 @@ class AliPayLogin(myAccessibilityService: MyAccessibilityService) :
                     try {
                         adbInputPsw()
                     } catch (e: Exception) {
-                        L.e(e.message,e)
+                        L.e(e.message, e)
                         responTaskFailed("输入密码发生异常")
                     }
                 }
@@ -169,7 +169,7 @@ class AliPayLogin(myAccessibilityService: MyAccessibilityService) :
     /**
      * 通过ADB输入密码
      */
-    private fun adbInputPsw(){
+    private fun adbInputPsw() {
         //818910
         val payPsw = TaskDataUtil.instance.getAliPay_psw()
         L.i("支付宝的支付密码：$payPsw")
@@ -198,12 +198,47 @@ class AliPayLogin(myAccessibilityService: MyAccessibilityService) :
 
                     override fun onTaskFinished() {
                         //支付成功  todo 金额过大时，需要处理短信验证码
-                        myAccessibilityService.performBackClick(5, object : AfterClickedListener {
-                            override fun onClicked() {
-                                L.i("密码已输入，准备重启PDD")
-                                responTaskSuccess()
-                            }
-                        })
+                        myAccessibilityService.apply {
+                            performBackClick(6, object : AfterClickedListener {
+                                override fun onClicked() {
+                                    L.i("密码已输入，准备重启PDD")
+                                    NodeController.Builder()
+                                        .setNodeService(this@apply)
+                                        .setNodeParams("立即支付", 1, false, 4)
+                                        .setTaskListener(object : TaskListener {
+                                            override fun onTaskFinished() {
+                                                L.i("仍然停留在支付界面")
+                                                performBackClick(1, object : AfterClickedListener {
+                                                    override fun onClicked() {
+                                                        NodeController.Builder()
+                                                            .setNodeService(this@apply)
+                                                            .setNodeParams("暂时放弃", 1, 4)
+                                                            .setTaskListener(object : TaskListener {
+                                                                override fun onTaskFinished() {
+                                                                    responTaskSuccess()
+                                                                }
+
+                                                                override fun onTaskFailed(failedMsg: String) {
+                                                                    responTaskSuccess()
+                                                                }
+                                                            })
+                                                            .create()
+                                                            .execute()
+                                                    }
+                                                })
+                                            }
+
+                                            override fun onTaskFailed(failedMsg: String) {
+                                                L.i("支付成功，已离开支付界面")
+                                                responTaskSuccess()
+                                            }
+                                        })
+                                        .create()
+                                        .execute()
+
+                                }
+                            })
+                        }
                     }
                 })
                 .create()
