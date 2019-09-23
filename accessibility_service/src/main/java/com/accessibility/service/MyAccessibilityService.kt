@@ -9,6 +9,7 @@ import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseAccessibilityService
+import com.accessibility.service.data.TaskCategory
 import com.accessibility.service.function.*
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
@@ -288,43 +289,58 @@ class MyAccessibilityService : BaseAccessibilityService() {
      * 登录成功后的处理
      */
     private fun afterLoginSucceed() {
-        if (!TaskDataUtil.instance.isCommentTask()!!) {
-            L.i("开始自动执行正常任务")
-            SearchGoods(this@MyAccessibilityService)
-                .setTaskListener(object : TaskListener {
-                    override fun onTaskFinished() {
-                        doTask()
-                    }
-
-                    override fun onTaskFailed(failedMsg: String) {
-                        responTaskFailed(failedMsg)
-                    }
-                })
-                .startService()
-        } else {
-            L.i("开始自动执行评论任务")
-            CommentTaskService(this@MyAccessibilityService)
-                .setCommentStatusListener(object : CommentTaskService.CommentStatusListener {
-                    override fun responCommentStatus(status: Int) {
-                        L.i("评论任务返回值 status = $status")
-                        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
-                            .put(Constant.KEY_COMMENT_SUCCESS_CODE, status)
-                    }
-
-                })
-                .setTaskListener(object : TaskListener {
-                    override fun onTaskFinished() {
-                        mHandler.postDelayed({
-                            responTaskFinished()
-                        }, 3 * 1000)
-                    }
-
-                    override fun onTaskFailed(failedMsg: String) {
-                        responTaskFailed(failedMsg)
-                    }
-                })
-                .startService()
+        val taskCategory = TaskDataUtil.instance.getTask_category()
+        taskCategory?.apply {
+            when (this) {
+                TaskCategory.NORMAL_TASK -> startNormalTaskAfterLogined()
+                else -> startOtherTaskAfterLogined()
+            }
         }
+    }
+
+    /**
+     * 开始自动执行正常任务
+     */
+    private fun startNormalTaskAfterLogined() {
+        L.i("开始自动执行正常任务")
+        SearchGoods(this@MyAccessibilityService)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    doTask()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    responTaskFailed(failedMsg)
+                }
+            })
+            .startService()
+    }
+
+    /**
+     * 开始自动执行非正常任务
+     */
+    private fun startOtherTaskAfterLogined() {
+        L.i("开始自动执行非正常任务")
+        CommentTaskService(this@MyAccessibilityService)
+            .setCommentStatusListener(object : CommentTaskService.CommentStatusListener {
+                override fun responCommentStatus(status: Int) {
+                    L.i("评论任务返回值 status = $status")
+                    SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                        .put(Constant.KEY_COMMENT_SUCCESS_CODE, status)
+                }
+            })
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    mHandler.postDelayed({
+                        responTaskFinished()
+                    }, 3 * 1000)
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    responTaskFailed(failedMsg)
+                }
+            })
+            .startService()
     }
 
     /**

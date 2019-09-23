@@ -98,7 +98,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
                     saveErrorInfo(e);
                     Looper.prepare();
                     mContext.sendBroadcast(new Intent(ACTION_EXCEPTION_RESTART));
-                    Toast.makeText(mContext, "UnCrashException", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
                     Looper.loop();
                 }
             });

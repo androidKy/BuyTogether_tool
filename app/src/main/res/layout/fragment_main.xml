@@ -1,12 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                             xmlns:app="http://schemas.android.com/apk/res-auto"
-                                             xmlns:tools="http://schemas.android.com/tools"
-                                             android:layout_width="match_parent"
-                                             android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:padding="@dimen/commonPadding"
+        android:layout_height="match_parent">
 
-    <FrameLayout android:id="@+id/mainFragment_container" android:layout_width="match_parent"
-                 android:layout_height="match_parent">
+    <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:text="任务类型："
+            android:textSize="20sp" />
+
+    <TextView
+            android:id="@+id/tv_taskType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/textView"
+            android:layout_alignBottom="@+id/textView"
+            android:layout_toEndOf="@+id/textView"
+            android:textSize="20sp"
+            android:textColor="@android:color/holo_red_light"
+            android:text="确认收货"/>
+
+    <FrameLayout android:id="@+id/fl_container" android:layout_width="match_parent"
+            android:layout_below="@id/textView"
+            android:layout_height="match_parent">
 
     </FrameLayout>
-</android.support.constraint.ConstraintLayout>
+
+</RelativeLayout>

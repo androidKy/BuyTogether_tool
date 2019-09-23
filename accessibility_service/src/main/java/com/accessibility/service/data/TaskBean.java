@@ -73,7 +73,7 @@ public class TaskBean {
         private int task_complete;
         private int task_fail;
         private String talk_msg;
-        private boolean isCommentTask;
+        private int task_category;  //任务分类，比如正常任务、评论任务和确认收货任务
         private String comment_content;
         private double can_comment_time;
         private String order_id;
@@ -256,12 +256,12 @@ public class TaskBean {
             this.can_comment_time = can_comment_time;
         }
 
-        public boolean isCommentTask() {
-            return isCommentTask;
+        public int getTask_category() {
+            return task_category;
         }
 
-        public void setCommentTask(boolean commentTask) {
-            isCommentTask = commentTask;
+        public void setTask_category(int task_category) {
+            this.task_category = task_category;
         }
 
         public static class IpBean {

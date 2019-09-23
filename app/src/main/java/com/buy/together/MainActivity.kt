@@ -180,9 +180,6 @@ class MainActivity : AppCompatActivity(), MainAcView {
         }, 2000)
     }
 
-    override fun onFailed(msg: String?) {
-        L.i(msg)
-    }
 
 
     private fun startPdd() {

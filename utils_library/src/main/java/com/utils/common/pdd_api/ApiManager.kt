@@ -34,6 +34,7 @@ class ApiManager {
         const val URL_GET_ACCOUNT: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/account/?id="
         const val URL_UPDATE_ACCOUNT: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/account/"
         const val URL_GET_ADDRESS: String = "$URL_HTTP$URL_SERVER_DOMAIN/others/address/"
+        const val URL_GET_CONFIRM_SIGNED:String = "$URL_HTTP$URL_SERVER_DOMAIN/task/confirm/"
 
         /* const val URL_GET_TASK: String = "$URL_HTTP$URL_TEST_DOMAIN/task/get/"
          const val URL_GET_COMMENT_TASK: String = "$URL_HTTP$URL_TEST_DOMAIN/task/comment/"
@@ -104,6 +105,32 @@ class ApiManager {
 
             override fun unvalid() {
                 responseError("获取评论任务", "网络连接失败")
+            }
+        })
+    }
+
+    /**
+     * 获取确认收货任务
+     */
+    fun getConfrimSignedTask(imei:String){
+        checkNetwork(object :NetworkListener{
+            override fun valid() {
+                AndroidNetworking.get("${URL_GET_CONFIRM_SIGNED}?imei=$imei")
+                    .addHeaders("API-AUTH", "a69caa73-f126-444d-879c-74e75d433940")
+                    .build()
+                    .getAsOkHttpResponse(object:OkHttpResponseListener{
+                        override fun onResponse(response: Response?) {
+                            responseSucceed(response,"获取确认收货任务成功")
+                        }
+
+                        override fun onError(anError: ANError?) {
+                            responseError(anError,"获取确认收货失败")
+                        }
+                    })
+            }
+
+            override fun unvalid() {
+                responseError("获取确认收货任务","网络连接失败")
             }
         })
     }
@@ -331,6 +358,44 @@ class ApiManager {
 
             override fun unvalid() {
                 responseError("更新评论任务状态", "网络连接失败")
+            }
+        })
+    }
+
+    /**
+     * 更新确认收货
+     */
+    fun updateConfrimSignedTask(taskId: Int, successCode: Int, remark: String)
+    {
+        checkNetwork(object : NetworkListener {
+            override fun valid() {
+                JSONObject().run {
+                  //  put("option", "complete_comment")
+                    put("id", taskId)
+                    put("success", successCode)
+                    put("remark", remark)
+                    put("imei",SPUtils.getInstance(SP_REAL_DEVICE_PARAMS).getString(KEY_REAL_DEVICE_IMEI))
+
+                    AndroidNetworking.post(URL_GET_CONFIRM_SIGNED)
+                        .setContentType(POST_JSON_CONTENT_TYPE)
+                        .addHeaders("API-AUTH", "a69caa73-f126-444d-879c-74e75d433940")
+                        .addJSONObjectBody(this)
+                        .build()
+                        .getAsOkHttpResponse(object : OkHttpResponseListener {
+                            override fun onResponse(response: Response?) {
+                                responseSucceed(response, "更新确认收货任务状态成功")
+                            }
+
+                            override fun onError(anError: ANError?) {
+                                responseError(anError, "更新确认收货任务状态失败")
+                            }
+
+                        })
+                }
+            }
+
+            override fun unvalid() {
+                responseError("更新确认收货任务状态", "网络连接失败")
             }
         })
     }

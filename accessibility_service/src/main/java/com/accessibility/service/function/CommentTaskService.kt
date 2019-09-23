@@ -4,6 +4,7 @@ import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseAcService
+import com.accessibility.service.data.TaskCategory
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.CommentStatus
@@ -70,23 +71,51 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
         }
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-//            .setNodeParams("待收货")
             .setNodeParams(mallName, 1, false, 5)
-            .setNodeParams("确认收货", 0, timeout = 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    checkIsSigned()
+                  findConfirmSignedNode()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    isFindComment()
+                    responFailed("该账号未下单: $failedMsg")
                 }
             })
             .create()
             .execute()
     }
 
-    private fun isFindComment() {
+    /**
+     * 查找确认收货按钮
+     */
+    private fun findConfirmSignedNode(){
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("确认收货", 0, timeout = 5)
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+                    checkIsSigned()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    val taskCategory = TaskDataUtil.instance.getTask_category()
+                    if (taskCategory == TaskCategory.COMMENT_TASK) {
+                        L.i("开始评论")
+                        findCommentNode()
+                    } else {
+                        L.i("确认收货已完成")
+                        responSucceed()
+                    }
+                }
+            })
+            .create()
+            .execute()
+    }
+
+    /**
+     * 查找立即评价节点
+     */
+    private fun findCommentNode() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
             .setNodeParams("立即评价", 0, true, 10)
@@ -99,7 +128,6 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
                     L.i("找不到立即评价，尝试去找追加评价")
                     isAdditioncalComment()
                 }
-
             })
             .create()
             .execute()
@@ -140,7 +168,6 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
                 override fun onTaskFinished() {
                     L.i("包裹未签收")
                     mCommentStatusListener?.responCommentStatus(CommentStatus.NOT_SIGNED)
-
                     responFailed("包裹未签收")
                 }
 
@@ -151,9 +178,15 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
                         .setNodeParams("确认收货", 1, 3)
                         .setTaskListener(object : TaskListener {
                             override fun onTaskFinished() {
-                                L.i("开始评论")
-                                startComment()
-//                                noComment()
+                                val taskCategory = TaskDataUtil.instance.getTask_category()
+                                if (taskCategory == TaskCategory.COMMENT_TASK) {
+                                    L.i("开始评论")
+                                    startComment()
+                                } else {
+                                    L.i("确认收货完成")
+                                    noComment()
+                                }
+//
                             }
 
                             override fun onTaskFailed(failedMsg: String) {
@@ -184,6 +217,7 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
+                    responFailed(failedMsg)
                 }
 
             })
