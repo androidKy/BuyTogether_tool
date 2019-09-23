@@ -54,6 +54,7 @@ class SearchByMallName(val myAccessibilityService: MyAccessibilityService) :
             .setNodeParams("搜索")
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
+                    L.i("准备在搜索框输入店铺。")
                     findMall(mallName)
                 }
 

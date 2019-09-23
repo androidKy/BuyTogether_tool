@@ -295,6 +295,16 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                                                     }
                                                 }
                                             })
+                                            .setTaskListener(object :TaskListener{
+                                                override fun onTaskFinished() {
+
+                                                }
+
+                                                override fun onTaskFailed(failedMsg: String) {
+                                                    responTaskFailed("登录失败的其他情况")
+                                                }
+
+                                            })
                                             .startService()
                                     }
                                 })

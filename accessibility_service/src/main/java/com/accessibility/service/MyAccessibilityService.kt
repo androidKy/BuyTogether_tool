@@ -136,7 +136,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
     }
 
     private fun test() {
-        if(!testFlag) {
+        if (!testFlag) {
             testFlag = true
 //            NodeController.Builder()
 //                .setNodeService(this)
@@ -220,7 +220,9 @@ class MyAccessibilityService : BaseAccessibilityService() {
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("已找到个人中心")
-                    afterLoginSucceed()     //任务失败，重新进来，不再重新登录
+//                    afterLoginSucceed()     //任务失败，重新进来，不再重新登录
+//                    再次判断，能否找到点击登录.
+                    isFindClickLogin()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -230,6 +232,31 @@ class MyAccessibilityService : BaseAccessibilityService() {
             })
             .create()
             .execute()
+    }
+
+    /**
+     *  需要再加一次判断，不能找到点击登录，则代表掉线的时候，PDD登录数据存留
+     */
+    private fun isFindClickLogin() {
+        NodeController.Builder()
+            .setNodeService(this)
+            .setNodeParams("点击登录", 0, 5)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+
+                    SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                        .put(Constant.KEY_IS_LOGINED, false)
+                    responTaskFailed("未进入登录状态")
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    afterLoginSucceed()     //任务失败，重新进来，不再重新登录
+                }
+
+            })
+            .create()
+            .execute()
+
     }
 
     /**
@@ -390,7 +417,10 @@ class MyAccessibilityService : BaseAccessibilityService() {
             setCurPageType(PageEnum.START_PAGE)
 
             PackageManagerUtils.killApplication(Constant.ALI_PAY_PKG)
-            PackageManagerUtils.restartAppByPkgName(PKG_PINDUODUO)
+            PackageManagerUtils.restartApplication(
+                PKG_PINDUODUO,
+                "${PKG_PINDUODUO}.ui.activity.MainFrameActivity"
+            )
         }, 5)
 
     }

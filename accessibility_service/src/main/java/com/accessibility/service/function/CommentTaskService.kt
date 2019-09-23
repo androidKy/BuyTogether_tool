@@ -14,8 +14,7 @@ import com.safframework.log.L
  * Description:评论任务
  * Created by Quinin on 2019-08-12.
  **/
-class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
-    BaseAcService(myAccessibilityService) {
+class CommentTaskService(val myAccessibilityService: MyAccessibilityService) : BaseAcService(myAccessibilityService) {
 
 
     var mCommentStatusListener: CommentStatusListener? = null
@@ -221,7 +220,9 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
                             override fun onTaskFinished() {
 
                                 L.i("成功提交评价")
-                                isCommentSucceed()
+                                //                    isCommentSucceed()
+                                // todo 人工进行操作
+                                deadLoop()
 
 
                             }
@@ -252,8 +253,8 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
     private fun deadLoop() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("个人中心",0,false,5)
-            .setTaskListener(object :TaskListener{
+            .setNodeParams("个人中心", 0, false, 5)
+            .setTaskListener(object : TaskListener {
                 override fun onTaskFailed(failedMsg: String) {
                     mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_MISSION_SUCCESS)
                     responSucceed()
