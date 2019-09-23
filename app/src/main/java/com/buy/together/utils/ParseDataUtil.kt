@@ -125,6 +125,7 @@ class ParseDataUtil {
             val taskBean = TaskBean()
             taskBean.code = commentBean.code
             taskBean.msg = commentBean.msg
+
             val task = TaskBean.TaskData()
 
             task.task_id = commentBean.task.task_id
@@ -132,6 +133,7 @@ class ParseDataUtil {
             task.isCommentTask = true
             task.order_id = commentBean.task.order_id
             task.can_comment_time = commentBean.task.can_comment_time
+            task.pic_links = commentBean.task.pic_links
 
             val goods = TaskBean.TaskData.GoodsBean()
             goods.id = commentBean.task.goods.id

@@ -19,7 +19,7 @@ class TaskDataUtil private constructor() {
         }
     }
 
-    fun clearData(){
+    fun clearData() {
         mTaskServiceData = null
     }
 
@@ -29,6 +29,10 @@ class TaskDataUtil private constructor() {
 
     fun getTaskServiceData(): TaskBean? {
         return mTaskServiceData
+    }
+
+    fun getPictureList(): List<String>? {
+        return mTaskServiceData?.task?.pic_links
     }
 
     /**

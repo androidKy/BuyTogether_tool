@@ -220,7 +220,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
                     if (!isCommentTask!!)
                         dealAccountError()
                     else {
-                        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).put(Constant.KEY_COMMENT_SUCCESS_CODE,CommentStatus.COMMENT_MISSION_FAILED)
+                        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).put(Constant.KEY_COMMENT_SUCCESS_CODE,CommentStatus.COMMENT_FAILED)
                         responTaskFailed("评论任务：id=${mUserId}-${mUserName}账号已失效")
                     }
                 }

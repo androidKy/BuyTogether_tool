@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">pddTask</string>
     <string name="app_comment">pddComment</string>
+    <string name="app_confirmSigned">pddConfirmSigned</string>
 </resources>

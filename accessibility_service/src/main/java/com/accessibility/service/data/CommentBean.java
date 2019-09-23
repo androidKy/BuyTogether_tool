@@ -1,5 +1,7 @@
 package com.accessibility.service.data;
 
+import java.util.List;
+
 /**
  * Description:
  * Created by Quinin on 2019-08-10.
@@ -63,6 +65,16 @@ public class CommentBean {
         private DeviceBean device;
         private DeliveryAddressBean delivery_address;
         private IpBean ip;
+        private List<String> pic_links;
+
+
+        public List<String> getPic_links() {
+            return pic_links;
+        }
+
+        public void setPic_links(List<String> pic_links) {
+            this.pic_links = pic_links;
+        }
 
         public int getTask_id() {
             return task_id;

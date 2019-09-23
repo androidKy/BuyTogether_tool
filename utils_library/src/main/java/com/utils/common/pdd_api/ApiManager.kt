@@ -83,13 +83,11 @@ class ApiManager {
     /**
      * 获取评论任务
      */
-    fun getCommentTask() {
+    fun getCommentTask(imei:String) {
         checkNetwork(object : NetworkListener {
             override fun valid() {
                 AndroidNetworking.get(
-                    "${URL_GET_COMMENT_TASK}?imei=${SPUtils.getInstance(
-                        SP_REAL_DEVICE_PARAMS
-                    ).getString(KEY_REAL_DEVICE_IMEI)}"
+                    "${URL_GET_COMMENT_TASK}?imei=$imei"
                 )
                     .addHeaders("API-AUTH", "a69caa73-f126-444d-879c-74e75d433940")
                     .build()

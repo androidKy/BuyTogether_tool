@@ -95,6 +95,10 @@ class MainViewModel(val context: Context, val mainView: MainView) :
     private fun startGetTask() {
         if (mIsCommentTask) {
             L.i("获取评论任务")
+            val imei = SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS)
+                .getString(Constant.KEY_REAL_DEVICE_IMEI)
+            //  val imei = "866187037596234"
+            L.i("真实imei：$imei")
             ApiManager()
                 .setDataListener(object : DataListener {
                     override fun onSucceed(result: String) {
@@ -105,7 +109,7 @@ class MainViewModel(val context: Context, val mainView: MainView) :
                         mainView.onFailed(errorMsg)
                     }
                 })
-                .getCommentTask()
+                .getCommentTask(imei)
         } else {
             L.i("获取正常任务")
             val imei = SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS)
@@ -560,7 +564,7 @@ class MainViewModel(val context: Context, val mainView: MainView) :
                     })
                     .updateCommentTaskStatus(
                         taskId,
-                        CommentStatus.COMMENT_MISSION_FAILED,
+                        CommentStatus.COMMENT_FAILED,
                         "$cityName 没有相应的代理IP"
                     )
             }

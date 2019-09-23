@@ -212,9 +212,13 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
     private fun updateCommentTask(isSucceed: Boolean, remark: String) {
         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
             val taskId = getInt(Constant.KEY_TASK_ID)
-            val successCode = getInt(Constant.KEY_COMMENT_SUCCESS_CODE)
+            var successCode = getInt(Constant.KEY_COMMENT_SUCCESS_CODE)
             var finalRemark = remark
-            L.i("上报评论任务状态：taskId:$taskId successCode:$successCode remark:$finalRemark")
+            L.i("上报评论任务状态：taskId:$taskId isSucceed:$isSucceed successCode:$successCode remark:$finalRemark")
+            if(!isSucceed)
+            {
+                successCode = 2
+            }
             when (successCode) {
                 0 -> finalRemark = "未签收"
                 1 -> finalRemark = "评论成功"
