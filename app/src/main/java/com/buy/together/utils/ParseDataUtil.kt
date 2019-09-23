@@ -18,7 +18,7 @@ class ParseDataUtil {
         val talk_msg = "talk_msg"
         val can_comment_time = "can_comment_time"
         val order_id = "order_id"
-        val isCommentTask = "isCommentTask"
+        val task_category = "getTask_category"
 
         val comment_content = "comment_content"
         val ip_address = "ip_address"
@@ -90,9 +90,26 @@ class ParseDataUtil {
             hashMap[comment_content] = taskData.comment_content.toString()
             hashMap[can_comment_time] = taskData.can_comment_time.toString()
             hashMap[order_id] = taskData.order_id
-            hashMap[isCommentTask] = taskData.isCommentTask.toString()
+            hashMap[task_category] = taskData.task_category.toString()
 
             hashMap[ip_city] = taskData.delivery_address.city
+            hashMap[account_name] = taskData.account.user
+            hashMap[account_psw] = taskData.account.pwd
+
+            hashMap[goods_id] = taskData.goods.id.toString()
+            //hashMap[goods_keyword] = taskData.goods.keyword
+            hashMap[goods_name] = taskData.goods.goods_name
+            hashMap[mall_name] = taskData.goods.mall_name
+            hashMap[search_price] = taskData.goods.search_price
+
+            return hashMap
+        }
+
+        fun parseConfirmSignedTask2HashMap(taskBean: TaskBean): HashMap<String, String> {
+            val taskData = taskBean.task
+            val hashMap = HashMap<String, String>()
+            hashMap[task_id] = taskData.task_id.toString()
+
             hashMap[account_name] = taskData.account.user
             hashMap[account_psw] = taskData.account.pwd
 
@@ -125,13 +142,14 @@ class ParseDataUtil {
             val taskBean = TaskBean()
             taskBean.code = commentBean.code
             taskBean.msg = commentBean.msg
+
             val task = TaskBean.TaskData()
 
             task.task_id = commentBean.task.task_id
             task.comment_content = commentBean.task.comment_content
-            task.isCommentTask = true
             task.order_id = commentBean.task.order_id
             task.can_comment_time = commentBean.task.can_comment_time
+            task.pic_links = commentBean.task.pic_links
 
             val goods = TaskBean.TaskData.GoodsBean()
             goods.id = commentBean.task.goods.id

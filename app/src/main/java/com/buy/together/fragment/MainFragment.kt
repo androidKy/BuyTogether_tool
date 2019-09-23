@@ -3,8 +3,10 @@ package com.buy.together.fragment
 import android.content.Intent
 import android.text.TextUtils
 import android.widget.FrameLayout
+import android.widget.TextView
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.data.TaskBean
+import com.accessibility.service.data.TaskCategory
 import com.accessibility.service.util.Constant
 import com.buy.together.BuildConfig
 import com.buy.together.R
@@ -16,7 +18,6 @@ import com.buy.together.fragment.viewmodel.MainViewModel
 import com.google.gson.Gson
 import com.proxy.service.LocalVpnManager
 import com.proxy.service.LocalVpnService
-import com.rmondjone.locktableview.DisplayUtil
 import com.rmondjone.locktableview.LockTableView
 import com.safframework.log.L
 import com.utils.common.SPUtils
@@ -30,7 +31,6 @@ import com.utils.common.ToastUtils
  **/
 class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedListener {
 
-
     private var mTableDatas = ArrayList<ArrayList<String>>()
     private var mTaskBean: TaskBean? = null
     private var mContainer: FrameLayout? = null
@@ -38,9 +38,10 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     private var mVpnFailedConnectCount: Int = 0 //VPN连接失败次数
     private var mIsResumed: Boolean = false  //Fragment是否被创建
     private var mIsCommentTask: Boolean = false  //是否是评论任务
+    private var mTVtaskType: TextView? = null
 
     init {
-        mIsCommentTask = BuildConfig.isCommentTask
+        mIsCommentTask = BuildConfig.taskType == TaskCategory.COMMENT_TASK
     }
 
     override fun getLayoutId(): Int {
@@ -49,38 +50,25 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
 
     override fun initView() {
         L.init(MainFragment::class.java.simpleName)
-        mContainer = mRootView?.findViewById<FrameLayout>(R.id.mainFragment_container)
+        mContainer = mRootView?.findViewById<FrameLayout>(R.id.fl_container)
+        mTVtaskType = mRootView?.findViewById(R.id.tv_taskType)
 
         initDisplayOpinion()
 
-        initHeader()
+        initHeader(mTableDatas)
+        context?.apply {
+            mViewModel = MainViewModel(this, this@MainFragment)
+        }
 
-        mViewModel = MainViewModel(context!!, this)
-
-
+        when(BuildConfig.taskType)
+        {
+            TaskCategory.NORMAL_TASK-> mTVtaskType?.text = "正常任务"
+            TaskCategory.COMMENT_TASK->mTVtaskType?.text = "评论任务"
+            TaskCategory.CONFIRM_SIGNED_TASK->mTVtaskType?.text = "确认收货任务"
+        }
         //initTableView(mTableDatas)
     }
 
-    private fun initHeader() {
-        val headerList = ArrayList<String>()
-
-        headerList.add("KEY")
-        headerList.add("VALUE")
-
-        mTableDatas.add(headerList)
-    }
-
-    private fun initDisplayOpinion() {
-
-        val dm = resources.displayMetrics
-        DisplayUtil.density = dm.density
-        DisplayUtil.densityDPI = dm.densityDpi
-        DisplayUtil.screenWidthPx = dm.widthPixels
-        DisplayUtil.screenhightPx = dm.heightPixels
-        DisplayUtil.screenWidthDip = DisplayUtil.px2dip(context, dm.widthPixels.toFloat()).toFloat()
-        DisplayUtil.screenHightDip =
-            DisplayUtil.px2dip(context, dm.heightPixels.toFloat()).toFloat()
-    }
 
     private fun initTableView(tableDatas: ArrayList<ArrayList<String>>) {
         context?.run {
@@ -136,9 +124,9 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         }
     }
 
-    override fun onResponVersionUpdate(){
-       LocalVpnManager.getInstance().stopVpnService(activity)
-       mViewModel?.getTask(mIsCommentTask)
+    override fun onResponVersionUpdate() {
+        LocalVpnManager.getInstance().stopVpnService(activity)
+        mViewModel?.getTask()
     }
 
     override fun onResponTask(taskBean: TaskBean) {
@@ -153,7 +141,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
             {
                 //  mIsCommentTask = !mIsCommentTask
                 mViewModel?.stopTaskTimer()
-                mViewModel?.startTaskTimer(mIsCommentTask)
+                mViewModel?.startTaskTimer()
                 mViewModel?.showTip(mContainer, "没有待领取的任务")
             }
             else -> {
@@ -163,7 +151,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
                     ToastUtils.showToast(this, "获取数据失败：${taskBean.msg}")
 
                     mViewModel?.stopTaskTimer()
-                    mViewModel?.startTaskTimer(mIsCommentTask)
+                    mViewModel?.startTaskTimer()
                 }
             }
         }
@@ -181,7 +169,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     override fun onFailed(msg: String?) {
         L.i("获取任务失败：$msg")
         mViewModel?.stopTaskTimer()
-        mViewModel?.startTaskTimer(mIsCommentTask)
+        mViewModel?.startTaskTimer()
         context?.run {
             if (!msg.isNullOrEmpty()) {
                 ToastUtils.showToast(this, msg)

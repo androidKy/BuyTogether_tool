@@ -2,7 +2,6 @@ package com.buy.together.fragment.view
 
 import com.accessibility.service.data.TaskBean
 import com.buy.together.base.BaseView
-import com.buy.together.bean.CloseProxyBean
 
 /**
  * Description:
@@ -13,8 +12,5 @@ interface MainView : BaseView {
     fun onResponTask(taskBean: TaskBean)
     fun onParseDatas(taskData: ArrayList<ArrayList<String>>)
     fun onClearDataResult(result: String)
-    fun onRequestPortsResult(result: String)
-    fun onResponPortsFailed(errorMsg:String)
-    fun onResponClosePort(closeProxyBean: CloseProxyBean?)
     fun onResponVpnResult(result:Boolean)
 }

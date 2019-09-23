@@ -19,7 +19,7 @@ class TaskDataUtil private constructor() {
         }
     }
 
-    fun clearData(){
+    fun clearData() {
         mTaskServiceData = null
     }
 
@@ -29,6 +29,10 @@ class TaskDataUtil private constructor() {
 
     fun getTaskServiceData(): TaskBean? {
         return mTaskServiceData
+    }
+
+    fun getPictureList(): List<String>? {
+        return mTaskServiceData?.task?.pic_links
     }
 
     /**
@@ -53,11 +57,11 @@ class TaskDataUtil private constructor() {
     }
 
     /**
-     * 是评论任务还是正常任务
+     * 返回任务类别，正常任务、评论任务和确认收货任务
      */
-    fun isCommentTask(): Boolean? {
+    fun getTask_category(): Int? {
         return mTaskServiceData?.run {
-            task?.isCommentTask
+            task?.task_category
         }
     }
 

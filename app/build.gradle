@@ -64,14 +64,16 @@ android {
              //outputFileName = "pdd_v${defaultConfig.versionName}_演示.apk"
         }
     }
-
+    /*
+     * taskType:0是正常任务,1是评论任务,2是确认收货
+     */
     productFlavors{
         normalTask{
             applicationId "com.shopping.pdd"
             versionCode 1
             versionName "1.0.1"
             manifestPlaceholders = [app_name:"@string/app_name"]
-            buildConfigField "boolean","isCommentTask","false"
+            buildConfigField "int","taskType","0"
         }
 
         commentTask{
@@ -79,7 +81,15 @@ android {
             versionCode 1
             versionName "1.0.1"
             manifestPlaceholders = [app_name:"@string/app_comment"]
-            buildConfigField "boolean","isCommentTask","true"
+            buildConfigField "int","taskType","1"
+        }
+
+        confirmSigned{
+            applicationId "com.shopping.pdd"
+            versionCode 1
+            versionName "1.0.0"
+            manifestPlaceholders = [app_name:"@string/app_confirmSigned"]
+            buildConfigField "int","taskType","2"
         }
     }
 }

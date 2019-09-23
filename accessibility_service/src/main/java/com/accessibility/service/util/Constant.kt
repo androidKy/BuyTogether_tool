@@ -26,8 +26,6 @@ class Constant {
         const val KEY_TASK_DATA = "key_task_data"
         const val KEY_TASK_ID = "key_task_id"
         const val KEY_ACCOUNT_ID = "key_account_id"
-        const val KEY_TASK_STATUS = "key_task_status"
-        const val KEY_TASK_TYPE = "key_task_type"   //任务类型：false正常任务，true为评论任务
         const val KEY_COMMENT_SUCCESS_CODE = "key_comment_success_code" // 0 未签收，1评论成功，2评论失败。
 
         const val KEY_ALIPAY_ACCOUNT = "key_alipay_account"         //支付宝账号

@@ -9,6 +9,7 @@ import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.base.BaseAccessibilityService
+import com.accessibility.service.data.TaskCategory
 import com.accessibility.service.function.*
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
@@ -214,49 +215,36 @@ class MyAccessibilityService : BaseAccessibilityService() {
     }
 
     private fun findPersonal() {
-        NodeController.Builder()
-            .setNodeService(this)
-            .setNodeParams("个人中心", 0, false, 6)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    L.i("已找到个人中心")
-//                    afterLoginSucceed()     //任务失败，重新进来，不再重新登录
-//                    再次判断，能否找到点击登录.
-                    isFindClickLogin()
-                }
+        val isDropLine = findViewByText("请使用其它方式登录")
+        if (isDropLine != null) {
+            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).remove(Constant.KEY_IS_LOGINED, true)
+            initParams()
+            chooseLogin()
+        } else {
+            NodeController.Builder()
+                .setNodeService(this)
+                .setNodeParams("个人中心", 0, true, 6)
+                .setTaskListener(object : TaskListener {
+                    override fun onTaskFinished() {
+                        L.i("已找到个人中心")
+                        val loginButtonNode = findViewByText("点击登录")
+                        if (loginButtonNode != null) {
+                            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                                .remove(Constant.KEY_IS_LOGINED, true)
+                            initParams()
+                            chooseLogin()
+                        } else
+                            afterLoginSucceed()     //任务失败，重新进来，不再重新登录
+                    }
 
-                override fun onTaskFailed(failedMsg: String) {
-                    this@MyAccessibilityService.performBackClick()
-                    findPersonal()
-                }
-            })
-            .create()
-            .execute()
-    }
-
-    /**
-     *  需要再加一次判断，不能找到点击登录，则代表掉线的时候，PDD登录数据存留
-     */
-    private fun isFindClickLogin() {
-        NodeController.Builder()
-            .setNodeService(this)
-            .setNodeParams("点击登录", 0, 5)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-
-                    SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
-                        .put(Constant.KEY_IS_LOGINED, false)
-                    responTaskFailed("未进入登录状态")
-                }
-
-                override fun onTaskFailed(failedMsg: String) {
-                    afterLoginSucceed()     //任务失败，重新进来，不再重新登录
-                }
-
-            })
-            .create()
-            .execute()
-
+                    override fun onTaskFailed(failedMsg: String) {
+                        this@MyAccessibilityService.performBackClick()
+                        findPersonal()
+                    }
+                })
+                .create()
+                .execute()
+        }
     }
 
     /**
@@ -339,43 +327,58 @@ class MyAccessibilityService : BaseAccessibilityService() {
      * 登录成功后的处理
      */
     private fun afterLoginSucceed() {
-        if (!TaskDataUtil.instance.isCommentTask()!!) {
-            L.i("开始自动执行正常任务")
-            SearchGoods(this@MyAccessibilityService)
-                .setTaskListener(object : TaskListener {
-                    override fun onTaskFinished() {
-                        doTask()
-                    }
-
-                    override fun onTaskFailed(failedMsg: String) {
-                        responTaskFailed(failedMsg)
-                    }
-                })
-                .startService()
-        } else {
-            L.i("开始自动执行评论任务")
-            CommentTaskService(this@MyAccessibilityService)
-                .setCommentStatusListener(object : CommentTaskService.CommentStatusListener {
-                    override fun responCommentStatus(status: Int) {
-                        L.i("评论任务返回值 status = $status")
-                        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
-                            .put(Constant.KEY_COMMENT_SUCCESS_CODE, status)
-                    }
-
-                })
-                .setTaskListener(object : TaskListener {
-                    override fun onTaskFinished() {
-                        mHandler.postDelayed({
-                            responTaskFinished()
-                        }, 3 * 1000)
-                    }
-
-                    override fun onTaskFailed(failedMsg: String) {
-                        responTaskFailed(failedMsg)
-                    }
-                })
-                .startService()
+        val taskCategory = TaskDataUtil.instance.getTask_category()
+        taskCategory?.apply {
+            when (this) {
+                TaskCategory.NORMAL_TASK -> startNormalTaskAfterLogined()
+                else -> startOtherTaskAfterLogined()
+            }
         }
+    }
+
+    /**
+     * 开始自动执行正常任务
+     */
+    private fun startNormalTaskAfterLogined() {
+        L.i("开始自动执行正常任务")
+        SearchGoods(this@MyAccessibilityService)
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    doTask()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    responTaskFailed(failedMsg)
+                }
+            })
+            .startService()
+    }
+
+    /**
+     * 开始自动执行非正常任务
+     */
+    private fun startOtherTaskAfterLogined() {
+        L.i("开始自动执行非正常任务")
+        CommentTaskService(this@MyAccessibilityService)
+            .setCommentStatusListener(object : CommentTaskService.CommentStatusListener {
+                override fun responCommentStatus(status: Int) {
+                    L.i("评论任务返回值 status = $status")
+                    SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                        .put(Constant.KEY_COMMENT_SUCCESS_CODE, status)
+                }
+            })
+            .setTaskListener(object : TaskListener {
+                override fun onTaskFinished() {
+                    mHandler.postDelayed({
+                        responTaskFinished()
+                    }, 3 * 1000)
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    responTaskFailed(failedMsg)
+                }
+            })
+            .startService()
     }
 
     /**
@@ -417,10 +420,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
             setCurPageType(PageEnum.START_PAGE)
 
             PackageManagerUtils.killApplication(Constant.ALI_PAY_PKG)
-            PackageManagerUtils.restartApplication(
-                PKG_PINDUODUO,
-                "${PKG_PINDUODUO}.ui.activity.MainFrameActivity"
-            )
+            PackageManagerUtils.restartAppByPkgName(PKG_PINDUODUO)
         }, 5)
 
     }

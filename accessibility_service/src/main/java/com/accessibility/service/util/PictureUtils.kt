@@ -48,7 +48,7 @@ class PictureUtils private constructor() {
         true
     }
 
-    fun setUrls(urls: ArrayList<String>): PictureUtils {
+    fun setUrls(urls: List<String>): PictureUtils {
         mUrls.clear()
         mUrls.addAll(urls)
         return this
@@ -81,11 +81,12 @@ class PictureUtils private constructor() {
                 val bitmap: Bitmap? = downloadPicture(url)
                 if (bitmap != null) {
                     val fileDir = File(Environment.getExternalStorageDirectory(), "pdd_picture")
+                    L.i("fileDir: $fileDir")
                     if (!fileDir.exists()) {
                         fileDir.mkdir()
-                    } else {
+                    } /*else {
                         deleteFiles(fileDir)
-                    }
+                    }*/
 
                     val fileName = "${System.currentTimeMillis()}.jpg"
                     val file = File(fileDir, fileName)
@@ -130,6 +131,7 @@ class PictureUtils private constructor() {
                         mHandler.sendEmptyMessage(MSG_DOWNLOAD_PROGRESS)
                     } else {
                         L.i("下载图片失败")
+                        mTaskListener?.onTaskFailed("下载图片失败")
                     }
                 }
             }

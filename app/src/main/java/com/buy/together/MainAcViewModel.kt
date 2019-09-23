@@ -2,15 +2,14 @@ package com.buy.together
 
 import android.Manifest
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.base.BaseAccessibilityService
+import com.accessibility.service.data.TaskCategory
 import com.accessibility.service.util.Constant
-import com.buy.together.base.BaseViewModel
 import com.proxy.service.core.AppInfo
 import com.proxy.service.core.AppProxyManager
 import com.safframework.log.L
@@ -23,8 +22,7 @@ import org.json.JSONObject
  * Description:
  * Created by Quinin on 2019-07-29.
  **/
-class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
-    BaseViewModel<Context, MainAcView>() {
+class MainAcViewModel(val context: Activity, val mainAcView: MainAcView){
 
     fun requestPermission() {
         val permissionArray = arrayListOf(
@@ -189,12 +187,12 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
             }
 
             override fun onSuccess(result: Boolean?) {
-                val isCommentTask = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
-                    .getBoolean(Constant.KEY_TASK_TYPE)
-                if (isCommentTask)
-//                    updateCommentTask(taskStatus,remark)
-                    updateCommentTask(isSucceed, remark)
-                else updateNormalTask(isSucceed, remark)
+                when(BuildConfig.taskType)
+                {
+                    TaskCategory.NORMAL_TASK -> updateNormalTask(isSucceed, remark)
+                    TaskCategory.COMMENT_TASK -> updateCommentTask(isSucceed, remark)
+                    else -> updateConfirmSignedTask(isSucceed, remark)
+                }
             }
 
             override fun onCancel() {
@@ -212,9 +210,13 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
     private fun updateCommentTask(isSucceed: Boolean, remark: String) {
         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
             val taskId = getInt(Constant.KEY_TASK_ID)
-            val successCode = getInt(Constant.KEY_COMMENT_SUCCESS_CODE)
+            var successCode = getInt(Constant.KEY_COMMENT_SUCCESS_CODE)
             var finalRemark = remark
-            L.i("上报评论任务状态：taskId:$taskId successCode:$successCode remark:$finalRemark")
+            L.i("上报评论任务状态：taskId:$taskId isSucceed:$isSucceed successCode:$successCode remark:$finalRemark")
+            if(!isSucceed)
+            {
+                successCode = 2
+            }
             when (successCode) {
                 0 -> finalRemark = "未签收"
                 1 -> finalRemark = "评论成功"
@@ -305,6 +307,50 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) :
                     orderMoney,
                     finalRemark
                 )
+        }
+    }
+
+    /**
+     * 更新确认收货任务
+     */
+    private fun updateConfirmSignedTask(isSucceed: Boolean, remark: String){
+        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
+            val taskId = getInt(Constant.KEY_TASK_ID)
+            var successCode = getInt(Constant.KEY_COMMENT_SUCCESS_CODE)
+            var finalRemark = remark
+            L.i("上报确认收货任务状态：taskId:$taskId isSucceed:$isSucceed successCode:$successCode remark:$finalRemark")
+            if(!isSucceed)
+            {
+                successCode = 2
+            }
+            when (successCode) {
+                0 -> finalRemark = "未签收"
+                1 -> finalRemark = "确认收货成功"
+                2 -> finalRemark = "确认收货失败"
+            }
+
+            ApiManager()
+                .setDataListener(object : DataListener {
+                    override fun onSucceed(result: String) {
+                        try {
+                            val jsonObj = JSONObject(result)
+                            val code = jsonObj.getInt("code")
+                            if (code == 200) {
+                                SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).clear(true)
+                            }
+                        } catch (e: Exception) {
+                            L.e(e.message, e)
+                        }
+                        sendTaskStatusReceiver()
+                        mainAcView.onResponUpdateTask()
+                    }
+
+                    override fun onFailed(errorMsg: String) {
+                        updateCommentTask(isSucceed, remark)
+                    }
+
+                })
+                .updateConfrimSignedTask(taskId, successCode, finalRemark)
         }
     }
 

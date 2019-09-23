@@ -7,6 +7,7 @@ import com.accessibility.service.auto.AdbScriptController
 import com.accessibility.service.auto.NodeController
 import com.accessibility.service.data.AccountBean
 import com.accessibility.service.data.TaskBean
+import com.accessibility.service.data.TaskCategory
 import com.accessibility.service.listener.AfterClickedListener
 import com.accessibility.service.listener.TaskListener
 import com.accessibility.service.page.CommentStatus
@@ -216,11 +217,11 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     //如果是评论任务，不重新获取账号，直接上报登录失败，正常任务就重新获取账号测试
-                    val isCommentTask = TaskDataUtil.instance.isCommentTask()
-                    if (!isCommentTask!!)
+                    val taskCategory = TaskDataUtil.instance.getTask_category()
+                    if (taskCategory == TaskCategory.NORMAL_TASK) {
                         dealAccountError()
-                    else {
-                        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).put(Constant.KEY_COMMENT_SUCCESS_CODE,CommentStatus.COMMENT_MISSION_FAILED)
+                    } else {
+                        SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).put(Constant.KEY_COMMENT_SUCCESS_CODE, CommentStatus.COMMENT_FAILED)
                         responTaskFailed("评论任务：id=${mUserId}-${mUserName}账号已失效")
                     }
                 }
@@ -271,7 +272,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("找不到个人中心。。。")
-                    myAccessibilityService.performBackClick(1,object:AfterClickedListener{
+                    myAccessibilityService.performBackClick(1, object : AfterClickedListener {
                         override fun onClicked() {
                             NodeController.Builder()
                                 .setNodeService(myAccessibilityService)
@@ -318,7 +319,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
             .execute()
     }
 
-    private fun loginSucceedDeal(){
+    private fun loginSucceedDeal() {
         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).put(Constant.KEY_IS_LOGINED, true)
         saveAccountName()
         //closeQQ_TIM()
@@ -504,10 +505,9 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
 
     private fun retryGetQQ() {
         updateAccount(2)
-        //判断是否是评论任务，如果是，不请求任务;否则重新请求QQ账号
-        val isCommentTask =
-            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getBoolean(Constant.KEY_TASK_TYPE)
-        if (isCommentTask) {
+        //不是正常任务,直接返回结果
+        val taskCategory = TaskDataUtil.instance.getTask_category()
+        if (taskCategory != TaskCategory.NORMAL_TASK) {
             responTaskFailed("${mUserName}账号失效，评论任务失败")
             return
         }
@@ -530,30 +530,41 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
         L.i("账号无效，重新拉取账号，任务ID：$taskId")
         if (taskId > 0) {
             ApiManager()
-                .setDataListener(object:DataListener{
+                .setDataListener(object : DataListener {
                     override fun onSucceed(result: String) {
                         try {
                             L.i("获取账号结果：$result")
-                            val taskBean = Gson().fromJson(result,TaskBean::class.java)
-                            if(taskBean.code == 200)
-                            {
+                            val taskBean = Gson().fromJson(result, TaskBean::class.java)
+                            if (taskBean.code == 200) {
                                 saveData(result)
 
-                                ClearDataService().clearData(object:TaskListener{
+                                ClearDataService().clearData(object : TaskListener {
                                     override fun onTaskFinished() {
-                                        myAccessibilityService.sendBroadcast(Intent(MyAccessibilityService.ACTION_TASK_STATUS))
-                                        PackageManagerUtils.startActivity(Constant.BUY_TOGETHER_PKG,
-                                            "${Constant.BUY_TOGETHER_PKG}.ui.activity.MainFrameActivity")
+                                        myAccessibilityService.sendBroadcast(
+                                            Intent(
+                                                MyAccessibilityService.ACTION_TASK_STATUS
+                                            )
+                                        )
+                                        PackageManagerUtils.startActivity(
+                                            Constant.BUY_TOGETHER_PKG,
+                                            "${Constant.BUY_TOGETHER_PKG}.ui.activity.MainFrameActivity"
+                                        )
                                     }
 
                                     override fun onTaskFailed(failedMsg: String) {
                                         L.i("清理数据失败")
-                                        myAccessibilityService.sendBroadcast(Intent(MyAccessibilityService.ACTION_TASK_STATUS))
-                                        PackageManagerUtils.startActivity(Constant.BUY_TOGETHER_PKG,
-                                            "${Constant.BUY_TOGETHER_PKG}.ui.activity.MainFrameActivity")
+                                        myAccessibilityService.sendBroadcast(
+                                            Intent(
+                                                MyAccessibilityService.ACTION_TASK_STATUS
+                                            )
+                                        )
+                                        PackageManagerUtils.startActivity(
+                                            Constant.BUY_TOGETHER_PKG,
+                                            "${Constant.BUY_TOGETHER_PKG}.ui.activity.MainFrameActivity"
+                                        )
                                     }
                                 })
-                            }else{
+                            } else {
                                 responTaskFailed("重新拉取账号失败:${taskBean.msg}")
                             }
                             /* val accountBean = Gson().fromJson(result, AccountBean::class.java)
@@ -615,7 +626,7 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
         taskBean.task?.apply {
             spUtils.apply {
                 L.i("保存的任务ID：$task_id")
-                put(Constant.KEY_TASK_ID, task_id,true)
+                put(Constant.KEY_TASK_ID, task_id, true)
 
                 account?.let {
                     put(Constant.KEY_ACCOUNT_ID, it.id, true)

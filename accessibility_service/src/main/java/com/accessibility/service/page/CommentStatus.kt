@@ -10,8 +10,8 @@ class CommentStatus {
 
     companion object{
         const val NOT_SIGNED:Int = 0
-        const val COMMENT_MISSION_SUCCESS:Int = 1
-        const val COMMENT_MISSION_FAILED:Int = 2
+        const val COMMENT_SUCCESS:Int = 1
+        const val COMMENT_FAILED:Int = 2
 
     }
 }
