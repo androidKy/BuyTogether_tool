@@ -14,7 +14,8 @@ import com.safframework.log.L
  * Description:评论任务
  * Created by Quinin on 2019-08-12.
  **/
-class CommentTaskService(val myAccessibilityService: MyAccessibilityService) : BaseAcService(myAccessibilityService) {
+class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
+    BaseAcService(myAccessibilityService) {
 
 
     var mCommentStatusListener: CommentStatusListener? = null
@@ -114,6 +115,7 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) : B
     private fun isAdditioncalComment() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
+            .setNodeParams("已评价",0,false,3,true)
             .setNodeParams("追加评价", 0, false, 4)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
@@ -137,7 +139,7 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) : B
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("包裹未签收")
-                   mCommentStatusListener?.responCommentStatus(CommentStatus.NOT_SIGNED)
+                    mCommentStatusListener?.responCommentStatus(CommentStatus.NOT_SIGNED)
 
                     responFailed("包裹未签收")
                 }
@@ -219,17 +221,15 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) : B
                             override fun onTaskFinished() {
 
                                 L.i("成功提交评价")
-                                //                    isCommentSucceed()
-                                // todo 人工进行操作
-                                deadLoop()
+                                isCommentSucceed()
 
 
                             }
 
-                override fun onTaskFailed(failedMsg: String) {
-                    mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_MISSION_FAILED)
-                    responFailed("评论失败：$failedMsg")
-                }
+                            override fun onTaskFailed(failedMsg: String) {
+                                mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_MISSION_FAILED)
+                                responFailed("评论失败：$failedMsg")
+                            }
 
                         })
                         .create()
