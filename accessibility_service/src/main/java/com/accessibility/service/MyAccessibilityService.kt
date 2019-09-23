@@ -191,22 +191,36 @@ class MyAccessibilityService : BaseAccessibilityService() {
     }
 
     private fun findPersonal() {
-        NodeController.Builder()
-            .setNodeService(this)
-            .setNodeParams("个人中心", 0, false, 6)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    L.i("已找到个人中心")
-                    afterLoginSucceed()     //任务失败，重新进来，不再重新登录
-                }
+        val isDropLine = findViewByText("请使用其它方式登录")
+        if (isDropLine != null) {
+            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).remove(Constant.KEY_IS_LOGINED, true)
+            initParams()
+            chooseLogin()
+        } else {
+            NodeController.Builder()
+                .setNodeService(this)
+                .setNodeParams("个人中心", 0, true, 6)
+                .setTaskListener(object : TaskListener {
+                    override fun onTaskFinished() {
+                        L.i("已找到个人中心")
+                        val loginButtonNode = findViewByText("点击登录")
+                        if (loginButtonNode != null) {
+                            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                                .remove(Constant.KEY_IS_LOGINED, true)
+                            initParams()
+                            chooseLogin()
+                        } else
+                            afterLoginSucceed()     //任务失败，重新进来，不再重新登录
+                    }
 
-                override fun onTaskFailed(failedMsg: String) {
-                    this@MyAccessibilityService.performBackClick()
-                    findPersonal()
-                }
-            })
-            .create()
-            .execute()
+                    override fun onTaskFailed(failedMsg: String) {
+                        this@MyAccessibilityService.performBackClick()
+                        findPersonal()
+                    }
+                })
+                .create()
+                .execute()
+        }
     }
 
     /**
