@@ -8,6 +8,7 @@ import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.data.TaskBean
 import com.accessibility.service.data.TaskCategory
 import com.accessibility.service.util.Constant
+import com.accessibility.service.util.PackageManagerUtils
 import com.buy.together.BuildConfig
 import com.buy.together.R
 import com.buy.together.base.BaseFragment
@@ -19,9 +20,10 @@ import com.google.gson.Gson
 import com.proxy.service.LocalVpnManager
 import com.proxy.service.LocalVpnService
 import com.safframework.log.L
-import com.utils.common.SPUtils
-import com.utils.common.ThreadUtils
-import com.utils.common.ToastUtils
+import com.utils.common.*
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 /**
@@ -58,39 +60,38 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
             mViewModel = MainViewModel(this, this@MainFragment)
         }
 
-        when(BuildConfig.taskType)
-        {
-            TaskCategory.NORMAL_TASK-> mTVtaskType?.text = "正常任务"
-            TaskCategory.COMMENT_TASK->mTVtaskType?.text = "评论任务"
-            TaskCategory.CONFIRM_SIGNED_TASK->mTVtaskType?.text = "确认收货任务"
+        when (BuildConfig.taskType) {
+            TaskCategory.NORMAL_TASK -> mTVtaskType?.text = "正常任务"
+            TaskCategory.COMMENT_TASK -> mTVtaskType?.text = "评论任务"
+            TaskCategory.CONFIRM_SIGNED_TASK -> mTVtaskType?.text = "确认收货任务"
         }
         //initTableView(mTableDatas)
     }
 
 
-   /* private fun initTableView(tableDatas: ArrayList<ArrayList<String>>) {
-        context?.run {
-            mContainer?.apply {
-                removeAllViews()
-                LockTableView(this@run, this@apply, tableDatas).let {
-                    it.setLockFristColumn(true) //是否锁定第一列
-                        .setLockFristRow(true) //是否锁定第一行
-                        .setMaxColumnWidth(300) //列最大宽度
-                        .setMinColumnWidth(60) //列最小宽度
-                        //.setColumnWidth(1, 30) //设置指定列文本宽度
-                        //.setColumnWidth(2, 0)
-                        .setMinRowHeight(20)//行最小高度
-                        .setMaxRowHeight(50)//行最大高度
-                        .setTextViewSize(16) //单元格字体大小
-                        .setFristRowBackGroudColor(R.color.table_head)//表头背景色
-                        .setTableHeadTextColor(R.color.beijin)//表头字体颜色
-                        .setTableContentTextColor(R.color.border_color)//单元格字体颜色
-                        .setCellPadding(5)//设置单元格内边距(dp)
-                        .show()
-                }
-            }
-        }
-    }*/
+    /* private fun initTableView(tableDatas: ArrayList<ArrayList<String>>) {
+         context?.run {
+             mContainer?.apply {
+                 removeAllViews()
+                 LockTableView(this@run, this@apply, tableDatas).let {
+                     it.setLockFristColumn(true) //是否锁定第一列
+                         .setLockFristRow(true) //是否锁定第一行
+                         .setMaxColumnWidth(300) //列最大宽度
+                         .setMinColumnWidth(60) //列最小宽度
+                         //.setColumnWidth(1, 30) //设置指定列文本宽度
+                         //.setColumnWidth(2, 0)
+                         .setMinRowHeight(20)//行最小高度
+                         .setMaxRowHeight(50)//行最大高度
+                         .setTextViewSize(16) //单元格字体大小
+                         .setFristRowBackGroudColor(R.color.table_head)//表头背景色
+                         .setTableHeadTextColor(R.color.beijin)//表头字体颜色
+                         .setTableContentTextColor(R.color.border_color)//单元格字体颜色
+                         .setCellPadding(5)//设置单元格内边距(dp)
+                         .show()
+                 }
+             }
+         }
+     }*/
 
     override fun onStart() {
         super.onStart()
@@ -161,7 +162,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
         initHeader(mTableDatas)
         mTableDatas.addAll(taskData)
 
-        initTableView(mContainer,mTableDatas)
+        initTableView(mContainer, mTableDatas)
 
         mViewModel?.clearData()
     }
@@ -303,6 +304,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     override fun onDestroyView() {
         super.onDestroyView()
         mViewModel?.clearSubscribes()
+        TimerUtils.instance.stop()
         activity?.apply {
             LocalVpnManager.getInstance().stopVpnService(this)
         }
@@ -328,25 +330,27 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
             val launchIntentForPackage =
                 context?.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
             if (launchIntentForPackage != null) {
-                //一个任务超时时间，超过一定时间后，根据是否还在做同一个任务，强制刷单APP重启
-                /* SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
-                     val taskId = getInt(Constant.KEY_TASK_ID)
-                     put(taskId.toString(), System.currentTimeMillis())
-                 }
-                 mContainer?.apply {
-                     postDelayed(Runnable {
-                         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
-                             val taskId = getInt(Constant.KEY_TASK_ID)
-                             val startTaskTime = getLong(taskId.toString())
-                             if(System.currentTimeMillis() - startTaskTime > 1000*60*7)
-                             {
-                                 startTask()
-                             }
-                         }
-
-                     }, 60 * 1000 * 8)
-                 }*/
                 startActivity(launchIntentForPackage)
+                //一个任务超时时间，超过一定时间后，根据是否还在做同一个任务，强制刷单APP重启
+                TimerUtils.instance.start(object : TimerTask() {
+                    override fun run() {
+                        val startTaskTime = SPUtils.getInstance(Constant.SP_TASK_TIME_OUT)
+                            .getString(Constant.KEY_TASK_TIMEOUT)
+                        val currentDate =
+                            SimpleDateFormat(
+                                "yyyy-MM-dd HH:mm:ss",
+                                Locale.CHINA
+                            ).run { format(Date()) }
+                        L.i("当前任务时间: $currentDate 从服务器获取时间：$startTaskTime")
+                        if (TimeUtils.getMinutes(currentDate, startTaskTime) > 8) {
+                            //startTask()
+                            L.i("任务已超时，即将重启自身")
+                            PackageManagerUtils.restartSelf(Constant.PKG_NAME)
+                        }else{
+                            L.i("任务未超时")
+                        }
+                    }
+                }, 60 * 1000 * 10)
             } else {
                 context?.run {
                     ToastUtils.showToast(this, "未安装拼多多")
