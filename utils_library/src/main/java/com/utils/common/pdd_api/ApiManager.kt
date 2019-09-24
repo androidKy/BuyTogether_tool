@@ -18,6 +18,7 @@ import org.json.JSONObject
  **/
 class ApiManager {
     private var mDataListener: DataListener? = null
+    private var mImei:String = ""
 
     companion object {
         const val SP_REAL_DEVICE_PARAMS = "real_device_params_sp"
@@ -46,6 +47,7 @@ class ApiManager {
 
     init {
         L.init(ApiManager::class.java)
+        mImei = SPUtils.getInstance(SP_REAL_DEVICE_PARAMS).getString(KEY_REAL_DEVICE_IMEI)
     }
 
     fun setDataListener(dataListener: DataListener): ApiManager {
@@ -60,8 +62,10 @@ class ApiManager {
     fun getNormalTask(imei: String) {
         checkNetwork(object : NetworkListener {
             override fun valid() {
-                AndroidNetworking.get("$URL_GET_TASK?imei=$imei")
+                AndroidNetworking.get(URL_GET_TASK)
                     .addHeaders("API-AUTH", "a69caa73-f126-444d-879c-74e75d433940")
+                    .addHeaders("Imei",imei)
+                    .addHeaders("Version",0.1.toString())
                     .build()
                     .getAsOkHttpResponse(object : OkHttpResponseListener {
                         override fun onResponse(response: Response?) {
@@ -88,10 +92,10 @@ class ApiManager {
     fun getCommentTask(imei:String) {
         checkNetwork(object : NetworkListener {
             override fun valid() {
-                AndroidNetworking.get(
-                    "${URL_GET_COMMENT_TASK}?imei=$imei"
-                )
+                AndroidNetworking.get(URL_GET_COMMENT_TASK)
                     .addHeaders("API-AUTH", "a69caa73-f126-444d-879c-74e75d433940")
+                    .addHeaders("Imei",imei)
+                    .addHeaders("Version",0.1.toString())
                     .build()
                     .getAsOkHttpResponse(object : OkHttpResponseListener {
                         override fun onResponse(response: Response?) {
@@ -116,8 +120,10 @@ class ApiManager {
     fun getConfrimSignedTask(imei:String){
         checkNetwork(object :NetworkListener{
             override fun valid() {
-                AndroidNetworking.get("${URL_GET_CONFIRM_SIGNED}?imei=$imei")
+                AndroidNetworking.get(URL_GET_CONFIRM_SIGNED)
                     .addHeaders("API-AUTH", "a69caa73-f126-444d-879c-74e75d433940")
+                    .addHeaders("Imei",imei)
+                    .addHeaders("Version",0.1.toString())
                     .build()
                     .getAsOkHttpResponse(object:OkHttpResponseListener{
                         override fun onResponse(response: Response?) {
@@ -145,6 +151,8 @@ class ApiManager {
             override fun valid() {
                 AndroidNetworking.get("$URL_GET_ACCOUNT$taskId")
                     .addHeaders("API-AUTH", "a69caa73-f126-444d-879c-74e75d433940")
+                    .addHeaders("Imei",mImei)
+                    .addHeaders("Version",0.1.toString())
                     .build()
                     .getAsOkHttpResponse(object : OkHttpResponseListener {
                         override fun onResponse(response: Response?) {
@@ -209,6 +217,8 @@ class ApiManager {
 
                     AndroidNetworking.post(URL_UPDATE_TASK_INFO)
                         .setContentType(POST_JSON_CONTENT_TYPE)
+                        .addHeaders("Imei",mImei)
+                        .addHeaders("Version",0.1.toString())
                         .addHeaders("API-AUTH", "a69caa73-f126-444d-879c-74e75d433940")
                         .addJSONObjectBody(this)
                         .build()
@@ -244,6 +254,8 @@ class ApiManager {
                     AndroidNetworking.post(URL_UPDATE_ACCOUNT)
                         .setContentType(POST_JSON_CONTENT_TYPE)
                         .addHeaders("API-AUTH", "a69caa73-f126-444d-879c-74e75d433940")
+                        .addHeaders("Imei",mImei)
+                        .addHeaders("Version",0.1.toString())
                         .addJSONObjectBody(this)
                         .build()
                         .getAsOkHttpResponse(object : OkHttpResponseListener {
@@ -303,6 +315,8 @@ class ApiManager {
                     AndroidNetworking.post(URL_UPDATE_TASK_INFO)
                         .setContentType(POST_JSON_CONTENT_TYPE)
                         .addHeaders("API-AUTH", "a69caa73-f126-444d-879c-74e75d433940")
+                        .addHeaders("Imei",mImei)
+                        .addHeaders("Version",0.1.toString())
                         .addJSONObjectBody(this)
                         .build()
                         .getAsOkHttpResponse(object : OkHttpResponseListener {
@@ -334,14 +348,13 @@ class ApiManager {
                     put("task_id", taskId)
                     put("success", successCode)
                     put("remark", remark)
-                    put(
-                        "imei",
-                        SPUtils.getInstance(SP_REAL_DEVICE_PARAMS).getString(KEY_REAL_DEVICE_IMEI)
-                    )
+                    put("imei",mImei)
 
                     AndroidNetworking.post(URL_UPDATE_TASK_INFO)
                         .setContentType(POST_JSON_CONTENT_TYPE)
                         .addHeaders("API-AUTH", "a69caa73-f126-444d-879c-74e75d433940")
+                        .addHeaders("Imei",mImei)
+                        .addHeaders("Version",0.1.toString())
                         .addJSONObjectBody(this)
                         .build()
                         .getAsOkHttpResponse(object : OkHttpResponseListener {
@@ -366,7 +379,7 @@ class ApiManager {
     /**
      * 更新确认收货
      */
-    fun updateConfrimSignedTask(taskId: Int, successCode: Int, remark: String)
+    fun updateConfirmSignedTask(taskId: Int, successCode: Int, remark: String)
     {
         checkNetwork(object : NetworkListener {
             override fun valid() {
@@ -375,11 +388,13 @@ class ApiManager {
                     put("id", taskId)
                     put("success", successCode)
                     put("remark", remark)
-                    put("imei",SPUtils.getInstance(SP_REAL_DEVICE_PARAMS).getString(KEY_REAL_DEVICE_IMEI))
+                    put("imei",mImei)
 
                     AndroidNetworking.post(URL_GET_CONFIRM_SIGNED)
                         .setContentType(POST_JSON_CONTENT_TYPE)
                         .addHeaders("API-AUTH", "a69caa73-f126-444d-879c-74e75d433940")
+                        .addHeaders("Imei",mImei)
+                        .addHeaders("Version",0.1.toString())
                         .addJSONObjectBody(this)
                         .build()
                         .getAsOkHttpResponse(object : OkHttpResponseListener {
