@@ -350,7 +350,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView){
                     }
 
                 })
-                .updateConfrimSignedTask(taskId, successCode, finalRemark)
+                .updateConfirmSignedTask(taskId, successCode, finalRemark)
         }
     }
 

@@ -37,6 +37,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
         const val PKG_PINDUODUO = "com.xunmeng.pinduoduo"
         const val PKG_QQ = "com.tencent.mobileqq"
         const val ACTION_TASK_STATUS: String = "com.task.status"
+        const val ACTIVITY_PDD_LAUNCHER = "com.xunmeng.pinduoduo.ui.activity.MainFrameActivity"
+        const val ACTIVITY_TASK_LAUNCHER = "com.buy.together.MainActivity"
 
         const val ACTION_EXCEPTION_RESTART = "action_exception_restart" //任务APP发生异常，重新启动任务APP
         const val ACTION_TASK_RESTART = "com.task.restart"      //发生未知错误，任务重新开始，重新请求代理和读取缓存的任务
@@ -396,7 +398,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
             setCurPageType(PageEnum.START_PAGE)
 
             PackageManagerUtils.killApplication(Constant.ALI_PAY_PKG)
-            PackageManagerUtils.restartAppByPkgName(PKG_PINDUODUO)
+            PackageManagerUtils.restartApplication(PKG_PINDUODUO,ACTIVITY_PDD_LAUNCHER)
         }, 5)
 
     }

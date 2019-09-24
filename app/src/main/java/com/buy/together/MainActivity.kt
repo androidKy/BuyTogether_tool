@@ -8,12 +8,14 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.support.v7.app.AppCompatActivity
+import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.MyAccessibilityService.Companion.ACTION_APP_RESTART
 import com.accessibility.service.MyAccessibilityService.Companion.ACTION_EXCEPTION_RESTART
 import com.accessibility.service.MyAccessibilityService.Companion.ACTION_TASK_FAILED
 import com.accessibility.service.MyAccessibilityService.Companion.ACTION_TASK_RESTART
 import com.accessibility.service.MyAccessibilityService.Companion.ACTION_TASK_SUCCEED
 import com.accessibility.service.MyAccessibilityService.Companion.KEY_TASK_MSG
+import com.accessibility.service.data.TaskCategory
 import com.accessibility.service.util.Constant
 import com.accessibility.service.util.PackageManagerUtils
 import com.buy.together.fragment.MainFragment
@@ -60,10 +62,17 @@ class MainActivity : AppCompatActivity(), MainAcView {
         }
 
         registerReceiver()
-        val imei = SPUtils.getInstance(Constant.SP_REAL_DEVICE_PARAMS)
-            .getString(Constant.KEY_REAL_DEVICE_IMEI)
-        L.i("真实imei：$imei")
 
+        initAction()
+    }
+
+    private fun initAction() {
+        when(BuildConfig.taskType)
+        {
+            TaskCategory.NORMAL_TASK ->   actionBar?.title = "pddTask_${BuildConfig.VERSION_NAME}"
+            TaskCategory.COMMENT_TASK -> actionBar?.title = "pddComment_${BuildConfig.VERSION_NAME}"
+            TaskCategory.CONFIRM_SIGNED_TASK -> actionBar?.title = "pddConfirmSigned_${BuildConfig.VERSION_NAME}"
+        }
     }
 
 
@@ -251,6 +260,6 @@ class MainActivity : AppCompatActivity(), MainAcView {
      * 重新启动任务App
      */
     fun restartTaskApp() {
-        PackageManagerUtils.restartAppByPkgName(Constant.PKG_NAME)
+        PackageManagerUtils.restartApplication(Constant.PKG_NAME,MyAccessibilityService.ACTIVITY_TASK_LAUNCHER)
     }
 }

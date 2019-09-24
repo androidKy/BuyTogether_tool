@@ -71,8 +71,8 @@ android {
         normalTask{
             applicationId "com.shopping.pdd"
             versionCode 1
-            versionName "1.0.1"
-            manifestPlaceholders = [app_name:"@string/app_name"]
+            versionName "1.1.0"
+            manifestPlaceholders = [app_name:"pddTask_$versionName"]
             buildConfigField "int","taskType","0"
         }
 
@@ -80,7 +80,7 @@ android {
             applicationId "com.shopping.pdd"
             versionCode 1
             versionName "1.0.1"
-            manifestPlaceholders = [app_name:"@string/app_comment"]
+            manifestPlaceholders = [app_name:"pddComment_$versionName"]
             buildConfigField "int","taskType","1"
         }
 
@@ -88,7 +88,7 @@ android {
             applicationId "com.shopping.pdd"
             versionCode 1
             versionName "1.0.0"
-            manifestPlaceholders = [app_name:"@string/app_confirmSigned"]
+            manifestPlaceholders = [app_name:"pddConfirm_$versionName"]
             buildConfigField "int","taskType","2"
         }
     }

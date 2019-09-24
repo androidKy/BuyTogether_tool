@@ -71,7 +71,7 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
         }
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams(mallName, 1, false, 5)
+            .setNodeParams(mallName, 1, false, 18)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                   findConfirmSignedNode()
@@ -152,6 +152,8 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
                         responSucceed()
                     } else {
                         L.i("其他情况")
+                        mCommentStatusListener?.responCommentStatus(CommentStatus.NOT_SIGNED)
+                        responSucceed()
                     }
                 }
 

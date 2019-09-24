@@ -18,7 +18,6 @@ import com.buy.together.fragment.viewmodel.MainViewModel
 import com.google.gson.Gson
 import com.proxy.service.LocalVpnManager
 import com.proxy.service.LocalVpnService
-import com.rmondjone.locktableview.LockTableView
 import com.safframework.log.L
 import com.utils.common.SPUtils
 import com.utils.common.ThreadUtils
@@ -55,7 +54,6 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
 
         initDisplayOpinion()
 
-        initHeader(mTableDatas)
         context?.apply {
             mViewModel = MainViewModel(this, this@MainFragment)
         }
@@ -70,7 +68,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
     }
 
 
-    private fun initTableView(tableDatas: ArrayList<ArrayList<String>>) {
+   /* private fun initTableView(tableDatas: ArrayList<ArrayList<String>>) {
         context?.run {
             mContainer?.apply {
                 removeAllViews()
@@ -92,7 +90,7 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
                 }
             }
         }
-    }
+    }*/
 
     override fun onStart() {
         super.onStart()
@@ -159,9 +157,11 @@ class MainFragment : BaseFragment(), MainView, LocalVpnService.onStatusChangedLi
 
 
     override fun onParseDatas(taskData: ArrayList<ArrayList<String>>) {
+        mTableDatas.clear()
+        initHeader(mTableDatas)
         mTableDatas.addAll(taskData)
 
-        initTableView(mTableDatas)
+        initTableView(mContainer,mTableDatas)
 
         mViewModel?.clearData()
     }

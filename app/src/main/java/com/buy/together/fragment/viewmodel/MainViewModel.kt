@@ -2,6 +2,7 @@ package com.buy.together.fragment.viewmodel
 
 import android.content.Context
 import android.text.TextUtils
+import com.accessibility.service.MyAccessibilityService.Companion.ACTIVITY_TASK_LAUNCHER
 import com.accessibility.service.data.CommentBean
 import com.accessibility.service.data.TaskBean
 import com.accessibility.service.data.TaskCategory
@@ -343,7 +344,7 @@ class MainViewModel(context: Context, val mainView: MainView) :
                 ToastUtils.showToast(context, "热更新：$resultStr")
                 //todo 上报热更新结果给后台
                 if (result) {
-                    PackageManagerUtils.restartAppByPkgName(Constant.PKG_NAME)
+                    PackageManagerUtils.restartApplication(Constant.PKG_NAME,ACTIVITY_TASK_LAUNCHER)
                 }
             }
             .fetchPatchUpdate(true)
