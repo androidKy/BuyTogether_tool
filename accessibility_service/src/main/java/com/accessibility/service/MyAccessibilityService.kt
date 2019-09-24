@@ -166,7 +166,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
         if (mCurPageType == PageEnum.START_PAGE) {
             setCurPageType(PageEnum.CHOOSING_LOGIN_PAGE)
             initTaskData()
-            L.i("拼多多登录界面")
+            L.i("拼多多登录界面2")
             /*   OcrUtils.recognizePic(
                    File("/storage/emulated/0/Android/data/screenShot.png"),
                    this.applicationContext

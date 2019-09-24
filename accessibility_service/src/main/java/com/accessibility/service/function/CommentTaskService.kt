@@ -292,7 +292,7 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
             .setNodeParams("个人中心", 0, false, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFailed(failedMsg: String) {
-                    mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_MISSION_SUCCESS)
+                    mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_SUCCESS)
                     responSucceed()
                 }
 
