@@ -22,7 +22,7 @@ import org.json.JSONObject
  * Description:
  * Created by Quinin on 2019-07-29.
  **/
-class MainAcViewModel(val context: Activity, val mainAcView: MainAcView){
+class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) {
 
     fun requestPermission() {
         val permissionArray = arrayListOf(
@@ -180,15 +180,15 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView){
                 CmdListUtil.getInstance().apply {
                     val cmdStr = "am force-stop ${Constant.ALI_PAY_PKG};" +
                             "am force-stop ${Constant.BUY_TOGETHER_PKG};" +
-                            "am force-stop ${Constant.XIAOMI_BROWSER_PKG};"
+                            "am force-stop ${Constant.XIAOMI_BROWSER_PKG};" +
+                            "pm clear ${Constant.XIAOMI_BROWSER_PKG};"
                     execCmd(cmdStr)
                     return true
                 }
             }
 
             override fun onSuccess(result: Boolean?) {
-                when(BuildConfig.taskType)
-                {
+                when (BuildConfig.taskType) {
                     TaskCategory.NORMAL_TASK -> updateNormalTask(isSucceed, remark)
                     TaskCategory.COMMENT_TASK -> updateCommentTask(isSucceed, remark)
                     else -> updateConfirmSignedTask(isSucceed, remark)
@@ -213,8 +213,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView){
             var successCode = getInt(Constant.KEY_COMMENT_SUCCESS_CODE)
             var finalRemark = remark
             L.i("上报评论任务状态：taskId:$taskId isSucceed:$isSucceed successCode:$successCode remark:$finalRemark")
-            if(!isSucceed)
-            {
+            if (!isSucceed) {
                 successCode = 2
             }
             when (successCode) {
@@ -229,7 +228,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView){
                         try {
                             val jsonObj = JSONObject(result)
                             val code = jsonObj.getInt("code")
-                            if (code == 200) {
+                            if (code == 200 || code == 406) {
                                 SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).clear(true)
                             }
                         } catch (e: Exception) {
@@ -261,7 +260,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView){
             val progress = getString(Constant.KEY_TASK_PROGRESS)
             L.i(
                 "上报任务状态：taskId=$taskId orderNumber=$orderNumber remark=$remark\n" +
-                        "orderMoney=$orderMoney paddAccount=$pddAccount progress=$progress"
+                        "orderMoney=$orderMoney pddAccount=$pddAccount progress=$progress"
             )
             var finalRemark = remark
             if (!isSucceed) {
@@ -280,7 +279,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView){
                         try {
                             val jsonObj = JSONObject(result)
                             val code = jsonObj.getInt("code")
-                            if (code == 200) {
+                            if (code == 200 || code == 406) {
                                 SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).clear(true)
                             } else {
                                 L.i("任务更新失败：code:$code")
@@ -313,14 +312,13 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView){
     /**
      * 更新确认收货任务
      */
-    private fun updateConfirmSignedTask(isSucceed: Boolean, remark: String){
+    private fun updateConfirmSignedTask(isSucceed: Boolean, remark: String) {
         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
             val taskId = getInt(Constant.KEY_TASK_ID)
             var successCode = getInt(Constant.KEY_COMMENT_SUCCESS_CODE)
             var finalRemark = remark
             L.i("上报确认收货任务状态：taskId:$taskId isSucceed:$isSucceed successCode:$successCode remark:$finalRemark")
-            if(!isSucceed)
-            {
+            if (!isSucceed) {
                 successCode = 2
             }
             when (successCode) {
@@ -335,7 +333,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView){
                         try {
                             val jsonObj = JSONObject(result)
                             val code = jsonObj.getInt("code")
-                            if (code == 200) {
+                            if (code == 200 || code == 406) {
                                 SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).clear(true)
                             }
                         } catch (e: Exception) {

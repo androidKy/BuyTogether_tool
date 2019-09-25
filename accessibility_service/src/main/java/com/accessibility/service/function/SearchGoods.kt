@@ -153,8 +153,9 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                         SPUtils.getInstance(Constant.SP_SEARCH_TYPE_FILE)
                             .getInt(Constant.KEY_CUR_SEARCH_TYPE)
                     L.i("搜索方式：$searchType 任务完成的数量：$taskFinishCount")
-//                    inputKeyword()
-                    inputKeyword()
+                    nodeService.postDelay(Runnable {
+                        inputKeyword()
+                    },1)
                     //searchByBrowser()
                     /*if (taskFinishCount != null && taskFinishCount > 0 && searchType > 0) {
                         if (searchType == SearchType.MALLNAME) {

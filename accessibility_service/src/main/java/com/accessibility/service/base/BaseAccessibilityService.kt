@@ -315,11 +315,11 @@ abstract class BaseAccessibilityService : AccessibilityService() {
             if (nodeInfo1.isClickable) {
                 //L.i("${nodeInfo1.className} was clicked")
                 nodeInfo1.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                if (nodeInfo1.text == "授权并登录") { //有时候点击一次没用
+               /* if (nodeInfo1.text == "授权并登录") { //有时候点击一次没用
                     postDelay(Runnable {
                         nodeInfo1?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
                     }, 2)
-                }
+                }*/
                 return
             }
             nodeInfo1 = nodeInfo1.parent
