@@ -153,7 +153,9 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                         SPUtils.getInstance(Constant.SP_SEARCH_TYPE_FILE)
                             .getInt(Constant.KEY_CUR_SEARCH_TYPE)
                     L.i("搜索方式：$searchType 任务完成的数量：$taskFinishCount")
-                    inputKeyword()
+                    nodeService.postDelay(Runnable {
+                        inputKeyword()
+                    },1)
                     //searchByBrowser()
                     /*if (taskFinishCount != null && taskFinishCount > 0 && searchType > 0) {
                         if (searchType == SearchType.MALLNAME) {
@@ -335,15 +337,14 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
     private fun startSearch() {
         var mHalfGoodName = ""
         mGoodName?.apply {
-            mHalfGoodName = if (this.length > 10) {
-                this.substring(0, 9)
-            } else mSearchPrice!!
+            val length = this.length
+            mHalfGoodName = this.substring(0,length-5)
         }
 
         val searchTime = (8..18).random().toLong()
         AdbScrollUtils.instantce
             .setNodeService(nodeService)
-            .setFindText(mHalfGoodName)
+            .setFindText(mSearchPrice!!)
             .setScrollTotalTime(searchTime * 1000)
             .setScrollSpeed(1000)
             .setStartXY("540,1700")
@@ -355,7 +356,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                         retrySearch()
                     } else {
                         L.i("$mSearchPrice 已找到，判断是否是同一商铺")
-                        isRightSaler(nodeInfo)
+                        isRightSaler(mSearchPrice!!)
                     }
                 }
             })
@@ -385,10 +386,10 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
     /**
      * 点击进去查看是否是同一卖家
      */
-    private fun isRightSaler(nodeInfo: AccessibilityNodeInfo) {
+    private fun isRightSaler(searchPrice:String) {
         NodeController.Builder()
             .setNodeService(nodeService)
-            .setNodeParams(mSearchPrice!!, 0, 5)
+            .setNodeParams(searchPrice, 1, 6)
             .setNodeParams("客服", 0, 8)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
@@ -398,7 +399,8 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("$failedMsg was not found.")
-                    responFailed("校验是否同一卖家失败")
+                    //responFailed("校验是否同一卖家失败")
+                    retrySearch()
                 }
             })
             .create()

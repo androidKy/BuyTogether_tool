@@ -201,7 +201,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
      */
     private fun click2pdd() {
         AdbScriptController.Builder()
-            .setXY("960,300", 8000)
+            .setXY("960,300", 4000)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     auth2pdd()

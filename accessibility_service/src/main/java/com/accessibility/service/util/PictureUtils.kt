@@ -151,6 +151,7 @@ class PictureUtils private constructor() {
      * 下载图片，返回bitmap
      */
     private fun downloadPicture(url: String): Bitmap? {
+        L.i("url:$url")
         var myFileUrl: URL? = null
         var bitmap: Bitmap? = null
         var conn: HttpURLConnection? = null

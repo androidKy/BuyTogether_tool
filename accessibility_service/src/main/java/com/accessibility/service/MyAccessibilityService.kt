@@ -395,10 +395,15 @@ class MyAccessibilityService : BaseAccessibilityService() {
         startPddTask()
 
         postDelay(Runnable {
-            setCurPageType(PageEnum.START_PAGE)
-
-            PackageManagerUtils.killApplication(Constant.ALI_PAY_PKG)
-            PackageManagerUtils.restartApplication(PKG_PINDUODUO,ACTIVITY_PDD_LAUNCHER)
+            val taskType = TaskDataUtil.instance.getTask_type()
+            if(taskType != null && taskType.toString().contains("4"))   //是否有支付
+            {
+                setCurPageType(PageEnum.START_PAGE)
+                PackageManagerUtils.killApplication(Constant.ALI_PAY_PKG)
+                PackageManagerUtils.restartApplication(PKG_PINDUODUO, ACTIVITY_PDD_LAUNCHER)
+            }else{
+                responTaskFinished()
+            }
         }, 5)
 
     }

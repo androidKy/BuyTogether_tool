@@ -1,6 +1,7 @@
 package com.buy.together.utils
 
 import com.accessibility.service.data.CommentBean
+import com.accessibility.service.data.ConfirmSignedBean
 import com.accessibility.service.data.TaskBean
 
 /**
@@ -167,19 +168,19 @@ class ParseDataUtil {
             task.ip = ip
 
             val delivery_address = TaskBean.TaskData.DeliveryAddressBean()
-            delivery_address.city = commentBean.task.delivery_address.city
-            delivery_address.name = commentBean.task.delivery_address.name
-            delivery_address.phone = commentBean.task.delivery_address.phone
-            delivery_address.province = commentBean.task.delivery_address.province
-            delivery_address.district = commentBean.task.delivery_address.district
-            delivery_address.street = commentBean.task.delivery_address.street
+            delivery_address.city = commentBean.task?.delivery_address?.city
+            delivery_address.name = commentBean.task?.delivery_address?.name
+            delivery_address.phone = commentBean.task?.delivery_address?.phone
+            delivery_address.province = commentBean.task?.delivery_address?.province
+            delivery_address.district = commentBean.task?.delivery_address?.district
+            delivery_address.street = commentBean.task?.delivery_address?.street
 
             task.delivery_address = delivery_address
 
             val account = TaskBean.TaskData.AccountBean()
-            account.id = commentBean.task.account.id
-            account.user = commentBean.task.account.user
-            account.pwd = commentBean.task.account.pwd
+            account.id = commentBean.task?.account?.id!!
+            account.user = commentBean.task?.account?.user
+            account.pwd = commentBean.task?.account?.pwd
             account.type = commentBean.task.account.type
             task.account = account
 
@@ -195,6 +196,56 @@ class ParseDataUtil {
             device.sn = commentBean.task.device.sn
             device.system = commentBean.task.device.system
             device.useragent = commentBean.task.device.useragent
+            task.device = device
+
+            taskBean.task = task
+
+            return taskBean
+        }
+
+        fun parseConfirmBean2TaskBean(confirmSignedBean: ConfirmSignedBean):TaskBean{
+            val taskBean = TaskBean()
+            taskBean.code = confirmSignedBean.code
+            taskBean.msg = confirmSignedBean.msg
+
+            val task = TaskBean.TaskData()
+
+            task.task_id = confirmSignedBean.task.id
+
+            val goods = TaskBean.TaskData.GoodsBean()
+            goods.id = confirmSignedBean.task.goods.id
+            goods.goods_id = confirmSignedBean.task.goods.goods_id
+            goods.goods_name = confirmSignedBean.task.goods.goods_name
+            goods.choose_info = confirmSignedBean.task.goods.choose_info
+            goods.mall_name = confirmSignedBean.task.goods.mall_name
+            goods.search_price = confirmSignedBean.task.goods.search_price
+            task.goods = goods
+
+            val ip = TaskBean.TaskData.IpBean()
+            ip.city = confirmSignedBean.task.ip.city
+            ip.content = confirmSignedBean.task.ip.content
+            ip.mac_address = confirmSignedBean.task.ip.mac_address
+            task.ip = ip
+
+            val account = TaskBean.TaskData.AccountBean()
+            account.id = confirmSignedBean.task?.account?.id!!
+            account.user = confirmSignedBean.task?.account?.user
+            account.pwd = confirmSignedBean.task?.account?.pwd
+            account.type = confirmSignedBean.task.account.type
+            task.account = account
+
+            val device = TaskBean.TaskData.DeviceBean()
+            device.imei = confirmSignedBean.task.device.imei
+            device.android = confirmSignedBean.task.device.android
+            device.brand = confirmSignedBean.task.device.brand
+            device.bluetooth = confirmSignedBean.task.device.bluetooth
+            device.id = confirmSignedBean.task.device.id
+            device.imsi = confirmSignedBean.task.device.imsi
+            device.mac = confirmSignedBean.task.device.mac
+            device.model = confirmSignedBean.task.device.model
+            device.sn = confirmSignedBean.task.device.sn
+            device.system = confirmSignedBean.task.device.system
+            device.useragent = confirmSignedBean.task.device.useragent
             task.device = device
 
             taskBean.task = task

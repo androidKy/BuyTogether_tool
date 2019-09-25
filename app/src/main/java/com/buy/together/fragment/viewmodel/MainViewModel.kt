@@ -3,6 +3,7 @@ package com.buy.together.fragment.viewmodel
 import android.content.Context
 import android.text.TextUtils
 import com.accessibility.service.data.CommentBean
+import com.accessibility.service.data.ConfirmSignedBean
 import com.accessibility.service.data.TaskBean
 import com.accessibility.service.data.TaskCategory
 import com.accessibility.service.function.ClearDataService
@@ -207,6 +208,25 @@ class MainViewModel(context: Context, val mainView: MainView) :
             taskBean.code = 400
         }
 
+        return taskBean
+    }
+
+    private fun parseConfirmTask(result:String):TaskBean{
+        var taskBean = TaskBean()
+        try {
+            val code = JSONObject(result).getInt("code")
+            if (code == 200) {
+                val confirmBean = Gson().fromJson(result, ConfirmSignedBean::class.java)
+                taskBean = ParseDataUtil.parseConfirmBean2TaskBean(confirmBean)
+            } else {
+                taskBean.code = code
+                taskBean.msg = JSONObject(result).getString("msg")
+            }
+        } catch (e: Exception) {
+            L.e(e.message, e)
+            taskBean.msg = e.message
+            taskBean.code = 400
+        }
         return taskBean
     }
 
