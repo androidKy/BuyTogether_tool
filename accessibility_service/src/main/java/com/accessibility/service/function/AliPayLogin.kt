@@ -57,6 +57,7 @@ class AliPayLogin(myAccessibilityService: MyAccessibilityService) :
     /**
      * 下发的支付宝账号和之前的一致，直接用余额支付
      */
+    @Synchronized
     private fun payDirectly() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)

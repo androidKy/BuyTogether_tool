@@ -22,7 +22,7 @@ class Constant {
 
         const val SP_SEARCH_TYPE_FILE = "search_type_sp"
 
-
+        const val KEY_TASK_TIMEOUT = "key_task_timeout"
         const val KEY_TASK_DATA = "key_task_data"
         const val KEY_TASK_ID = "key_task_id"
         const val KEY_ACCOUNT_ID = "key_account_id"

@@ -27,8 +27,10 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
     private var mChooseSize: Int = 0 //选择规格的数量
     private var mIsConfrimChoosed = false //是否已选择好规格并且点击确认
     private var mCurChooseIndex: Int = 0 //当前正在选择的规格index
+    private var mIsPaying = false   //是否正在支付
 
     override fun startService() {
+        mIsPaying = false
         confirmBuyType()
     }
 
@@ -311,32 +313,16 @@ class BuyGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeServ
             .setNodeParams("立即支付", 0, true, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    payByAlipay()
+                    if (!mIsPaying) {
+                        mIsPaying = true
+                        payByAlipay()
+                    }
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
                     responFailed(failedMsg)
                 }
 
-            })
-            .create()
-            .execute()
-    }
-
-    private fun payForNow() {
-        NodeController.Builder()
-            .setNodeService(nodeService)
-            .setNodeParams("立即支付")
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    payByAlipay()
-                    L.i("点击立即支付")
-                }
-
-                override fun onTaskFailed(failedMsg: String) {
-                    L.i("节点找不到：$failedMsg")
-                    responFailed("支付页面跳转失败")
-                }
             })
             .create()
             .execute()

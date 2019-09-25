@@ -2,7 +2,6 @@ package com.buy.together.fragment.viewmodel
 
 import android.content.Context
 import android.text.TextUtils
-import com.accessibility.service.MyAccessibilityService.Companion.ACTIVITY_TASK_LAUNCHER
 import com.accessibility.service.data.CommentBean
 import com.accessibility.service.data.TaskBean
 import com.accessibility.service.data.TaskCategory
@@ -28,6 +27,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.json.JSONObject
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -53,7 +53,7 @@ class MainViewModel(context: Context, val mainView: MainView) :
                 //val afterUnicode = UnicodeUtils.decodeUnicode(cacheTaskData)
                 L.i("从缓存获取任务：$cacheTaskData")
                 //mIsFromCache = true
-                parseTaskData(cacheTaskData)
+                parseTaskData(cacheTaskData,false)
             } else {
                 // mIsFromCache = false
                 L.i("从服务器获取任务")
@@ -81,7 +81,7 @@ class MainViewModel(context: Context, val mainView: MainView) :
         ApiManager()
             .setDataListener(object : DataListener {
                 override fun onSucceed(result: String) {
-                    parseTaskData(result)
+                    parseTaskData(result,true)
                 }
 
                 override fun onFailed(errorMsg: String) {
@@ -91,6 +91,7 @@ class MainViewModel(context: Context, val mainView: MainView) :
             .getNormalTask(imei)
     }
 
+
     /**
      * 获取评论任务
      */
@@ -99,7 +100,7 @@ class MainViewModel(context: Context, val mainView: MainView) :
             .setDataListener(object : DataListener {
                 override fun onSucceed(result: String) {
                     //保存服务器下发的taskId，用于判断任务是否超时
-                    parseTaskData(result)
+                    parseTaskData(result,true)
                 }
 
                 override fun onFailed(errorMsg: String) {
@@ -117,7 +118,7 @@ class MainViewModel(context: Context, val mainView: MainView) :
             .setDataListener(object : DataListener {
                 override fun onSucceed(result: String) {
                     //保存服务器下发的taskId，用于判断任务是否超时
-                    parseTaskData(result)
+                    parseTaskData(result,true)
                 }
 
                 override fun onFailed(errorMsg: String) {
@@ -127,7 +128,18 @@ class MainViewModel(context: Context, val mainView: MainView) :
             .getConfrimSignedTask(imei)
     }
 
-    private fun parseTaskData(result: String) {
+
+    private fun saveGetTaskTime() {
+        val currentDate =
+            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).run { format(Date()) }
+        L.i("保存从服务器获取任务的时间:$currentDate")
+        SPUtils.getInstance(Constant.SP_TASK_TIME_OUT).put(Constant.KEY_TASK_TIMEOUT,currentDate)
+    }
+
+    /**
+     * 解析获取的任务数据
+     */
+    private fun parseTaskData(result: String,isFromServer:Boolean) {
         val disposable = Observable.just(result)
             .flatMap { flatIt ->
                 val taskBean = when (BuildConfig.taskType) {
@@ -135,6 +147,11 @@ class MainViewModel(context: Context, val mainView: MainView) :
                     else -> parseCommentTask(flatIt)
                 }
                 taskBean.task?.task_category = BuildConfig.taskType
+                val taskId = taskBean.task?.task_id
+                if(isFromServer && taskId != null && taskId >0) //判断是否从服务器获取到可以做的任务
+                {
+                    saveGetTaskTime()
+                }
                 Observable.just(taskBean)
             }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -344,7 +361,7 @@ class MainViewModel(context: Context, val mainView: MainView) :
                 ToastUtils.showToast(context, "热更新：$resultStr")
                 //todo 上报热更新结果给后台
                 if (result) {
-                    PackageManagerUtils.restartApplication(Constant.PKG_NAME,ACTIVITY_TASK_LAUNCHER)
+                    PackageManagerUtils.restartSelf(Constant.PKG_NAME)
                 }
             }
             .fetchPatchUpdate(true)

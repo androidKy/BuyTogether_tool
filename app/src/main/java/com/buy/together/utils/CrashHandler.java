@@ -6,7 +6,6 @@ package com.buy.together.utils;
  **/
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -15,6 +14,10 @@ import android.os.Environment;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.widget.Toast;
+
+import com.accessibility.service.util.Constant;
+import com.accessibility.service.util.PackageManagerUtils;
+import com.safframework.log.L;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,8 +33,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import static com.accessibility.service.MyAccessibilityService.ACTION_EXCEPTION_RESTART;
 
 /**
  * @作者: lijingbo
@@ -97,7 +98,9 @@ public class CrashHandler implements UncaughtExceptionHandler {
                     collectErrorInfo();
                     saveErrorInfo(e);
                     Looper.prepare();
-                    mContext.sendBroadcast(new Intent(ACTION_EXCEPTION_RESTART));
+                    L.e(e.getMessage(),e);
+                   // mContext.sendBroadcast(new Intent(ACTION_EXCEPTION_RESTART));
+                    PackageManagerUtils.restartSelf(Constant.PKG_NAME);
                     Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
                     Looper.loop();
                 }

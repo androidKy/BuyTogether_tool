@@ -36,12 +36,31 @@ public class PackageManagerUtils {
         }
         return mInstance;
     }*/
-    public static void restartAppByPkgName(String pkgName) {
-        final Intent intent = Utils.getApp().getPackageManager().getLaunchIntentForPackage(pkgName);
-        if (intent == null)
-            return;
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        Utils.getApp().startActivity(intent);
+    public static void restartSelf(final String pkgName) {
+        ThreadUtils.executeByCached(new ThreadUtils.Task<Boolean>() {
+            @Override
+            public Boolean doInBackground() throws Throwable {
+                String result = new CMDUtil().execCmd("am force-stop " + pkgName + ";" +
+                        "am start -n " + pkgName + "/" + MyAccessibilityService.ACTIVITY_TASK_LAUNCHER);
+                return null;
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onFail(Throwable t) {
+
+            }
+        });
+
     }
 
     public static void killApplication(final String packageName) {
