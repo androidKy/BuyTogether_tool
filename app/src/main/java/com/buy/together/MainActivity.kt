@@ -46,6 +46,8 @@ class MainActivity : AppCompatActivity(), MainAcView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        
+        L.i("热更新 V1.1.5...")
 
         val formatStrategy = CsvFormatStrategy.newBuilder()
             .tag("Pdd_Log")

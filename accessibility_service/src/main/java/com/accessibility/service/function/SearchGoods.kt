@@ -28,6 +28,8 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
     private var mIsVerifySaler: Boolean = false //是否校验过同一卖家，如果是，则先上滑动再继续查找，否则不先上滑
     private var mStartTime: Long = 0 //搜索开始时间
 
+    private var hasResearched:Boolean  ?= null //  是否第二次搜索商品？
+
     companion object {
         const val XY_SEARCH_EDITTEXT = "540,245"    //主界面的搜索框的坐标
         const val XY_SEARCH_RESULT_EDITTEXT = "540,145" //搜索界面的搜索框的坐标
@@ -42,6 +44,8 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
         mSearchPrice = TaskDataUtil.instance.getSearchPrice()
         mMallName = TaskDataUtil.instance.getMall_name()
         val keywordList = TaskDataUtil.instance.getGoodKeyWordList()
+        hasResearched = SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+            .getBoolean(Constant.KEY_HAS_RESEARCHED)
 
         if (mGoodName.isNullOrEmpty() || mMallName.isNullOrEmpty() || mSearchPrice.isNullOrEmpty()
         ) {
@@ -154,7 +158,15 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                             .getInt(Constant.KEY_CUR_SEARCH_TYPE)
                     L.i("搜索方式：$searchType 任务完成的数量：$taskFinishCount")
                     nodeService.postDelay(Runnable {
-                        inputKeyword()
+                        // 第二次或以上执行浏览器搜索。
+                        if(hasResearched!!){
+                            searchByBrowser()
+                        }else{
+                            inputKeyword()
+                            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                                .put(Constant.KEY_HAS_RESEARCHED,true)
+                        }
+
                     },1)
                     //searchByBrowser()
                     /*if (taskFinishCount != null && taskFinishCount > 0 && searchType > 0) {
