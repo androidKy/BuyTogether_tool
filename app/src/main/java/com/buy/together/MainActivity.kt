@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
         )
         setContentView(R.layout.activity_main)
         
-        L.i("热更新 V1.1.8...")
+       // L.i("热更新 V1.1.8...")
 
         val formatStrategy = CsvFormatStrategy.newBuilder()
             .tag("Pdd_Log")
