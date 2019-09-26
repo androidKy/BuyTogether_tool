@@ -46,6 +46,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
         const val ACTION_TASK_FAILED = "com.task.failed" //任务失败更新任务状态
         const val ACTION_TASK_SUCCEED = "com.task.succeed"  //任务成功更新任务状态
         const val KEY_TASK_MSG = "key__task_msg" //任务更新的备注
+
+        const val ACTION_BOOT_COMPLETED = Intent.ACTION_BOOT_COMPLETED
         /* var mTaskListener: TaskListener? = null
 
          fun setTaskListener(taskListener: TaskListener) {

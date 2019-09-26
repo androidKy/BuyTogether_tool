@@ -8,8 +8,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.support.v7.app.AppCompatActivity
+import android.view.WindowManager
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.MyAccessibilityService.Companion.ACTION_APP_RESTART
+import com.accessibility.service.MyAccessibilityService.Companion.ACTION_BOOT_COMPLETED
 import com.accessibility.service.MyAccessibilityService.Companion.ACTION_EXCEPTION_RESTART
 import com.accessibility.service.MyAccessibilityService.Companion.ACTION_TASK_FAILED
 import com.accessibility.service.MyAccessibilityService.Companion.ACTION_TASK_RESTART
@@ -45,9 +47,15 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.setFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD,
+            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+        )
         setContentView(R.layout.activity_main)
         
-        L.i("热更新 V1.1.5...")
+        L.i("热更新 V1.1.8...")
 
         val formatStrategy = CsvFormatStrategy.newBuilder()
             .tag("Pdd_Log")
@@ -159,7 +167,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
     override fun onAccessibilityService() {
         if (!mTaskRunning) {
-            startTask()
+//            startTask()
         }
     }
 
@@ -251,6 +259,12 @@ class MainActivity : AppCompatActivity(), MainAcView {
                     ACTION_TASK_SUCCEED -> {
                         L.i("任务完成，更新任务状态")
                         mMainAcViewModel?.updateTask(true, "success")
+                    }
+
+                    // todo 新添加代码
+                    ACTION_BOOT_COMPLETED ->{
+                        L.i("开启自改动，成功")
+
                     }
                 }
             }
