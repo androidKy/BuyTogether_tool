@@ -63,7 +63,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
             val goodName = TaskDataUtil.instance.getGoods_name()
             NodeController.Builder()
                 .setNodeService(nodeService)
-                .setNodeParams(goodName!!,1,5)
+                .setNodeParams(goodName!!,1,8)
                 .setTaskListener(object:TaskListener{
                     override fun onTaskFinished() {
                         L.i("已跳转到商品详情，开始滑动")

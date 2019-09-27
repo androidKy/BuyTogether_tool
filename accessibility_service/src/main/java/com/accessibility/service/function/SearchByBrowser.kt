@@ -55,7 +55,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
             L.i("浏览器已打开")
             checkBrowseType()
 //            skipNavigation()
-        }, 5)
+        }, 3)
         /* NodeController.Builder()
              .setNodeService(myAccessibilityService)
              .setNodeFoundListener(object : TaskListener {
@@ -128,7 +128,7 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
     private fun openGoodUrl() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("同意并使用")
+            .setNodeParams("同意并使用",0,4)
             .setNodeParams("确定", 0, 5)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
@@ -139,7 +139,21 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("跳转商品链接失败:$failedMsg")
                     // B型机会进入此处通过搜索框搜索。
-                    clickSearchBox()
+                    //clickSearchBox()
+                    NodeController.Builder()
+                        .setNodeService(myAccessibilityService)
+                        .setNodeParams("确定",0,6)
+                        .setTaskListener(object:TaskListener{
+                            override fun onTaskFinished() {
+                                responSucceed()
+                            }
+
+                            override fun onTaskFailed(failedMsg: String) {
+                                clickSearchBox()
+                            }
+                        })
+                        .create()
+                        .execute()
                 }
             })
             .create()

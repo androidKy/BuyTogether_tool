@@ -243,7 +243,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
                     override fun onTaskFailed(failedMsg: String) {
                         this@MyAccessibilityService.performBackClick()
-                        findPersonal()
+                        //findPersonal()
                     }
                 })
                 .create()

@@ -162,7 +162,6 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                         if(hasResearched!!){
                             searchByBrowser()
                         }else{
-                            inputKeyword()
                             SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
                                 .put(Constant.KEY_HAS_RESEARCHED,true)
                         }
