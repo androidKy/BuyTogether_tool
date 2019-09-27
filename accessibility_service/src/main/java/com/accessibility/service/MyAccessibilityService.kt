@@ -368,7 +368,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 override fun responCommentStatus(status: Int) {
                     L.i("评论任务返回值 status = $status")
                     SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
-                        .put(Constant.KEY_COMMENT_SUCCESS_CODE, status)
+                        .put(Constant.KEY_COMMENT_SUCCESS_CODE, status,true)
                 }
             })
             .setTaskListener(object : TaskListener {

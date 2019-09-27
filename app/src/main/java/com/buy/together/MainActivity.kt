@@ -47,15 +47,17 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.setFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD,
-            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD,
+            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+        )
         window.setFlags(
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         )
         setContentView(R.layout.activity_main)
-        
-       // L.i("热更新 V1.1.8...")
+
+        // L.i("热更新 V1.1.8...")
 
         val formatStrategy = CsvFormatStrategy.newBuilder()
             .tag("Pdd_Log")
@@ -77,11 +79,11 @@ class MainActivity : AppCompatActivity(), MainAcView {
     }
 
     private fun initAction() {
-        when(BuildConfig.taskType)
-        {
-            TaskCategory.NORMAL_TASK ->   actionBar?.title = "pddTask_${BuildConfig.VERSION_NAME}"
+        when (BuildConfig.taskType) {
+            TaskCategory.NORMAL_TASK -> actionBar?.title = "pddTask_${BuildConfig.VERSION_NAME}"
             TaskCategory.COMMENT_TASK -> actionBar?.title = "pddComment_${BuildConfig.VERSION_NAME}"
-            TaskCategory.CONFIRM_SIGNED_TASK -> actionBar?.title = "pddConfirmSigned_${BuildConfig.VERSION_NAME}"
+            TaskCategory.CONFIRM_SIGNED_TASK -> actionBar?.title =
+                "pddConfirmSigned_${BuildConfig.VERSION_NAME}"
         }
     }
 
@@ -167,7 +169,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
     override fun onAccessibilityService() {
         if (!mTaskRunning) {
-//            startTask()
+            startTask()
         }
     }
 
@@ -190,15 +192,19 @@ class MainActivity : AppCompatActivity(), MainAcView {
      * 任务完成情况已更新
      * @see MainAcViewModel.updateTask
      */
-    override fun onResponUpdateTask() {
-        L.i("更新任务状态完成，重新开始任务")
-        //延迟2秒，等SP的异步清理完信息
+    override fun onResponUpdateTask(result: Boolean) {
+        L.i("更新任务状态完成,任务是否成功：$result")
+        mMainAcViewModel?.clearDataAndRestartTask()
+
+    }
+
+    override fun onClearDataResult() {
+        L.i("清理数据完成,开始下一轮任务")
         Handler(Looper.getMainLooper()).postDelayed({
             mTaskRunning = false
             startTask()
         }, 2000)
     }
-
 
 
     private fun startPdd() {
@@ -262,7 +268,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
                     }
 
                     // todo 新添加代码
-                    ACTION_BOOT_COMPLETED ->{
+                    ACTION_BOOT_COMPLETED -> {
                         L.i("开启自改动，成功")
 
                     }
@@ -276,6 +282,9 @@ class MainActivity : AppCompatActivity(), MainAcView {
      * 重新启动任务App
      */
     fun restartTaskApp() {
-        PackageManagerUtils.restartApplication(Constant.PKG_NAME,MyAccessibilityService.ACTIVITY_TASK_LAUNCHER)
+        PackageManagerUtils.restartApplication(
+            Constant.PKG_NAME,
+            MyAccessibilityService.ACTIVITY_TASK_LAUNCHER
+        )
     }
 }

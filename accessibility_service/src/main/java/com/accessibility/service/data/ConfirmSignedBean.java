@@ -9,7 +9,7 @@ public class ConfirmSignedBean {
     /**
      * code : 200
      * msg : 成功
-     * task : {"id":611,"order_id":"190905-136434484093225","ip":{"city":"盘锦市","content":"14.18.242.34","mac_address":"1c:15:1f:ae:10:27"},"goods":{"id":80,"goods_url":"https://mobile.yangkeduo.com/goods.html?goods_id=36849535783&refer_page_name=goods_detail&refer_page_id=10014_1567672399464_B1SDp1HTo3&refer_page_sn=10014&_x_share_id=b1902fc19f444c22b7f30afa6efaf574","goods_id":36849535783,"cat_id":6556,"goods_name":"坚果胚芽燕麦片即食冲饮水果谷物早餐懒人食品营养早餐","mall_name":"维施大健康品牌店","keyword":"坚果胚芽燕麦片即食冲饮","search_price":"37.9","choose_info":"团购价:37.9,正常价:39.9 规格:一盒（内含16袋）"},"account":{"id":2041,"user":"209017350","pwd":"8xd97jjxcy","type":0},"device":{"id":448,"bluetooth":"02:00:00:00:00:00","imei":"867008037092264","brand":"HUAWEI","android":"7.0","mac":"1c:15:1f:ae:10:27","system":"BAC-AL00C00B200","sn":"B7EDU17A21001310","imsi":"460021052755719","model":"BAC-AL00","useragent":"Dalvik/2.1.0 (Linux; U; Android 7.0; BAC-AL00 Build/HUAWEIBAC-AL00)"}}
+     * task : {"id":2418,"order_id":"190919-109333054592808","ip":{"city":"沈阳市","content":"14.18.242.34","mac_address":"02:00:00:00:00:00"},"goods":{"id":207,"goods_url":"https://mobile.yangkeduo.com/goods.html?goods_id=42435902163","goods_id":42435902163,"cat_id":8475,"goods_name":"网红快手卡卡同款2019秋铅笔裤弹力百搭高腰显瘦黑色小脚裤休闲裤","mall_name":"芒果时装","keyword":"网红快手同款弹力裤,网红同款铅笔裤 ","search_price":"39.99","choose_info":"团购价:39.99,正常价:49.99 规格:黑色,S"},"account":{"id":3709,"user":"209560075","pwd":"h0ypmmui6h","type":0},"device":{"id":476416,"bluetooth":"02:00:00:00:00:00","imei":"866700033454578","brand":"0","android":"7.1.1","mac":"02:00:00:00:00:00","system":"V105","sn":"9047ca20","imsi":"460019949641380","model":"0","useragent":"Dalvik/2.1.0 (Linux; U; Android 7.1.1; 1801-A01 Build/NMF26X)"},"delivery_address":{"name":"牧高朗","phone":"18922058292","province":"辽宁省","city":"沈阳市","district":"沈河区","street":"大南街25-7号-D"}}
      */
 
     private int code;
@@ -42,12 +42,13 @@ public class ConfirmSignedBean {
 
     public static class ConfirmBean {
         /**
-         * id : 611
-         * order_id : 190905-136434484093225
-         * ip : {"city":"盘锦市","content":"14.18.242.34","mac_address":"1c:15:1f:ae:10:27"}
-         * goods : {"id":80,"goods_url":"https://mobile.yangkeduo.com/goods.html?goods_id=36849535783&refer_page_name=goods_detail&refer_page_id=10014_1567672399464_B1SDp1HTo3&refer_page_sn=10014&_x_share_id=b1902fc19f444c22b7f30afa6efaf574","goods_id":36849535783,"cat_id":6556,"goods_name":"坚果胚芽燕麦片即食冲饮水果谷物早餐懒人食品营养早餐","mall_name":"维施大健康品牌店","keyword":"坚果胚芽燕麦片即食冲饮","search_price":"37.9","choose_info":"团购价:37.9,正常价:39.9 规格:一盒（内含16袋）"}
-         * account : {"id":2041,"user":"209017350","pwd":"8xd97jjxcy","type":0}
-         * device : {"id":448,"bluetooth":"02:00:00:00:00:00","imei":"867008037092264","brand":"HUAWEI","android":"7.0","mac":"1c:15:1f:ae:10:27","system":"BAC-AL00C00B200","sn":"B7EDU17A21001310","imsi":"460021052755719","model":"BAC-AL00","useragent":"Dalvik/2.1.0 (Linux; U; Android 7.0; BAC-AL00 Build/HUAWEIBAC-AL00)"}
+         * id : 2418
+         * order_id : 190919-109333054592808
+         * ip : {"city":"沈阳市","content":"14.18.242.34","mac_address":"02:00:00:00:00:00"}
+         * goods : {"id":207,"goods_url":"https://mobile.yangkeduo.com/goods.html?goods_id=42435902163","goods_id":42435902163,"cat_id":8475,"goods_name":"网红快手卡卡同款2019秋铅笔裤弹力百搭高腰显瘦黑色小脚裤休闲裤","mall_name":"芒果时装","keyword":"网红快手同款弹力裤,网红同款铅笔裤 ","search_price":"39.99","choose_info":"团购价:39.99,正常价:49.99 规格:黑色,S"}
+         * account : {"id":3709,"user":"209560075","pwd":"h0ypmmui6h","type":0}
+         * device : {"id":476416,"bluetooth":"02:00:00:00:00:00","imei":"866700033454578","brand":"0","android":"7.1.1","mac":"02:00:00:00:00:00","system":"V105","sn":"9047ca20","imsi":"460019949641380","model":"0","useragent":"Dalvik/2.1.0 (Linux; U; Android 7.1.1; 1801-A01 Build/NMF26X)"}
+         * delivery_address : {"name":"牧高朗","phone":"18922058292","province":"辽宁省","city":"沈阳市","district":"沈河区","street":"大南街25-7号-D"}
          */
 
         private int id;
@@ -56,6 +57,7 @@ public class ConfirmSignedBean {
         private GoodsBean goods;
         private AccountBean account;
         private DeviceBean device;
+        private DeliveryAddressBean delivery_address;
 
         public int getId() {
             return id;
@@ -105,11 +107,19 @@ public class ConfirmSignedBean {
             this.device = device;
         }
 
+        public DeliveryAddressBean getDelivery_address() {
+            return delivery_address;
+        }
+
+        public void setDelivery_address(DeliveryAddressBean delivery_address) {
+            this.delivery_address = delivery_address;
+        }
+
         public static class IpBean {
             /**
-             * city : 盘锦市
+             * city : 沈阳市
              * content : 14.18.242.34
-             * mac_address : 1c:15:1f:ae:10:27
+             * mac_address : 02:00:00:00:00:00
              */
 
             private String city;
@@ -143,15 +153,15 @@ public class ConfirmSignedBean {
 
         public static class GoodsBean {
             /**
-             * id : 80
-             * goods_url : https://mobile.yangkeduo.com/goods.html?goods_id=36849535783&refer_page_name=goods_detail&refer_page_id=10014_1567672399464_B1SDp1HTo3&refer_page_sn=10014&_x_share_id=b1902fc19f444c22b7f30afa6efaf574
-             * goods_id : 36849535783
-             * cat_id : 6556
-             * goods_name : 坚果胚芽燕麦片即食冲饮水果谷物早餐懒人食品营养早餐
-             * mall_name : 维施大健康品牌店
-             * keyword : 坚果胚芽燕麦片即食冲饮
-             * search_price : 37.9
-             * choose_info : 团购价:37.9,正常价:39.9 规格:一盒（内含16袋）
+             * id : 207
+             * goods_url : https://mobile.yangkeduo.com/goods.html?goods_id=42435902163
+             * goods_id : 42435902163
+             * cat_id : 8475
+             * goods_name : 网红快手卡卡同款2019秋铅笔裤弹力百搭高腰显瘦黑色小脚裤休闲裤
+             * mall_name : 芒果时装
+             * keyword : 网红快手同款弹力裤,网红同款铅笔裤
+             * search_price : 39.99
+             * choose_info : 团购价:39.99,正常价:49.99 规格:黑色,S
              */
 
             private long id;
@@ -239,9 +249,9 @@ public class ConfirmSignedBean {
 
         public static class AccountBean {
             /**
-             * id : 2041
-             * user : 209017350
-             * pwd : 8xd97jjxcy
+             * id : 3709
+             * user : 209560075
+             * pwd : h0ypmmui6h
              * type : 0
              */
 
@@ -285,17 +295,17 @@ public class ConfirmSignedBean {
 
         public static class DeviceBean {
             /**
-             * id : 448
+             * id : 476416
              * bluetooth : 02:00:00:00:00:00
-             * imei : 867008037092264
-             * brand : HUAWEI
-             * android : 7.0
-             * mac : 1c:15:1f:ae:10:27
-             * system : BAC-AL00C00B200
-             * sn : B7EDU17A21001310
-             * imsi : 460021052755719
-             * model : BAC-AL00
-             * useragent : Dalvik/2.1.0 (Linux; U; Android 7.0; BAC-AL00 Build/HUAWEIBAC-AL00)
+             * imei : 866700033454578
+             * brand : 0
+             * android : 7.1.1
+             * mac : 02:00:00:00:00:00
+             * system : V105
+             * sn : 9047ca20
+             * imsi : 460019949641380
+             * model : 0
+             * useragent : Dalvik/2.1.0 (Linux; U; Android 7.1.1; 1801-A01 Build/NMF26X)
              */
 
             private long id;
@@ -396,6 +406,72 @@ public class ConfirmSignedBean {
 
             public void setUseragent(String useragent) {
                 this.useragent = useragent;
+            }
+        }
+
+        public static class DeliveryAddressBean {
+            /**
+             * name : 牧高朗
+             * phone : 18922058292
+             * province : 辽宁省
+             * city : 沈阳市
+             * district : 沈河区
+             * street : 大南街25-7号-D
+             */
+
+            private String name;
+            private String phone;
+            private String province;
+            private String city;
+            private String district;
+            private String street;
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public String getPhone() {
+                return phone;
+            }
+
+            public void setPhone(String phone) {
+                this.phone = phone;
+            }
+
+            public String getProvince() {
+                return province;
+            }
+
+            public void setProvince(String province) {
+                this.province = province;
+            }
+
+            public String getCity() {
+                return city;
+            }
+
+            public void setCity(String city) {
+                this.city = city;
+            }
+
+            public String getDistrict() {
+                return district;
+            }
+
+            public void setDistrict(String district) {
+                this.district = district;
+            }
+
+            public String getStreet() {
+                return street;
+            }
+
+            public void setStreet(String street) {
+                this.street = street;
             }
         }
     }

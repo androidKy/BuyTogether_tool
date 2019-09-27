@@ -19,6 +19,15 @@ public class TaskBean {
     private String msg;
     private TaskData task;
 
+    @Override
+    public String toString() {
+        return "TaskBean{" +
+                "code=" + code +
+                ", msg='" + msg + '\'' +
+                ", task=" + task +
+                '}';
+    }
+
     public int getCode() {
         return code;
     }
@@ -87,6 +96,34 @@ public class TaskBean {
         private StayTimeBean stay_time;
         private PayAccountBean pay_account;
         private List<String> pic_links;
+
+        @Override
+        public String toString() {
+            return "TaskData{" +
+                    "task_id=" + task_id +
+                    ", task_type=" + task_type +
+                    ", task_status=" + task_status +
+                    ", task_amount=" + task_amount +
+                    ", task_dispense=" + task_dispense +
+                    ", task_complete=" + task_complete +
+                    ", task_fail=" + task_fail +
+                    ", talk_msg='" + talk_msg + '\'' +
+                    ", task_category=" + task_category +
+                    ", comment_content='" + comment_content + '\'' +
+                    ", can_comment_time=" + can_comment_time +
+                    ", order_id='" + order_id + '\'' +
+                    ", buy_behavior=" + buy_behavior +
+                    ", create_time=" + create_time +
+                    ", ip=" + ip +
+                    ", account=" + account +
+                    ", goods=" + goods +
+                    ", device=" + device +
+                    ", delivery_address=" + delivery_address +
+                    ", stay_time=" + stay_time +
+                    ", pay_account=" + pay_account +
+                    ", pic_links=" + pic_links +
+                    '}';
+        }
 
         public List<String> getPic_links() {
             return pic_links;

@@ -4,7 +4,7 @@ apply plugin: 'tinkerpatch-support'
  */
 def taskType = "normaltask"
 def bakPath = file("${buildDir}/tinkerApk/")
-def baseInfo = "app-1.1.0-0924-17-53-34"
+def baseInfo = "app-1.0.0-0927-10-49-11"
 def variantName = "${taskType}-release" //commenttask-release、confirmsigned_release、normaltask-release
 
 /**
@@ -36,7 +36,7 @@ tinkerpatchSupport {
     appKey = "cef4f2011223ec10" //下单任务：cef4f2011223ec10 评论任务：9195226acf82aea1 确认收货：b4a579389083f10f
 
     /** 注意: 若发布新的全量包, appVersion一定要更新 **/
-    appVersion = "1.1.5"
+    appVersion = "1.0.0"
 
     def pathPrefix = "${bakPath}/${baseInfo}/${variantName}/"
     def name = "app-${taskType}-release"

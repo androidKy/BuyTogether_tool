@@ -175,34 +175,42 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) {
      */
 
     fun updateTask(isSucceed: Boolean, remark: String) {
-        ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
-            override fun doInBackground(): Boolean {
-                CmdListUtil.getInstance().apply {
-                    val cmdStr = "am force-stop ${Constant.ALI_PAY_PKG};" +
-                            "am force-stop ${Constant.BUY_TOGETHER_PKG};" +
-                            "am force-stop ${Constant.XIAOMI_BROWSER_PKG};" +
-                            "pm clear ${Constant.XIAOMI_BROWSER_PKG};"
-                    execCmd(cmdStr)
-                    return true
-                }
-            }
-
-            override fun onSuccess(result: Boolean?) {
-                when (BuildConfig.taskType) {
-                    TaskCategory.NORMAL_TASK -> updateNormalTask(isSucceed, remark)
-                    TaskCategory.COMMENT_TASK -> updateCommentTask(isSucceed, remark)
-                    else -> updateConfirmSignedTask(isSucceed, remark)
-                }
-            }
-
-            override fun onCancel() {
-            }
-
-            override fun onFail(t: Throwable?) {
-            }
-
-        })
+        when (BuildConfig.taskType) {
+            TaskCategory.NORMAL_TASK -> updateNormalTask(isSucceed, remark)
+            TaskCategory.COMMENT_TASK -> updateCommentTask(isSucceed, remark)
+            else -> updateConfirmSignedTask(isSucceed, remark)
+        }
     }
+
+    /**
+     * 清理数据重新启动任务
+     */
+    fun clearDataAndRestartTask() {
+        mainAcView.onClearDataResult()
+        /* ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
+             override fun doInBackground(): Boolean {
+                 CmdListUtil.getInstance().apply {
+                     val cmdStr = "am force-stop ${Constant.ALI_PAY_PKG};" +
+                             "am force-stop ${Constant.BUY_TOGETHER_PKG};" +
+                             "pm clear ${Constant.XIAOMI_BROWSER_PKG};"
+                     execCmd(cmdStr)
+                     return true
+                 }
+             }
+
+             override fun onSuccess(result: Boolean?) {
+               mainAcView.onClearDataResult()
+             }
+
+             override fun onCancel() {
+             }
+
+             override fun onFail(t: Throwable?) {
+             }
+
+         })*/
+    }
+
 
     /**
      * 更新评论任务状态
@@ -210,12 +218,12 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) {
     private fun updateCommentTask(isSucceed: Boolean, remark: String) {
         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
             val taskId = getInt(Constant.KEY_TASK_ID)
-            var successCode = getInt(Constant.KEY_COMMENT_SUCCESS_CODE)
+            var successCode = getInt(Constant.KEY_COMMENT_SUCCESS_CODE,0)
             var finalRemark = remark
             L.i("上报评论任务状态：taskId:$taskId isSucceed:$isSucceed successCode:$successCode remark:$finalRemark")
-            if (!isSucceed) {
+           /* if (!isSucceed) {
                 successCode = 2
-            }
+            }*/
             when (successCode) {
                 0 -> finalRemark = "未签收"
                 1 -> finalRemark = "评论成功"
@@ -235,7 +243,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) {
                             L.e(e.message, e)
                         }
                         sendTaskStatusReceiver()
-                        mainAcView.onResponUpdateTask()
+                        mainAcView.onResponUpdateTask(isSucceed)
                     }
 
                     override fun onFailed(errorMsg: String) {
@@ -267,7 +275,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) {
                 orderNumber = ""
                 orderMoney = ""
                 sendTaskStatusReceiver()
-                mainAcView.onResponUpdateTask()
+                mainAcView.onResponUpdateTask(isSucceed)
                 return
             } else {
                 finalRemark = "任务成功:$progress"
@@ -288,7 +296,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) {
                             L.e(e.message, e)
                         }
                         sendTaskStatusReceiver()
-                        mainAcView.onResponUpdateTask()
+                        mainAcView.onResponUpdateTask(isSucceed)
                     }
 
                     override fun onFailed(errorMsg: String) {
@@ -315,12 +323,12 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) {
     private fun updateConfirmSignedTask(isSucceed: Boolean, remark: String) {
         SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).apply {
             val taskId = getInt(Constant.KEY_TASK_ID)
-            var successCode = getInt(Constant.KEY_COMMENT_SUCCESS_CODE)
+            var successCode = getInt(Constant.KEY_COMMENT_SUCCESS_CODE,1)
             var finalRemark = remark
             L.i("上报确认收货任务状态：taskId:$taskId isSucceed:$isSucceed successCode:$successCode remark:$finalRemark")
-            if (!isSucceed) {
+           /* if (!isSucceed) {
                 successCode = 2
-            }
+            }*/
             when (successCode) {
                 0 -> finalRemark = "未签收"
                 1 -> finalRemark = "确认收货成功"
@@ -340,7 +348,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) {
                             L.e(e.message, e)
                         }
                         sendTaskStatusReceiver()
-                        mainAcView.onResponUpdateTask()
+                        mainAcView.onResponUpdateTask(isSucceed)
                     }
 
                     override fun onFailed(errorMsg: String) {

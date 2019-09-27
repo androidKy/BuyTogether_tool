@@ -78,6 +78,7 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
+                    mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_FAILED)
                     responFailed("该账号未下单: $failedMsg")
                 }
             })
@@ -104,6 +105,7 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
                         findCommentNode()
                     } else {
                         L.i("确认收货已完成")
+                        mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_SUCCESS)
                         responSucceed()
                     }
                 }
@@ -193,6 +195,7 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
 
                             override fun onTaskFailed(failedMsg: String) {
                                 L.i("评论失败：$failedMsg")
+                                mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_FAILED)
                             }
 
                         })
@@ -219,6 +222,7 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
+                    mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_FAILED)
                     responFailed(failedMsg)
                 }
 
@@ -328,6 +332,7 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
+                    mCommentStatusListener?.responCommentStatus(CommentStatus.NOT_SIGNED)
                     responFailed(failedMsg)
                 }
             })
@@ -345,6 +350,7 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
 
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("选择图片失败：$failedMsg")
+                    mCommentStatusListener?.responCommentStatus(CommentStatus.NOT_SIGNED)
                     responFailed(failedMsg)
                 }
             })

@@ -7,8 +7,10 @@ package com.buy.together
  **/
 interface MainAcView {
 
-    fun onResponUpdateTask()
+    fun onResponUpdateTask(result:Boolean)
     fun onPermissionGranted()
 
     fun onAccessibilityService()
+
+    fun onClearDataResult()
 }

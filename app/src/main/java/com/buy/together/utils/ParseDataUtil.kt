@@ -221,6 +221,16 @@ class ParseDataUtil {
             goods.search_price = confirmSignedBean.task.goods.search_price
             task.goods = goods
 
+            val delivery_address = TaskBean.TaskData.DeliveryAddressBean()
+            delivery_address.city = confirmSignedBean.task?.delivery_address?.city
+            delivery_address.name = confirmSignedBean.task?.delivery_address?.name
+            delivery_address.phone = confirmSignedBean.task?.delivery_address?.phone
+            delivery_address.province = confirmSignedBean.task?.delivery_address?.province
+            delivery_address.district = confirmSignedBean.task?.delivery_address?.district
+            delivery_address.street = confirmSignedBean.task?.delivery_address?.street
+
+            task.delivery_address = delivery_address
+
             val ip = TaskBean.TaskData.IpBean()
             ip.city = confirmSignedBean.task.ip.city
             ip.content = confirmSignedBean.task.ip.content
@@ -249,7 +259,6 @@ class ParseDataUtil {
             task.device = device
 
             taskBean.task = task
-
             return taskBean
         }
     }

@@ -54,7 +54,7 @@ class MainViewModel(context: Context, val mainView: MainView) :
                 //val afterUnicode = UnicodeUtils.decodeUnicode(cacheTaskData)
                 L.i("从缓存获取任务：$cacheTaskData")
                 //mIsFromCache = true
-                parseTaskData(cacheTaskData,false)
+                parseTaskData(cacheTaskData, false)
             } else {
                 // mIsFromCache = false
                 L.i("从服务器获取任务")
@@ -82,7 +82,7 @@ class MainViewModel(context: Context, val mainView: MainView) :
         ApiManager()
             .setDataListener(object : DataListener {
                 override fun onSucceed(result: String) {
-                    parseTaskData(result,true)
+                    parseTaskData(result, true)
                 }
 
                 override fun onFailed(errorMsg: String) {
@@ -101,7 +101,7 @@ class MainViewModel(context: Context, val mainView: MainView) :
             .setDataListener(object : DataListener {
                 override fun onSucceed(result: String) {
                     //保存服务器下发的taskId，用于判断任务是否超时
-                    parseTaskData(result,true)
+                    parseTaskData(result, true)
                 }
 
                 override fun onFailed(errorMsg: String) {
@@ -119,7 +119,7 @@ class MainViewModel(context: Context, val mainView: MainView) :
             .setDataListener(object : DataListener {
                 override fun onSucceed(result: String) {
                     //保存服务器下发的taskId，用于判断任务是否超时
-                    parseTaskData(result,true)
+                    parseTaskData(result, true)
                 }
 
                 override fun onFailed(errorMsg: String) {
@@ -134,22 +134,28 @@ class MainViewModel(context: Context, val mainView: MainView) :
         val currentDate =
             SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).run { format(Date()) }
         L.i("保存从服务器获取任务的时间:$currentDate")
-        SPUtils.getInstance(Constant.SP_TASK_TIME_OUT).put(Constant.KEY_TASK_TIMEOUT,currentDate)
+        SPUtils.getInstance(Constant.SP_TASK_TIME_OUT).put(Constant.KEY_TASK_TIMEOUT, currentDate)
     }
 
     /**
      * 解析获取的任务数据
      */
-    private fun parseTaskData(result: String,isFromServer:Boolean) {
+    private fun parseTaskData(result: String, isFromServer: Boolean) {
         val disposable = Observable.just(result)
             .flatMap { flatIt ->
-                val taskBean = when (BuildConfig.taskType) {
-                    TaskCategory.NORMAL_TASK -> parseNormalTask(flatIt)
-                    else -> parseCommentTask(flatIt)
-                }
+                val taskBean =
+                    if (!isFromServer) {
+                        parseNormalTask(flatIt)
+                    } else {
+                        when (BuildConfig.taskType) {
+                            TaskCategory.NORMAL_TASK -> parseNormalTask(flatIt)
+                            TaskCategory.COMMENT_TASK -> parseCommentTask(flatIt)
+                            else -> parseConfirmTask(flatIt)
+                        }
+                    }
                 taskBean.task?.task_category = BuildConfig.taskType
                 val taskId = taskBean.task?.task_id
-                if(isFromServer && taskId != null && taskId >0) //判断是否从服务器获取到可以做的任务
+                if (isFromServer && taskId != null && taskId > 0) //判断是否从服务器获取到可以做的任务
                 {
                     saveGetTaskTime()
                 }
@@ -211,7 +217,7 @@ class MainViewModel(context: Context, val mainView: MainView) :
         return taskBean
     }
 
-    private fun parseConfirmTask(result:String):TaskBean{
+    private fun parseConfirmTask(result: String): TaskBean {
         var taskBean = TaskBean()
         try {
             val code = JSONObject(result).getInt("code")
