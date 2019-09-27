@@ -287,7 +287,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) {
                         try {
                             val jsonObj = JSONObject(result)
                             val code = jsonObj.getInt("code")
-                            if (code == 200 || code == 406) {
+                            if (code == 200) {
                                 SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).clear(true)
                             } else {
                                 L.i("任务更新失败：code:$code")

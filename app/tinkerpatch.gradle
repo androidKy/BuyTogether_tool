@@ -4,7 +4,7 @@ apply plugin: 'tinkerpatch-support'
  */
 def taskType = "normaltask"
 def bakPath = file("${buildDir}/tinkerApk/")
-def baseInfo = "app-1.0.0-0927-10-49-11"
+def baseInfo = "app-1.0.0-0927-11-02-13"
 def variantName = "${taskType}-release" //commenttask-release、confirmsigned_release、normaltask-release
 
 /**
