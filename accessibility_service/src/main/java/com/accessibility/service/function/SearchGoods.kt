@@ -13,7 +13,9 @@ import com.accessibility.service.util.AdbScrollUtils
 import com.accessibility.service.util.Constant
 import com.accessibility.service.util.TaskDataUtil
 import com.safframework.log.L
+import com.utils.common.CMDUtil
 import com.utils.common.SPUtils
+import com.utils.common.ThreadUtils
 
 /**
  * Description:
@@ -160,8 +162,17 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                     nodeService.postDelay(Runnable {
                         // 第二次或以上执行浏览器搜索。
                         if(hasResearched!!){
-                            searchByBrowser()
+                            //todo 暂时补救代码
+//                            searchByMallName()
+//                            searchByBrowser()
+
+                            clearBrowserData()
                         }else{
+//                            clearBrowserData()
+//                            searchByBrowser()
+//                            searchByMallName()
+                            inputKeyword()
+                            L.i("inputKeyword已执行。。。")
                             SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
                                 .put(Constant.KEY_HAS_RESEARCHED,true)
                         }
@@ -185,6 +196,28 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
             })
             .create()
             .execute()
+    }
+
+    private fun clearBrowserData() {
+        ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>(){
+            override fun doInBackground(): Boolean {
+                var clearDataCmd = "pm clear ${Constant.XIAOMI_BROWSER_PKG}"
+                CMDUtil().execCmd(clearDataCmd)
+                return true
+            }
+
+            override fun onSuccess(result: Boolean?) {
+                searchByBrowser()
+            }
+
+            override fun onCancel() {
+            }
+
+            override fun onFail(t: Throwable?) {
+            }
+
+        } )
+
     }
 
     /**

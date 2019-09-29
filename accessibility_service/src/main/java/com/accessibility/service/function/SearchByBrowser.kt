@@ -143,23 +143,47 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    L.i("跳转商品链接失败:$failedMsg")
-                    // B型机会进入此处通过搜索框搜索。
-                    //clickSearchBox()
-                    NodeController.Builder()
-                        .setNodeService(myAccessibilityService)
-                        .setNodeParams("确定",0,6)
-                        .setTaskListener(object:TaskListener{
-                            override fun onTaskFinished() {
-                                responSucceed()
-                            }
+                    L.i("是否打开已复制链接:$failedMsg")
+                    isOpenCopyLink()
+                }
+            })
+            .create()
+            .execute()
+    }
 
-                            override fun onTaskFailed(failedMsg: String) {
-                                clickSearchBox()
-                            }
-                        })
-                        .create()
-                        .execute()
+    private fun isOpenCopyLink() {
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("是否打开",1,false,10)
+            .setNodeParams("确定",0,true,10)
+            .setTaskListener(object :TaskListener{
+                override fun onTaskFinished() {
+                    click2pdd()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+
+                    isRequestOpenPdd()
+                }
+
+            })
+            .create()
+            .execute()
+    }
+
+    private fun isRequestOpenPdd() {
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("网页请求",1,false,10)
+            .setNodeParams("确定",0,true,10)
+            .setTaskListener(object : TaskListener{
+                override fun onTaskFinished() {
+                    responSucceed()
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    L.i("浏览器搜索失败")
+                    click2pdd()
                 }
             })
             .create()

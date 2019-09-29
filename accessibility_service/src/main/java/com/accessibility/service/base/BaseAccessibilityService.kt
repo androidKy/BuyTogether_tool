@@ -1,6 +1,7 @@
 package com.accessibility.service.base
 
 import android.accessibilityservice.AccessibilityService
+import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -30,6 +31,8 @@ abstract class BaseAccessibilityService : AccessibilityService() {
     var mIsLogined = false
 
     val mHandler = Handler(Looper.getMainLooper())
+
+   var flags = serviceInfo.flags or AccessibilityServiceInfo.FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY
 
     public companion object {
 
@@ -120,6 +123,28 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         else ArrayList<AccessibilityNodeInfo>()
     }
 
+    /**
+     *  递归遍历出WebView节点
+     */
+    private var accessibilityNodeInfoWebView: AccessibilityNodeInfo? = null
+    private fun findWebViewNode(rootNode: AccessibilityNodeInfo) {
+        for (i in 0 until rootNode.childCount) {
+           val child = rootNode.getChild(i)
+            if("android.webkit.WebView" == child.className){
+                accessibilityNodeInfoWebView = child
+                L.i("findWebViewNode--", "找到webView")
+                return
+            }
+            if(child.childCount>0){
+                findWebViewNode(child)
+            }
+        }
+    }
+
+    private fun getRecordNode(webviewNode:AccessibilityNodeInfo){
+        val count = webviewNode.childCount
+        L.i("getRecordNode--","孩子数:$count")
+    }
 
     /**
      * 根据text获取节点

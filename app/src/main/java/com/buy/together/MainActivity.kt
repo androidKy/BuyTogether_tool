@@ -57,12 +57,14 @@ class MainActivity : AppCompatActivity(), MainAcView {
         )
         setContentView(R.layout.activity_main)
 
-        // L.i("热更新 V1.1.8...")
+//         L.i("热更新 V1.1.8...")
+
 
         val formatStrategy = CsvFormatStrategy.newBuilder()
             .tag("Pdd_Log")
             .build()
         Logger.addLogAdapter(DiskLogAdapter(formatStrategy))
+        L.i("有无改到代码3")
 
         ProxyConfig.Instance.globalMode = true
 
@@ -77,6 +79,8 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
         initAction()
     }
+
+
 
     private fun initAction() {
         when (BuildConfig.taskType) {
@@ -130,7 +134,6 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
     override fun onResume() {
         super.onResume()
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -209,7 +212,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
     private fun startPdd() {
         //展示弹框
-
+        L.i("准备打开PDD")
         val launchIntentForPackage =
             this.packageManager?.getLaunchIntentForPackage(Constant.BUY_TOGETHER_PKG)
         if (launchIntentForPackage != null) {

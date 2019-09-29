@@ -32,6 +32,8 @@ class MyAccessibilityService : BaseAccessibilityService() {
     private var testFlag: Boolean = false
     private var mTaskStatusReceiver: BroadcastReceiver? = null
 
+    private var deadLoop: Int = 0
+
 
     companion object {
         const val PKG_PINDUODUO = "com.xunmeng.pinduoduo"
@@ -118,7 +120,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
         try {
             clickPermission(event)
             chooseLogin()
-            //            test()
+//                        test()
         } catch (e: Exception) {
             L.e(e.message)
         }
@@ -143,22 +145,24 @@ class MyAccessibilityService : BaseAccessibilityService() {
     private fun test() {
         if (!testFlag) {
             testFlag = true
-//            NodeController.Builder()
-//                .setNodeService(this)
-//                .setNodeParams("追加评价",0,false,10,true)
-//                .setNodeParams("已评价",0,false,10)
-//                .setTaskListener(object :TaskListener{
-//                    override fun onTaskFinished() {
-//                        L.i("???")
-//                    }
-//
-//                    override fun onTaskFailed(failedMsg: String) {
-//                        L.i("...")
-//                    }
-//
-//                })
-//                .create()
-//                .execute()
+            NodeController.Builder()
+                .setNodeService(this)
+                .setNodeParams("是否打开已复制链接", 0, false, 10, true)
+                .setNodeParams("是否打开", 1, false, 10, true)
+                .setNodeParams("https://", 1, false, 10, true)
+                .setNodeParams("确定", 1, false, 10, true)
+                .setTaskListener(object : TaskListener {
+                    override fun onTaskFinished() {
+                        L.i("???")
+                    }
+
+                    override fun onTaskFailed(failedMsg: String) {
+                        L.i("...")
+                    }
+
+                })
+                .create()
+                .execute()
 
         }
     }
@@ -277,6 +281,21 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 override fun onTaskFailed(failedMsg: String) {
                     this@MyAccessibilityService.performBackClick()
                     confirmPayResult()
+                    L.i("deadLoop = $deadLoop")
+                    deadLoop++
+                    if (deadLoop >= 5) {
+                        LoginService(this@MyAccessibilityService).login(object : TaskListener {
+                            override fun onTaskFinished() {
+                                confirmPayResult()
+                            }
+
+                            override fun onTaskFailed(failedMsg: String) {
+                                var failedMsg = "账号被封停"
+                                responTaskFailed(failedMsg)
+                            }
+
+                        })
+                    }
                 }
             })
             .create()
@@ -298,7 +317,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    // 有可能弹出见面福利
+                    // 有可能弹出见面福利,有时成功登录，但找不到点击登录死循环。
                     dealAccident()
                 }
             })
@@ -368,7 +387,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
                 override fun responCommentStatus(status: Int) {
                     L.i("评论任务返回值 status = $status")
                     SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
-                        .put(Constant.KEY_COMMENT_SUCCESS_CODE, status,true)
+                        .put(Constant.KEY_COMMENT_SUCCESS_CODE, status, true)
                 }
             })
             .setTaskListener(object : TaskListener {
@@ -422,12 +441,12 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
         postDelay(Runnable {
             val taskType = TaskDataUtil.instance.getTask_type()
-            if(taskType != null && taskType.toString().contains("4"))   //是否有支付
+            if (taskType != null && taskType.toString().contains("4"))   //是否有支付
             {
                 setCurPageType(PageEnum.START_PAGE)
                 PackageManagerUtils.killApplication(Constant.ALI_PAY_PKG)
                 PackageManagerUtils.restartApplication(PKG_PINDUODUO, ACTIVITY_PDD_LAUNCHER)
-            }else{
+            } else {
                 responTaskFinished()
             }
         }, 5)
