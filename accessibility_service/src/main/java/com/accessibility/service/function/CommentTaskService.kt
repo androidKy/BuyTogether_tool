@@ -176,18 +176,18 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
             .setNodeParams(goodName,1,4)
-            .setNodeParams("确认收货",0,6)
-            .setNodeParams("未签收", 1, false, 4)
+            .setNodeParams("查看物流",1,false,4)
+            .setNodeParams("已签收", 1, false, 4)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    L.i("包裹未签收")
-                    mCommentStatusListener?.responCommentStatus(CommentStatus.NOT_SIGNED)
-                    responFailed("包裹未签收")
+                    L.i("包裹已签收")
+                  /*  mCommentStatusListener?.responCommentStatus(CommentStatus.NOT_SIGNED)
+                    responFailed("包裹未签收")*/
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    L.i("包裹已签收")
-                    NodeController.Builder()
+                    L.i("包裹未签收")
+                    /*NodeController.Builder()
                         .setNodeService(myAccessibilityService)
                         .setNodeParams("确认收货", 1, 3)
                         .setTaskListener(object : TaskListener {
@@ -210,7 +210,7 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
 
                         })
                         .create()
-                        .execute()
+                        .execute()*/
                 }
             })
             .create()

@@ -32,12 +32,18 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
 
     override fun startService() {
         //复制文本内容到剪贴板，然后打开浏览器
-        val goodUrl = TaskDataUtil.instance.getGoodUrl()
+        var goodUrl = TaskDataUtil.instance.getGoodUrl()
         L.i("商品链接：$goodUrl")
         if (goodUrl.isNullOrEmpty()) {
             responFailed("商品链接不能为空")
             return
         }
+        L.i("before split goodUrl: $goodUrl")
+        if(goodUrl.contains("&page_from"))
+        {
+            goodUrl = goodUrl.split("&page_from")[0]
+        }
+        L.i("after split goodUrl: $goodUrl")
 
         val clipboardManager =
             myAccessibilityService.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
