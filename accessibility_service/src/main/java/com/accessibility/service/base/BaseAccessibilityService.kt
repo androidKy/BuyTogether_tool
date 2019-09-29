@@ -258,6 +258,18 @@ abstract class BaseAccessibilityService : AccessibilityService() {
 
     private fun findHalfNodeForEachWindows(text:String, rootWindow:AccessibilityNodeInfo):AccessibilityNodeInfo?{
         val windowNodeList = rootWindow.findAccessibilityNodeInfosByText(text)
+       /* if(windowNodeList.isNotEmpty())
+        {
+            for (node in windowNodeList) {
+                //  L.i("nodeList textList = ${node.text} className = ${node.className}")
+                if (node.text == text)
+                    return node
+            }
+            return windowNodeList[0]
+        }
+
+        return null*/
+
         if (windowNodeList.isEmpty()) {
             val childCount = rootWindow.childCount
             for (i in 0 until childCount) {
@@ -286,6 +298,14 @@ abstract class BaseAccessibilityService : AccessibilityService() {
 
     private fun findFullNodeForEachWindows(text:String, rootWindow:AccessibilityNodeInfo):AccessibilityNodeInfo?{
         val windowNodeList = rootWindow.findAccessibilityNodeInfosByText(text)
+        /*if(windowNodeList.isNotEmpty())
+        {
+            for (node in windowNodeList) {
+                //  L.i("nodeList textList = ${node.text} className = ${node.className}")
+                if (node.text == text)
+                    return node
+            }
+        }*/
         if (windowNodeList.isEmpty()) {
             val childCount = rootWindow.childCount
             for (i in 0 until childCount) {

@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
         Logger.addLogAdapter(DiskLogAdapter(formatStrategy))
         L.i("有无改到代码3")
 
-        ProxyConfig.Instance.globalMode = true
+        ProxyConfig.Instance.globalMode = false
 
         initFragment()
 
@@ -161,7 +161,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
         }
         NetStateReceiver.unRegisterNetworkStateReceiver(this)
 
-        mMainAcViewModel?.disableAccessibilityService()
+       // mMainAcViewModel?.disableAccessibilityService()
     }
 
     override fun onPermissionGranted() {

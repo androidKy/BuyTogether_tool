@@ -225,9 +225,9 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) {
                 successCode = 2
             }*/
             when (successCode) {
-                0 -> finalRemark = "未签收"
-                1 -> finalRemark = "评论成功"
-                2 -> finalRemark = "评论失败"
+                0 -> finalRemark = "未签收:$remark"
+                1 -> finalRemark = "评论成功:$remark"
+                2 -> finalRemark = "评论失败:$remark"
             }
 
             ApiManager()

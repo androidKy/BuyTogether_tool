@@ -149,7 +149,9 @@ class TaskDataUtil private constructor() {
             task?.goods?.goods_name
         }
     }
-
+    fun getGoods_id():String?{
+        return mTaskServiceData?.task?.goods?.goods_id?.toString()
+    }
     /**
      * 获取商品链接
      */

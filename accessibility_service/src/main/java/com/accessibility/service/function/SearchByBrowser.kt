@@ -32,24 +32,20 @@ class SearchByBrowser(private val myAccessibilityService: MyAccessibilityService
 
     override fun startService() {
         //复制文本内容到剪贴板，然后打开浏览器
-        var goodUrl = TaskDataUtil.instance.getGoodUrl()
-        L.i("商品链接：$goodUrl")
-        if (goodUrl.isNullOrEmpty()) {
-            responFailed("商品链接不能为空")
+        val goodId = TaskDataUtil.instance.getGoods_id()
+        L.i("商品id：$goodId")
+        if (goodId.isNullOrEmpty()) {
+            responFailed("商品id不能为空")
             return
         }
-        L.i("before split goodUrl: $goodUrl")
-        if(goodUrl.contains("&page_from"))
-        {
-            goodUrl = goodUrl.split("&page_from")[0]
-        }
-        L.i("after split goodUrl: $goodUrl")
+        //https://mobile.yangkeduo.com/goods.html?goods_id=47128281875
+        val goodUrl = "https://mobile.yangkeduo.com/goods.html?goods_id=$goodId"
 
         val clipboardManager =
             myAccessibilityService.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboardManager.text = goodUrl
 
-        L.i("开始打开浏览器")
+        L.i("开始打开浏览器:$goodUrl")
         PackageManagerUtils.startXiaomiBrowser(Constant.XIAOMI_BROWSER_PKG)
         /*myAccessibilityService.packageManager.getLaunchIntentForPackage(Constant.XIAOMI_BROWSER_PKG).apply {
             if (this != null)

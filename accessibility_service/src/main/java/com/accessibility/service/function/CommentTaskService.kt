@@ -95,7 +95,7 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
             .setNodeParams("确认收货", 0,false, timeout = 5)
             .setTaskListener(object :TaskListener{
                 override fun onTaskFinished() {
-                    checkIsSigned()
+                    enterGoodInfo()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -164,7 +164,10 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
             .execute()
     }
 
-    private fun checkIsSigned() {
+    /**
+     * 进入商品详情，再点击确认收货检查是否签收
+     */
+    private fun enterGoodInfo() {
         var goodName = TaskDataUtil.instance.getGoods_name()
         if(goodName.isNullOrEmpty())
         {
@@ -175,42 +178,98 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
         goodName = goodName.substring(0,goodName.length/2)
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams(goodName,1,4)
-            .setNodeParams("查看物流",1,false,4)
-            .setNodeParams("已签收", 1, false, 4)
+            .setNodeParams(goodName,1,false,4)
+            .setNodeParams("确认收货",0,6)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    L.i("包裹已签收")
-                  /*  mCommentStatusListener?.responCommentStatus(CommentStatus.NOT_SIGNED)
-                    responFailed("包裹未签收")*/
+                    //confirmIsSigned()
+                    enterConfirmBt()
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
-                    L.i("包裹未签收")
-                    /*NodeController.Builder()
-                        .setNodeService(myAccessibilityService)
-                        .setNodeParams("确认收货", 1, 3)
-                        .setTaskListener(object : TaskListener {
-                            override fun onTaskFinished() {
-                                val taskCategory = TaskDataUtil.instance.getTask_category()
-                                if (taskCategory == TaskCategory.COMMENT_TASK) {
-                                    L.i("开始评论")
-                                    startComment()
-                                } else {
-                                    L.i("确认收货完成")
-                                    noComment()
+                    mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_FAILED)
+                    responFailed("未找到该商品:$goodName")
+                }
+            })
+            .create()
+            .execute()
+    }
+
+    /**
+     * 点击确认收货按钮确认是否收货 todo webview检测不到节点如何处理
+     */
+    private fun confirmIsSigned(){
+        //延迟两秒，不然会在当前页面查找到待收货
+        myAccessibilityService.postDelay(Runnable {
+            NodeController.Builder()
+                .setNodeService(myAccessibilityService)
+                .setNodeParams("确认收货",0,false,8)
+                .setTaskListener(object:TaskListener{
+                    override fun onTaskFinished() {
+                        AdbScriptController.Builder()
+                            .setXY("960,1845")
+                            .setTaskListener(object :TaskListener{
+                                override fun onTaskFinished() {
+                                    enterConfirmBt()
                                 }
-//
-                            }
 
-                            override fun onTaskFailed(failedMsg: String) {
-                                L.i("评论失败：$failedMsg")
-                                mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_FAILED)
-                            }
+                                override fun onTaskFailed(failedMsg: String) {
+                                    mCommentStatusListener?.responCommentStatus(
+                                        CommentStatus.NOT_SIGNED
+                                    )
+                                    responFailed("adb命令执行失败")
+                                }
+                            })
+                            .create()
+                            .execute()
+                    }
 
-                        })
-                        .create()
-                        .execute()*/
+                    override fun onTaskFailed(failedMsg: String) {
+                        //confirmIsSigned()
+                    }
+                })
+                .create()
+                .execute()
+        },2)
+    }
+
+    private fun enterConfirmBt(){
+        NodeController.Builder()
+            .setNodeService(myAccessibilityService)
+            .setNodeParams("未签收",1,false,4)
+            .setTaskListener(object:TaskListener{
+                override fun onTaskFinished() {
+                    L.i("该货物未签收")
+                    mCommentStatusListener?.responCommentStatus(
+                        CommentStatus.NOT_SIGNED
+                    )
+                    responFailed("包裹未签收")
+                }
+
+                override fun onTaskFailed(failedMsg: String) {
+                    NodeController.Builder()
+                       .setNodeService(myAccessibilityService)
+                       .setNodeParams("确认收货", 1, 6)
+                       .setTaskListener(object : TaskListener {
+                           override fun onTaskFinished() {
+                               val taskCategory = TaskDataUtil.instance.getTask_category()
+                               if (taskCategory == TaskCategory.COMMENT_TASK) {
+                                   L.i("开始评论")
+                                   startComment()
+                               } else {
+                                   L.i("确认收货完成")
+                                   confirmSignedOnly()
+                               }
+                           }
+
+                           override fun onTaskFailed(failedMsg: String) {
+                               L.i("$failedMsg was not found.")
+                               mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_FAILED)
+                               responFailed("包裹已确认收货")
+                           }
+                       })
+                       .create()
+                       .execute()
                 }
             })
             .create()
@@ -220,7 +279,7 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
     /**
      *  不进行评论，单纯确认收货
      */
-    private fun noComment() {
+    private fun confirmSignedOnly() {
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
             .setNodeParams("提交评价", 0, false)
@@ -270,13 +329,6 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
                         .setTaskListener(object : TaskListener {
                             override fun onTaskFinished() {
                                 isUploadPicture()
-
-                                L.i("成功提交评价")
-                                //                    isCommentSucceed()
-                                // todo 人工进行操作
-//                                deadLoop()
-
-
                             }
 
                             override fun onTaskFailed(failedMsg: String) {
