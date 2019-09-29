@@ -138,7 +138,8 @@ abstract class BaseAccessibilityService : AccessibilityService() {
                             //L.i("window id: ${nodeWindowList[i].id}")
                             val nodeInfo = nodeWindowList[i].root
                             if (nodeInfo != null) {
-                                val nodeList = nodeInfo.findAccessibilityNodeInfosByText(text)
+                                return findHalfNodeForEachWindows(text,nodeInfo)
+                               /* val nodeList = nodeInfo.findAccessibilityNodeInfosByText(text)
                                 // L.i("nodeList size = ${nodeList.size} textList = $text ")
                                 if (nodeList.size > 0) {
                                     for (node in nodeList) {
@@ -147,21 +148,36 @@ abstract class BaseAccessibilityService : AccessibilityService() {
                                             return node
                                     }
                                     return nodeList[0]
-                                }
+                                }*/
                             }
                         }
                 }
             } else {
-                val nodeList = rootWindow.findAccessibilityNodeInfosByText(text)
-                // L.i("nodeList size = ${nodeList.size} textList = $text ")
-                if (nodeList.size > 0) {
-                    for (node in nodeList) {
+                return findHalfNodeForEachWindows(text,rootWindow)
+               /* val windowNodeList = rootWindow.findAccessibilityNodeInfosByText(text)
+                if (windowNodeList.size == 0) {
+                    val childCount = rootWindow.childCount
+                    for (i in 0 until childCount) {
+                        val childNodeList =
+                            rootWindow.getChild(i).findAccessibilityNodeInfosByText(text)
+                        if (childNodeList.size > 0) {
+                            for (node in childNodeList) {
+                                //  L.i("nodeList textList = ${node.text} className = ${node.className}")
+                                if (node.text == text)
+                                    return node
+                            }
+                            return childNodeList[0]
+                        }
+                    }
+                } else {
+                    for (node in windowNodeList) {
                         //  L.i("nodeList textList = ${node.text} className = ${node.className}")
                         if (node.text == text)
                             return node
                     }
-                    return nodeList[0]
-                }
+                    return windowNodeList[0]
+                }*/
+
             }
         } catch (e: Exception) {
             L.i("半查找节点无障碍服务崩溃：${e.message}")
@@ -172,7 +188,6 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         //L.i("$text not found")
         return null
     }
-
     /**
      * 查找与text完全相同的节点
      */
@@ -189,20 +204,13 @@ abstract class BaseAccessibilityService : AccessibilityService() {
                             //L.i("window id: ${nodeWindowList[i].id}")
                             val nodeInfo = nodeWindowList[i].root
                             if (nodeInfo != null) {
-                                val nodeList = nodeInfo.findAccessibilityNodeInfosByText(text)
-                                // L.i("nodeList size = ${nodeList.size} textList = $text ")
-                                if (nodeList.size > 0) {
-                                    for (node in nodeList) {
-                                        //  L.i("nodeList textList = ${node.text} className = ${node.className}")
-                                        if (node.text == text)
-                                            return node
-                                    }
-                                }
+                                findFullNodeForEachWindows(text,nodeInfo)
                             }
                         }
                 }
             } else {
-                val nodeList = rootWindow.findAccessibilityNodeInfosByText(text)
+                return findFullNodeForEachWindows(text,rootWindow)
+               /* val nodeList = rootWindow.findAccessibilityNodeInfosByText(text)
 
                 if (nodeList.size > 0) {
                     for (node in nodeList) {
@@ -210,7 +218,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
                         if (node.text == text)
                             return node
                     }
-                }
+                }*/
             }
         } catch (e: Exception) {
             L.i("全查找节点无障碍服务崩溃：${e.message}")
@@ -222,6 +230,62 @@ abstract class BaseAccessibilityService : AccessibilityService() {
         //L.i("$text not found")
         return null
     }
+
+    private fun findHalfNodeForEachWindows(text:String, rootWindow:AccessibilityNodeInfo):AccessibilityNodeInfo?{
+        val windowNodeList = rootWindow.findAccessibilityNodeInfosByText(text)
+        if (windowNodeList.isEmpty()) {
+            val childCount = rootWindow.childCount
+            for (i in 0 until childCount) {
+                val childNodeList =
+                    rootWindow.getChild(i).findAccessibilityNodeInfosByText(text)
+                if (childNodeList.size > 0) {
+                    for (node in childNodeList) {
+                        //  L.i("nodeList textList = ${node.text} className = ${node.className}")
+                        if (node.text == text)
+                            return node
+                    }
+                    return childNodeList[0]
+                }
+            }
+        } else {
+            for (node in windowNodeList) {
+                //  L.i("nodeList textList = ${node.text} className = ${node.className}")
+                if (node.text == text)
+                    return node
+            }
+            return windowNodeList[0]
+        }
+
+        return null
+    }
+
+    private fun findFullNodeForEachWindows(text:String, rootWindow:AccessibilityNodeInfo):AccessibilityNodeInfo?{
+        val windowNodeList = rootWindow.findAccessibilityNodeInfosByText(text)
+        if (windowNodeList.isEmpty()) {
+            val childCount = rootWindow.childCount
+            for (i in 0 until childCount) {
+                val childNodeList =
+                    rootWindow.getChild(i).findAccessibilityNodeInfosByText(text)
+                if (childNodeList.size > 0) {
+                    for (node in childNodeList) {
+                        //  L.i("nodeList textList = ${node.text} className = ${node.className}")
+                        if (node.text == text)
+                            return node
+                    }
+                }
+            }
+        } else {
+            for (node in windowNodeList) {
+                //  L.i("nodeList textList = ${node.text} className = ${node.className}")
+                if (node.text == text)
+                    return node
+            }
+        }
+
+        return null
+    }
+
+
 
     /**
      * 查找与text完全相同的节点集合
@@ -315,11 +379,11 @@ abstract class BaseAccessibilityService : AccessibilityService() {
             if (nodeInfo1.isClickable) {
                 //L.i("${nodeInfo1.className} was clicked")
                 nodeInfo1.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-               /* if (nodeInfo1.text == "授权并登录") { //有时候点击一次没用
-                    postDelay(Runnable {
-                        nodeInfo1?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                    }, 2)
-                }*/
+                /* if (nodeInfo1.text == "授权并登录") { //有时候点击一次没用
+                     postDelay(Runnable {
+                         nodeInfo1?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                     }, 2)
+                 }*/
                 return
             }
             nodeInfo1 = nodeInfo1.parent

@@ -92,7 +92,7 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
     private fun findConfirmSignedNode(){
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("确认收货", 0, timeout = 5)
+            .setNodeParams("确认收货", 0,false, timeout = 5)
             .setTaskListener(object :TaskListener{
                 override fun onTaskFinished() {
                     checkIsSigned()
@@ -165,9 +165,19 @@ class CommentTaskService(val myAccessibilityService: MyAccessibilityService) :
     }
 
     private fun checkIsSigned() {
+        var goodName = TaskDataUtil.instance.getGoods_name()
+        if(goodName.isNullOrEmpty())
+        {
+            mCommentStatusListener?.responCommentStatus(CommentStatus.COMMENT_FAILED)
+            responFailed("未找到该商品")
+            return
+        }
+        goodName = goodName.substring(0,goodName.length/2)
         NodeController.Builder()
             .setNodeService(myAccessibilityService)
-            .setNodeParams("未签收", 1, false, 3)
+            .setNodeParams(goodName,1,4)
+            .setNodeParams("确认收货",0,6)
+            .setNodeParams("未签收", 1, false, 4)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
                     L.i("包裹未签收")
