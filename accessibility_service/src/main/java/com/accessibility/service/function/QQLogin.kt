@@ -1,6 +1,5 @@
 package com.accessibility.service.function
 
-import android.content.Intent
 import android.text.TextUtils
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.auto.AdbScriptController
@@ -540,11 +539,11 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
 
                                 ClearDataService().clearData(object : TaskListener {
                                     override fun onTaskFinished() {
-                                        myAccessibilityService.sendBroadcast(
+                                       /* myAccessibilityService.sendBroadcast(
                                             Intent(
                                                 MyAccessibilityService.ACTION_TASK_STATUS
                                             )
-                                        )
+                                        )*/
                                         PackageManagerUtils.startActivity(
                                             Constant.BUY_TOGETHER_PKG,
                                             "${Constant.BUY_TOGETHER_PKG}.ui.activity.MainFrameActivity"
@@ -553,11 +552,11 @@ open class QQLogin constructor(val myAccessibilityService: MyAccessibilityServic
 
                                     override fun onTaskFailed(failedMsg: String) {
                                         L.i("清理数据失败")
-                                        myAccessibilityService.sendBroadcast(
+                                        /*myAccessibilityService.sendBroadcast(
                                             Intent(
                                                 MyAccessibilityService.ACTION_TASK_STATUS
                                             )
-                                        )
+                                        )*/
                                         PackageManagerUtils.startActivity(
                                             Constant.BUY_TOGETHER_PKG,
                                             "${Constant.BUY_TOGETHER_PKG}.ui.activity.MainFrameActivity"

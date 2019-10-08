@@ -1,5 +1,7 @@
 package com.accessibility.service.function
 
+import android.os.Handler
+import android.os.Looper
 import android.view.accessibility.AccessibilityNodeInfo
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.auto.NodeController
@@ -24,6 +26,14 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
     private var mTaskProgress: StringBuilder = StringBuilder()
     private var mScanGoodTime: Int = 0
     private var mExceptionHappened: Boolean = false
+    private var mTaskType: String = "1"
+    private var mOriginTaskType: String = ""
+
+    companion object {
+        const val MSG_SCAN_FINISHED = 1000
+        const val MSG_TALK_FINISHED = 2000
+        const val MSG_COLLECT_FINISHED = 3000
+    }
 
     fun setScreenDensity(width: Int, height: Int): TaskService {
         mScreenWidth = width
@@ -34,22 +44,76 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
     override fun doOnEvent() {
         try {
             mTaskProgress.clear()
-            var taskType = TaskDataUtil.instance.getTask_type()
-            L.i("taskType = $taskType")
-            when (taskType) {
-                2, 23, 24, 234 -> talkWithSaler()
-//                2,23,24,234,1234 -> talkWithSaler()
-                3, 32, 34 -> collectGoods()
-                4 -> buyGoods()
-                else -> {
-                    nodeService.postDelay(Runnable {
-                        scanGoods()
-                    }, 2)
-                }
-            }
+            // var taskType =
+            mOriginTaskType = TaskDataUtil.instance.getTask_type().toString()
+            L.i("开始任务之前：taskType = $mOriginTaskType")
+            mTaskType = mOriginTaskType.replace("4", "")
+            finishOneTask("0")
+            /* when (taskType) {
+                 2, 23, 24, 234 -> talkWithSaler()
+ //                2,23,24,234,1234 -> talkWithSaler()
+                 3, 32, 34 -> collectGoods()
+                 4 -> buyGoods()
+                 else -> {
+                     nodeService.postDelay(Runnable {
+                         scanGoods()
+                     }, 2)
+                 }
+             }*/
         } catch (e: Exception) {
             L.e(e.message, e)
             responFailed("任务过程中出现异常")
+        }
+    }
+
+    private val mHandler: Handler = Handler(Looper.getMainLooper()) {
+        when (it.what) {
+            MSG_SCAN_FINISHED -> {
+                saveFinishProgress("1")
+                finishOneTask("1")
+            }
+
+            MSG_TALK_FINISHED -> {
+                saveFinishProgress("2")
+                finishOneTask("2")
+            }
+
+            MSG_COLLECT_FINISHED -> {
+                saveFinishProgress("3")
+                finishOneTask("3")
+            }
+
+        }
+        false
+    }
+
+    /**
+     * 保存当前完成的任务类型
+     */
+    private fun saveFinishProgress(progress: String) {
+        mTaskProgress.append(progress)
+        saveTaskProgress(mTaskProgress.toString())
+    }
+
+    private fun finishOneTask(progress: String) {
+        mTaskType = mTaskType.replace(progress, "")
+
+        L.i("完成任务类型：$progress mTaskType: $mTaskType")
+
+        if (mTaskType.isEmpty()) {
+            if (mOriginTaskType.contains("4")) {
+                buyGoods()
+            } else responSuccess()
+        } else {
+            //随机打乱顺序
+            val arrayType = mTaskType.toCharArray()
+            val startType = arrayType.random().toString()
+            L.i("开始任务类型：$startType")
+            when (startType) {
+                "1" -> scanGoods()
+                "2" -> talkWithSaler()
+                "3" -> collectGoods()
+            }
         }
     }
 
@@ -57,14 +121,13 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
      * 开始做任务
      */
     private fun scanGoods() {
-        mScanGoodTime = (8..20).random()
-
+        mScanGoodTime = (30..120).random()
         try {
             val goodName = TaskDataUtil.instance.getGoods_name()
             NodeController.Builder()
                 .setNodeService(nodeService)
-                .setNodeParams(goodName!!,1,16)
-                .setTaskListener(object:TaskListener{
+                .setNodeParams(goodName!!, 1, 16)
+                .setTaskListener(object : TaskListener {
                     override fun onTaskFinished() {
                         L.i("已跳转到商品详情，开始滑动")
                         startScroll()
@@ -79,7 +142,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
                 .execute()
 
         } catch (e: Exception) {
-            if (!mExceptionHappened){
+            if (!mExceptionHappened) {
                 L.i("无障碍服务崩溃：${e.message}")
                 mExceptionHappened = true
                 //nodeService.sendBroadcast(Intent(MyAccessibilityService.ACTION_EXCEPTION_RESTART))
@@ -88,7 +151,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
         }
     }
 
-    private fun startScroll(){
+    private fun startScroll() {
         NodeUtils.instance
             .setNodeFoundListener(object : NodeFoundListener {
                 override fun onNodeFound(nodeInfo: AccessibilityNodeInfo?) {
@@ -113,27 +176,22 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
     inner class ForwardListenerImpl : ScrollUtils.ScrollListener {
 
         override fun onScrollFinished(nodeInfo: AccessibilityNodeInfo) {
-            L.i("向上滑动完成，开始向下拉")
-            ScrollUtils(nodeService, nodeInfo)
-                .setBackwardTime(mScanGoodTime)
-                .setScrollListener(BackwardListenerImpl())
-                .scrollBackward()
-        }
-    }
+            L.i("浏览完成，进行下一步任务")
+            NodeController.Builder()
+                .setNodeService(nodeService)
+                .setNodeParams("顶部", 0, 4)
+                .setTaskListener(object : TaskListener {
+                    override fun onTaskFinished() {
+                        mHandler.sendEmptyMessage(MSG_SCAN_FINISHED)
+                    }
 
-    inner class BackwardListenerImpl : ScrollUtils.ScrollListener {
-        override fun onScrollFinished(nodeInfo: AccessibilityNodeInfo) {
-            L.i("浏览完成,根据任务类型是否需要进行下一步任务")
-            mTaskProgress.append("1")
-            saveTaskProgress(mTaskProgress.toString())
-            TaskDataUtil.instance.getTask_type()?.apply {
-                when (this) {
-                    12, 123, 124, 1234 -> talkWithSaler()
-                    13, 132, 134 -> collectGoods()
-                    14, 142, 143 -> buyGoods()
-                    else -> responSuccess()
-                }
-            }
+                    override fun onTaskFailed(failedMsg: String) {
+                        L.i("回到顶部失败")
+
+                    }
+                })
+                .create()
+                .execute()
         }
     }
 
@@ -151,16 +209,7 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
             SPUtils.getInstance(Constant.SP_TASK_FILE_NAME).getBoolean(Constant.KEY_ALREADY_TALKED)
         if (isTalked) {
             L.i("已聊过天")
-            //continueTask()
-            mTaskProgress.append("2")
-            saveTaskProgress(mTaskProgress.toString())
-            TaskDataUtil.instance.getTask_type()?.apply {
-                when (this) {
-                    23, 234, 123, 1234 -> collectGoods()
-                    24, 124, 324 -> buyGoods()
-                    else -> responSuccess()
-                }
-            }
+            mHandler.sendEmptyMessage(MSG_TALK_FINISHED)
         } else {
             L.i("没有聊过天")
             startTalk(talkMsg)
@@ -181,7 +230,12 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
                 override fun onTaskFinished() {
                     SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
                         .put(Constant.KEY_ALREADY_TALKED, true)
-                    continueTask()
+                    //continueTask()
+                    nodeService.performBackClick(5,object:AfterClickedListener{
+                        override fun onClicked() {
+                            mHandler.sendEmptyMessage(MSG_TALK_FINISHED)
+                        }
+                    })
                 }
             })
             .setNodeParams("客服")
@@ -191,24 +245,6 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
             .execute()
     }
 
-    /**
-     * 继续下一步
-     */
-    private fun continueTask() {
-        mTaskProgress.append("2")
-        saveTaskProgress(mTaskProgress.toString())
-        nodeService.performBackClick(2, object : AfterClickedListener {
-            override fun onClicked() {
-                TaskDataUtil.instance.getTask_type()?.apply {
-                    when (this) {
-                        23, 234, 123, 1234 -> collectGoods()
-                        24, 124, 324 -> buyGoods()
-                        else -> responSuccess()
-                    }
-                }
-            }
-        })
-    }
 
     /**
      * 3:收藏商品
@@ -219,33 +255,15 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
             .setTaskListener(object : TaskListener {
                 override fun onTaskFailed(failedMsg: String) {
                     L.i("$failedMsg was not found.商品已收藏")
-                    mTaskProgress.append("3")
-                    saveTaskProgress(mTaskProgress.toString())
-                    TaskDataUtil.instance.getTask_type()?.apply {
-                        when (this) {
-                            1234, 134, 234, 34 -> buyGoods()
-                            132, 32, 324 -> talkWithSaler()
-
-                            else -> responSuccess()
-                        }
-                    }
+                    mHandler.sendEmptyMessage(MSG_COLLECT_FINISHED)
                 }
 
                 override fun onTaskFinished() {
                     L.i("商品已收藏")
-                    mTaskProgress.append("3")
-                    saveTaskProgress(mTaskProgress.toString())
-                    TaskDataUtil.instance.getTask_type()?.apply {
-                        when (this) {
-                            1234, 134, 234, 34 -> buyGoods()
-                            132, 32, 324 -> talkWithSaler()
-
-                            else -> responSuccess()
-                        }
-                    }
+                    mHandler.sendEmptyMessage(MSG_COLLECT_FINISHED)
                 }
             })
-            .setNodeParams("收藏")
+            .setNodeParams("收藏",0,6)
             .create()
             .execute()
     }
@@ -255,8 +273,9 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
      */
     private fun buyGoods() {
         L.i("购买商品，并且选择商品各个参数")
-        mTaskProgress.append("4")
-        saveTaskProgress(mTaskProgress.toString())
+       /* mTaskProgress.append("4")
+        saveTaskProgress(mTaskProgress.toString())*/
+        saveFinishProgress("4")
         BuyGoods(nodeService)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
@@ -271,33 +290,6 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
     }
 
     /**
-     * 在QQ好友中找好友代付
-     */
-    private fun payByOther() {
-        NodeController.Builder()
-            .setNodeService(nodeService)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    L.i("支付成功，下单完成，重新开始下一轮任务")
-                    responSuccess()
-                }
-
-                override fun onTaskFailed(failedMsg: String) {
-                    L.i("$failedMsg was not found.支付失败")
-                    responFailed(failedMsg)
-                }
-
-            })
-            .setNodeParams("立即支付")
-            .setNodeParams("找好友代付")
-            .setNodeParams("Quinin1993")    //支付好友的昵称
-            .setNodeParams("完成")
-            .setNodeParams("发送")
-            .create()
-            .execute()
-    }
-
-    /**
      * 保存任务进度
      */
     private fun saveTaskProgress(progress: String) {
@@ -308,12 +300,10 @@ class TaskService constructor(nodeService: MyAccessibilityService) : BaseEventSe
 
 
     private fun responFailed(failedMsg: String) {
-        //saveTaskProgress(mTaskProgress.toString())
         mTaskFinishedListener?.onTaskFailed(failedMsg)
     }
 
     private fun responSuccess() {
-        //saveTaskProgress(mTaskProgress.toString())
         mTaskFinishedListener?.onTaskFinished()
     }
 }

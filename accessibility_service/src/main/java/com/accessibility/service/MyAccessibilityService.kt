@@ -172,6 +172,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
      */
     private fun chooseLogin() {
         if (mCurPageType == PageEnum.START_PAGE) {
+            deadLoop = 0
             setCurPageType(PageEnum.CHOOSING_LOGIN_PAGE)
             initTaskData()
             L.i("拼多多登录界面2")
@@ -264,7 +265,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
             .setNodeParams("个人中心", 0, true, 4)
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    L.i("已找到个人中心")
+                    L.i("已找到个人中心，开始确认是否支付成功")
                     ConfirmPayResult(this@MyAccessibilityService)
                         .setTaskListener(object : TaskListener {
                             override fun onTaskFinished() {
@@ -392,9 +393,9 @@ class MyAccessibilityService : BaseAccessibilityService() {
             })
             .setTaskListener(object : TaskListener {
                 override fun onTaskFinished() {
-                    mHandler.postDelayed({
+                    this@MyAccessibilityService.postDelay(Runnable{
                         responTaskFinished()
-                    }, 3 * 1000)
+                    }, 3)
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -443,7 +444,6 @@ class MyAccessibilityService : BaseAccessibilityService() {
             val taskType = TaskDataUtil.instance.getTask_type()
             if (taskType != null && taskType.toString().contains("4"))   //是否有支付
             {
-                setCurPageType(PageEnum.START_PAGE)
                 PackageManagerUtils.killApplication(Constant.ALI_PAY_PKG)
                 PackageManagerUtils.restartApplication(PKG_PINDUODUO, ACTIVITY_PDD_LAUNCHER)
             } else {
@@ -453,7 +453,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
 
     }
 
-
+    @Synchronized
     private fun responTaskFinished() {
         L.i("任务完成，重新开始下一轮任务")
         //initParams()
@@ -463,7 +463,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
             sendBroadcast(Intent(ACTION_TASK_SUCCEED))
         }, 2)
     }
-
+    @Synchronized
     private fun responTaskFailed(msg: String) {
         //initParams()
         startPddTask()

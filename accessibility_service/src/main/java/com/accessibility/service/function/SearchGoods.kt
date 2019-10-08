@@ -30,7 +30,7 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
     private var mIsVerifySaler: Boolean = false //是否校验过同一卖家，如果是，则先上滑动再继续查找，否则不先上滑
     private var mStartTime: Long = 0 //搜索开始时间
 
-    private var hasResearched:Boolean  ?= null //  是否第二次搜索商品？
+    private var hasResearched: Boolean? = null //  是否第二次搜索商品？
 
     companion object {
         const val XY_SEARCH_EDITTEXT = "540,245"    //主界面的搜索框的坐标
@@ -160,34 +160,21 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                             .getInt(Constant.KEY_CUR_SEARCH_TYPE)
                     L.i("搜索方式：$searchType 任务完成的数量：$taskFinishCount")
                     nodeService.postDelay(Runnable {
-                        // 第二次或以上执行浏览器搜索。
-                        if(hasResearched!!){
-                            //todo 暂时补救代码
-//                            searchByMallName()
-//                            searchByBrowser()
-
-                            clearBrowserData()
-                        }else{
-//                            clearBrowserData()
-//                            searchByBrowser()
-//                            searchByMallName()
-                            inputKeyword()
-                            L.i("inputKeyword已执行。。。")
-                            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
-                                .put(Constant.KEY_HAS_RESEARCHED,true)
-                        }
-
-                    },1)
-                    //searchByBrowser()
-                    /*if (taskFinishCount != null && taskFinishCount > 0 && searchType > 0) {
-                        if (searchType == SearchType.MALLNAME) {
-                            searchByMallName()
-                        } else if (searchType == SearchType.BROWSER) {
+                        //第二次或以上执行浏览器搜索。
+                        if (hasResearched!!) {
+                            //clearBrowserData()
                             searchByBrowser()
+                        } else {
+                            SPUtils.getInstance(Constant.SP_TASK_FILE_NAME)
+                                .put(Constant.KEY_HAS_RESEARCHED, true)  //记录已搜索一次
+                            //随机进入商品
+                            when ((1..3).random()) {
+                                1 -> inputKeyword()
+                                2 -> searchByMallName()
+                                else -> searchByBrowser()
+                            }
                         }
-                    } else {
-                        inputKeyword()
-                    }*/
+                    }, 1)
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -198,27 +185,6 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
             .execute()
     }
 
-    private fun clearBrowserData() {
-        ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>(){
-            override fun doInBackground(): Boolean {
-                var clearDataCmd = "pm clear ${Constant.XIAOMI_BROWSER_PKG}"
-                CMDUtil().execCmd(clearDataCmd)
-                return true
-            }
-
-            override fun onSuccess(result: Boolean?) {
-                searchByBrowser()
-            }
-
-            override fun onCancel() {
-            }
-
-            override fun onFail(t: Throwable?) {
-            }
-
-        } )
-
-    }
 
     /**
      * 输入搜索关键字
@@ -286,7 +252,6 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
                     mStartTime = System.currentTimeMillis()
                     L.i("搜索开始的时间: $mStartTime")
                     startSearchByKeyWord()
-
                 }
 
                 override fun onTaskFailed(failedMsg: String) {
@@ -325,21 +290,38 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
      * 浏览器根据链接跳转
      */
     private fun searchByBrowser() {
-        SearchByBrowser(nodeService)
-            .setTaskListener(object : TaskListener {
-                override fun onTaskFinished() {
-                    L.i("浏览器根据链接跳转成功")
-                    SPUtils.getInstance(Constant.SP_SEARCH_TYPE_FILE)
-                        .put(Constant.KEY_CUR_SEARCH_TYPE, SearchType.BROWSER)
-                    responSucceed()
-                }
+        ThreadUtils.executeByCached(object : ThreadUtils.Task<Boolean>() {
+            override fun doInBackground(): Boolean {
+                var clearDataCmd = "pm clear ${Constant.XIAOMI_BROWSER_PKG}"
+                CMDUtil().execCmd(clearDataCmd)
+                return true
+            }
 
-                override fun onTaskFailed(failedMsg: String) {
-                    L.i("浏览器根据链接跳转失败：$failedMsg")
-                    responFailed(failedMsg)
-                }
-            })
-            .startService()
+            override fun onSuccess(result: Boolean?) {
+                SearchByBrowser(nodeService)
+                    .setTaskListener(object : TaskListener {
+                        override fun onTaskFinished() {
+                            L.i("浏览器根据链接跳转成功")
+                            SPUtils.getInstance(Constant.SP_SEARCH_TYPE_FILE)
+                                .put(Constant.KEY_CUR_SEARCH_TYPE, SearchType.BROWSER)
+                            responSucceed()
+                        }
+
+                        override fun onTaskFailed(failedMsg: String) {
+                            L.i("浏览器根据链接跳转失败：$failedMsg")
+                            responFailed(failedMsg)
+                        }
+                    })
+                    .startService()
+            }
+
+            override fun onCancel() {
+            }
+
+            override fun onFail(t: Throwable?) {
+            }
+
+        })
     }
 
     /**
@@ -380,11 +362,11 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
      */
     private fun startSearch() {
         var mHalfGoodName = mSearchPrice!!
-       /* mGoodName?.apply {
-            mHalfGoodName = if (this.length > 10) {
-                this.substring(0, 9)
-            } else mSearchPrice!!
-        }*/
+        /* mGoodName?.apply {
+             mHalfGoodName = if (this.length > 10) {
+                 this.substring(0, 9)
+             } else mSearchPrice!!
+         }*/
 
         val searchTime = (8..18).random().toLong()
         AdbScrollUtils.instantce
