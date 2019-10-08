@@ -379,12 +379,12 @@ class SearchGoods(val nodeService: MyAccessibilityService) : BaseAcService(nodeS
      * 开始查找
      */
     private fun startSearch() {
-        var mHalfGoodName = ""
-        mGoodName?.apply {
+        var mHalfGoodName = mSearchPrice!!
+       /* mGoodName?.apply {
             mHalfGoodName = if (this.length > 10) {
                 this.substring(0, 9)
             } else mSearchPrice!!
-        }
+        }*/
 
         val searchTime = (8..18).random().toLong()
         AdbScrollUtils.instantce

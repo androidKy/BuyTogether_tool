@@ -61,6 +61,7 @@ class PictureUtils private constructor() {
     }
 
     fun savePictures() {
+        mDownloadFinished = 0
         downloadPictures()
     }
 
