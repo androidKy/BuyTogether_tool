@@ -111,7 +111,7 @@ class ScrollUtils constructor(private val nodeService: BaseAccessibilityService,
             nodeService.performScrollForward(recyclerViewNode)
             mForwardTime--
 
-            mHandler.sendEmptyMessageDelayed(MSG_FORWARD_WHAT, 1000)
+            mHandler.sendEmptyMessageDelayed(MSG_FORWARD_WHAT, 1500)
             findNode()
         } else {
             if (!mIsNodeFound) {
@@ -128,7 +128,7 @@ class ScrollUtils constructor(private val nodeService: BaseAccessibilityService,
             nodeService.performScrollBackward(recyclerViewNode)
             mBackwardTime--
 
-            mHandler.sendEmptyMessageDelayed(MSG_BACKWARD_WHAT, 1000)
+            mHandler.sendEmptyMessageDelayed(MSG_BACKWARD_WHAT, 1500)
             findNode()
         } else {
             if (!mIsNodeFound) {

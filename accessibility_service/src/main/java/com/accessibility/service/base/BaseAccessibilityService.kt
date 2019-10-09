@@ -163,8 +163,8 @@ abstract class BaseAccessibilityService : AccessibilityService() {
                             //L.i("window id: ${nodeWindowList[i].id}")
                             val nodeInfo = nodeWindowList[i].root
                             if (nodeInfo != null) {
-                                return findHalfNodeForEachWindows(text,nodeInfo)
-                               /* val nodeList = nodeInfo.findAccessibilityNodeInfosByText(text)
+                               // return findHalfNodeForEachWindows(text,nodeInfo)
+                                val nodeList = nodeInfo.findAccessibilityNodeInfosByText(text)
                                 // L.i("nodeList size = ${nodeList.size} textList = $text ")
                                 if (nodeList.size > 0) {
                                     for (node in nodeList) {
@@ -173,7 +173,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
                                             return node
                                     }
                                     return nodeList[0]
-                                }*/
+                                }
                             }
                         }
                 }
@@ -229,17 +229,23 @@ abstract class BaseAccessibilityService : AccessibilityService() {
                             //L.i("window id: ${nodeWindowList[i].id}")
                             val nodeInfo = nodeWindowList[i].root
                             if (nodeInfo != null) {
-                                findFullNodeForEachWindows(text,nodeInfo)
+                                //findFullNodeForEachWindows(text,nodeInfo)
+                                val nodeList = nodeInfo.findAccessibilityNodeInfosByText(text)
+
+                                if (nodeList.size > 0) {
+                                    for (node in nodeList) {
+                                        if (node.text == text)
+                                            return node
+                                    }
+                                }
                             }
                         }
                 }
             } else {
                 return findFullNodeForEachWindows(text,rootWindow)
                /* val nodeList = rootWindow.findAccessibilityNodeInfosByText(text)
-
                 if (nodeList.size > 0) {
                     for (node in nodeList) {
-                        // L.i("nodeList textList = ${node.text} className = ${node.className}")
                         if (node.text == text)
                             return node
                     }
@@ -291,7 +297,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
                     return node
             }
             return windowNodeList[0]
-        }
+        }*/
 
         return null
     }
@@ -325,7 +331,7 @@ abstract class BaseAccessibilityService : AccessibilityService() {
                 if (node.text == text)
                     return node
             }
-        }
+        }*/
 
         return null
     }

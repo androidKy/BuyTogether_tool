@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.support.v7.app.AppCompatActivity
+import android.view.KeyEvent
 import android.view.WindowManager
 import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.MyAccessibilityService.Companion.ACTION_APP_RESTART
@@ -32,10 +33,12 @@ import com.proxy.service.core.ProxyConfig
 import com.safframework.log.L
 import com.utils.common.SPUtils
 import com.utils.common.ToastUtils
+import kotlin.system.exitProcess
 
 
 class MainActivity : AppCompatActivity(), MainAcView {
 
+    private var mFirstExitTime: Long = 0
     private var mMainFragment: MainFragment? = null
     private var mTaskRunning: Boolean = false
     private var mMainAcViewModel: MainAcViewModel? = null
@@ -79,7 +82,6 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
         initAction()
     }
-
 
 
     private fun initAction() {
@@ -136,6 +138,20 @@ class MainActivity : AppCompatActivity(), MainAcView {
         super.onResume()
     }
 
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        val secondExitTime = System.currentTimeMillis()
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (secondExitTime - mFirstExitTime < 1000) {
+                exitProcess(0)
+            } else {
+                ToastUtils.showToast(this, "再按一次退出程序")
+                mFirstExitTime = System.currentTimeMillis()
+            }
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == START_VPN_SERVICE_REQUEST_CODE) {
@@ -161,7 +177,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
         }
         NetStateReceiver.unRegisterNetworkStateReceiver(this)
 
-       // mMainAcViewModel?.disableAccessibilityService()
+        // mMainAcViewModel?.disableAccessibilityService()
     }
 
     override fun onPermissionGranted() {
