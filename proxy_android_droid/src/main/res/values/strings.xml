@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">proxy_android_droid</string>
+
+    <!-- status string -->
+    <string name="service_running">Running in the background</string>
+    <string name="forward_success">Connected</string>
+    <string name="forward_fail">Fail to connect</string>
+    <string name="service_stopped">ProxyDroid service stopped</string>
+    <string name="auto_reconnected">Reconnecting</string>
+    <string name="reconnect_success">Reconnected</string>
+    <string name="already_stopped">Service has already been stopped</string>
+    <string name="already_running">Service has already been started</string>
+    <string name="forward_stop">Disconnected</string>
+    <string name="service_failed">Please check your network and login information</string>
+    <string name="reconnect_fail">Cannot reconnect, service stopped</string>
+    <string name="connecting">Connecting</string>
+    <string name="auto_connecting">Connecting...</string>
+    <string name="loading">Loading app list...</string>
+
+    <!-- Connection errors -->
+    <string name="msg_pac_error">Incorrect or unsupported PAC file</string>
+    <string name="msg_resolve_error">Incorrect or unknown proxy host name</string>
+
+    <!-- file chooser -->
+    <string name="file_chooser">Choose your key file</string>
+    <string name="key_manager">Key File Manager</string>
+    <string name="current_dir">Current Directory</string>
+    <string name="parent_dir">Parent Directory</string>
+    <string name="folder">Folder</string>
+    <string name="file_size">File Size</string>
+    <string name="file_toast">Import from this file: </string>
+    <string name="file_error">Too many rules: </string>
+</resources>

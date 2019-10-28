@@ -1,0 +1,24 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.proxy.droid">
+    <application>
+        <service
+            android:name="org.proxydroid.ProxyDroidService"
+            android:enabled="true" />
+
+       <!-- <receiver android:name="org.proxydroid.ConnectivityBroadcastReceiver" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>-->
+       <!-- <receiver android:name="org.proxydroid.ProxyDroidWidgetProvider" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="org.proxydroid.ProxyDroidWidgetProvider.PROXY_SWITCH_ACTION" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/proxydroid_appwidget_provider" />
+        </receiver>-->
+    </application>
+</manifest>

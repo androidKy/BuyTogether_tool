@@ -68,13 +68,13 @@ open class BaseViewModel<c : Context,bv : BaseView>(val context: Context,val bas
                         L.i("关闭端口成功：$this")
                         SPUtils.getInstance(Constant.SP_IP_PORTS).clear()
                         val closeProxyBean = Gson().fromJson(this, CloseProxyBean::class.java)
-                        baseView.onResponClosePort(closeProxyBean)
+                        //baseView.onResponClosePort(closeProxyBean)
                     }
                 }
 
                 override fun onError(anError: ANError?) {
                     L.i("关闭端口失败：${anError?.response?.body()?.string()} errorMsg: ${anError?.errorDetail}")
-                    baseView.onResponClosePort(null)
+                    //baseView.onResponClosePort(null)
                 }
             })
     }
@@ -183,7 +183,7 @@ open class BaseViewModel<c : Context,bv : BaseView>(val context: Context,val bas
                         requestPorts(result)
                     else {
                         L.i("cache ports: $portsCache")
-                        baseView.onRequestPortsResult(portsCache)
+                        //baseView.onRequestPortsResult(portsCache)
                     }
                 } else {
                     L.i("$cityName 该城市没有IP，重新获取地址")
@@ -249,7 +249,7 @@ open class BaseViewModel<c : Context,bv : BaseView>(val context: Context,val bas
                                     put(Constant.KEY_IP_PORTS, this@run)
                                     put(Constant.KEY_CUR_PORT, proxyIpBean.data.port[0].toString())
                                 }
-                                baseView.onRequestPortsResult(this)
+                                //baseView.onRequestPortsResult(this)
                             }
                             /*   proxyIpBean?.data?.code == 203 -> {
 
@@ -262,7 +262,7 @@ open class BaseViewModel<c : Context,bv : BaseView>(val context: Context,val bas
                                     requestPorts(cityId)
                                 } else{
                                     mGetProxyFailedCount = 0
-                                    baseView.onResponPortsFailed("请求端口数据出错：code = ${proxyIpBean.data?.code}")
+                                    //baseView.onResponPortsFailed("请求端口数据出错：code = ${proxyIpBean.data?.code}")
                                 }
                             }
                         }
@@ -271,7 +271,7 @@ open class BaseViewModel<c : Context,bv : BaseView>(val context: Context,val bas
 
                 override fun onError(anError: ANError?) {
                     L.i("申请端口失败：${anError?.errorDetail}")
-                    baseView.onResponPortsFailed("申请端口失败：${anError?.errorDetail}")
+                    //baseView.onResponPortsFailed("申请端口失败：${anError?.errorDetail}")
                 }
             })
     }

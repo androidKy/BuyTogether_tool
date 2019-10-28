@@ -56,21 +56,21 @@
                 android:priority="1000"></service>
 
         <activity android:name=".BackupTestActivity">
-            <intent-filter>
+            <!--<intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            </intent-filter>-->
         </activity>
 
         <activity
                 android:name=".MainActivity"
                 android:launchMode="singleInstance">
-           <!-- <intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>-->
+            </intent-filter>
         </activity>
         <activity
                 android:name="com.utils.common.screen.ScreenShotActivity"

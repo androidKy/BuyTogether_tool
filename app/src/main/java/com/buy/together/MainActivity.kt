@@ -28,10 +28,8 @@ import com.buy.together.utils.NetUtils
 import com.orhanobut.logger.CsvFormatStrategy
 import com.orhanobut.logger.DiskLogAdapter
 import com.orhanobut.logger.Logger
-import com.proxy.service.LocalVpnService.START_VPN_SERVICE_REQUEST_CODE
-import com.proxy.service.core.ProxyConfig
+import com.proxy.droid.ProxyManager
 import com.safframework.log.L
-import com.utils.common.SPUtils
 import com.utils.common.ToastUtils
 import kotlin.system.exitProcess
 
@@ -69,7 +67,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
         Logger.addLogAdapter(DiskLogAdapter(formatStrategy))
         L.i("有无改到代码3")
 
-        ProxyConfig.Instance.globalMode = false
+        //ProxyConfig.Instance.globalMode = false
 
         initFragment()
 
@@ -81,6 +79,11 @@ class MainActivity : AppCompatActivity(), MainAcView {
         registerReceiver()
 
         initAction()
+
+        ProxyManager.Builder()
+            .setContext(this)
+            .build()
+            .init()
     }
 
 
@@ -154,20 +157,7 @@ class MainActivity : AppCompatActivity(), MainAcView {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == START_VPN_SERVICE_REQUEST_CODE) {
-            L.i("VPN启动回调的Activity")
-            if (resultCode == RESULT_OK) {
-                val ipPorts =
-                    SPUtils.getInstance(Constant.SP_IP_PORTS).getString(Constant.KEY_IP_PORTS)
-                L.i("第一次打开VPN，需要确认允许VPN连接。ipPorts: $ipPorts")
-                mMainFragment?.startMyVpnService(ipPorts)
-            } else {
-                //log("onActivityResult", "resultCode != RESULT_OK")
-                //onLogReceived("canceled.")
-                //EventBus.getDefault().postSticky(PostModel(PostCode.DisConnect_VPN))
-            }
-            return
-        }
+
     }
 
     override fun onDestroy() {

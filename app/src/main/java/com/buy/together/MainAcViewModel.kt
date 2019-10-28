@@ -10,8 +10,6 @@ import com.accessibility.service.MyAccessibilityService
 import com.accessibility.service.base.BaseAccessibilityService
 import com.accessibility.service.data.TaskCategory
 import com.accessibility.service.util.Constant
-import com.proxy.service.core.AppInfo
-import com.proxy.service.core.AppProxyManager
 import com.safframework.log.L
 import com.utils.common.*
 import com.utils.common.pdd_api.ApiManager
@@ -69,7 +67,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) {
             // 获取到应用所在包的名字,即在AndriodMainfest中的package的值。
             val packageName = packageInfo.packageName
             // L.i("app name: $appName packageName: $packageName")
-
+/*
             AppInfo().run {
                 appLabel = appName
                 pkgName = packageName
@@ -82,7 +80,7 @@ class MainAcViewModel(val context: Activity, val mainAcView: MainAcView) {
                 ) {
                     AppProxyManager.getInstance().setAppInfo(this)
                 }
-            }
+            }*/
         }
     }
 
