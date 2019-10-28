@@ -18,7 +18,6 @@ import javax.net.ssl.SSLHandshakeException;
 
 public class BetterHttpRequestRetryHandler implements HttpRequestRetryHandler {
 
-	// TODO: make configurable
 	private static final int RETRY_SLEEP_TIME_MILLIS = 1500;
 
 	private static HashSet<Class<?>> exceptionWhitelist = new HashSet<Class<?>>();
@@ -34,7 +33,6 @@ public class BetterHttpRequestRetryHandler implements HttpRequestRetryHandler {
 		exceptionWhitelist.add(SocketException.class);
 
 		// never retry timeouts
-		// TODO: this doesn't actually capture all timeouts; I've seen timeouts
 		// being thrown as a
 		// plain SocketExceptiion
 		exceptionBlacklist.add(InterruptedIOException.class);
@@ -71,7 +69,6 @@ public class BetterHttpRequestRetryHandler implements HttpRequestRetryHandler {
 		} else if (!sent) {
 			// for all other errors, retry only if request hasn't been fully
 			// sent yet
-			// TODO: refine to resend all idempotent requests
 			retry = true;
 		} else {
 			// otherwise do not retry

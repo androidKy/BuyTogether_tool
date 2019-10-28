@@ -276,7 +276,6 @@ class MainActivity : AppCompatActivity(), MainAcView {
                         mMainAcViewModel?.updateTask(true, "success")
                     }
 
-                    // todo 新添加代码
                     ACTION_BOOT_COMPLETED -> {
                         L.i("开启自改动，成功")
 

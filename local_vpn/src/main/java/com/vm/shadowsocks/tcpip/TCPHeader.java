@@ -71,7 +71,6 @@ public class TCPHeader {
 
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
         return String.format("%s%s%s%s%s%s%d->%d %s:%s",
                 (getFlags() & SYN) == SYN ? "SYN " : "",
                 (getFlags() & ACK) == ACK ? "ACK " : "",

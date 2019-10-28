@@ -12,7 +12,6 @@ public class CommonMethods {
         try {
             return Inet4Address.getByAddress(ipAddress);
         } catch (UnknownHostException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             return null;
         }

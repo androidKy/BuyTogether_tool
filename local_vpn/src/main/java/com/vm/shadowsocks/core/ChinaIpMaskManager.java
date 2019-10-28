@@ -43,7 +43,6 @@ public class ChinaIpMaskManager {
             inputStream.close();
             System.out.printf("ChinaIpMask records count: %d\n", ChinaIpMaskDict.size());
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

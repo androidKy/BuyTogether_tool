@@ -385,7 +385,6 @@ class MainViewModel(context: Context, val mainView: MainView) :
                 val resultStr = if (patchResult.isSuccess) "成功" else "失败"
                 L.i("热更新结果: $resultStr 当前补丁版本号: ${TinkerPatch.with().patchVersion}")
                 ToastUtils.showToast(context, "热更新：$resultStr")
-                //todo 上报热更新结果给后台
                 if (result) {
                     PackageManagerUtils.restartSelf(Constant.PKG_NAME)
                 }

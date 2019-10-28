@@ -169,7 +169,7 @@ public class DNSProxy implements Runnable {
      * DOMAIN NAMES - IMPLEMENTATION AND SPECIFICATION
      * http://www.ietf.org/rfc/rfc1035.txt
      */
-    protected byte[] createDNSResponse(byte[] quest, byte[] ips) {  //todo
+    protected byte[] createDNSResponse(byte[] quest, byte[] ips) {
         byte[] response = null;
         int start = 0;
 

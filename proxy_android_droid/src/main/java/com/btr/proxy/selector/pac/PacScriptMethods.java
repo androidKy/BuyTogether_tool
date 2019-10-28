@@ -571,7 +571,6 @@ public class PacScriptMethods implements ScriptMethods {
 	 ************************************************************************/
 	@Override
 	public boolean isInNetEx(String ipAddress, String ipPrefix) {
-		// TODO rossi 27.06.2011 Auto-generated method stub
 		return false;
 	}
 
@@ -625,12 +624,10 @@ public class PacScriptMethods implements ScriptMethods {
 			try {
 				parsedAddresses.add(InetAddress.getByName(ip));
 			} catch (UnknownHostException e) {
-				// TODO rossi 01.11.2011 Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		Collections.sort(parsedAddresses, null);
-		// TODO rossi 27.06.2011 Implement me.
 		return ipAddressList;
 	}
 
