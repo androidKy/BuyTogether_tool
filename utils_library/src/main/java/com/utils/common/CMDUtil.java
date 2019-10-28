@@ -12,6 +12,7 @@ public class CMDUtil {
     private final String COMMAND_EXIT = "exit\n";
     private final String COMMAND_LINE_END = "\n";
 
+
     //静默安装
     public boolean installSlient(String path) {
         String cmd = "pm install -r " + path;
@@ -22,6 +23,7 @@ public class CMDUtil {
         String cmd = "pm uninstall " + packageName;
         return execCmd(cmd).contains("Success");
     }
+
 
     public String execCmd(String command) {
         if (ThreadUtils.isMainThread()) {

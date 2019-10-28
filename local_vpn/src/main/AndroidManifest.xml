@@ -1,0 +1,29 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.proxy.service">
+
+    <application android:networkSecurityConfig="@xml/network_security_config">
+        <receiver
+            android:name=".receiver.VpnNotificationReceiver"
+            android:exported="false">
+
+        </receiver>
+        <!--<service android:name=".MyVpnService"
+                 android:exported="false"/>-->
+        <service
+            android:name="com.vm.shadowsocks.core.LocalVpnService"
+            android:exported="false"
+            android:permission="android.permission.BIND_VPN_SERVICE">
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
+
+    </application>
+
+    <uses-permission
+        android:name="android.permission.INTERACT_ACROSS_USERS"
+        tools:ignore="ProtectedPermissions" />
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+</manifest>

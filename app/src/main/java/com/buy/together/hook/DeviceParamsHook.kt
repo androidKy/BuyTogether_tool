@@ -108,8 +108,8 @@ class DeviceParamsHook : HookListener {
                 val strArg0 = args?.get(0) as String
                 strArg0.apply {
                     when (this) {
-                        "ro.product.brand" -> setResult(DeviceParams.BRAND_KEY, this@run)
-                        "ro.product.mode" -> setResult(DeviceParams.MODEL_KEY, this@run)
+                        "ro.product.brand" -> setResult(getValueFromSP(DeviceParams.BRAND_KEY), this@run)
+                        "ro.product.mode" -> setResult(getValueFromSP(DeviceParams.MODEL_KEY), this@run)
                     }
                 }
             }
@@ -124,6 +124,7 @@ class DeviceParamsHook : HookListener {
     }
 
     private fun getValueFromSP(key: String): String {
+
         return HookUtil.getValueFromSP(AndroidAppHelper.currentApplication(), key)
     }
 }

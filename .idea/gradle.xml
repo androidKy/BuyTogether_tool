@@ -11,6 +11,7 @@
             <option value="$PROJECT_DIR$/accessibility_service" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/localVPN" />
+            <option value="$PROJECT_DIR$/local_vpn" />
             <option value="$PROJECT_DIR$/logger" />
             <option value="$PROJECT_DIR$/saf-log" />
             <option value="$PROJECT_DIR$/utils_library" />

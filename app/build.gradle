@@ -61,35 +61,35 @@ android {
     applicationVariants.all { variant ->
         variant.outputs.all { output ->
             outputFileName = "pdd_v${defaultConfig.versionName}_${variant.name}.apk"
-             //outputFileName = "pdd_v${defaultConfig.versionName}_演示.apk"
+            //outputFileName = "pdd_v${defaultConfig.versionName}_演示.apk"
         }
     }
     /*
      * taskType:0是正常任务,1是评论任务,2是确认收货
      */
-    productFlavors{
-        normalTask{
+    productFlavors {
+        normalTask {
             applicationId "com.shopping.pdd"
             versionCode 1
             versionName "1.1.0"
-            manifestPlaceholders = [app_name:"pddTask_$versionName"]
-            buildConfigField "int","taskType","0"
+            manifestPlaceholders = [app_name: "pddTask_$versionName"]
+            buildConfigField "int", "taskType", "0"
         }
 
-        commentTask{
+        commentTask {
             applicationId "com.shopping.pdd"
             versionCode 1
             versionName "1.0.1"
-            manifestPlaceholders = [app_name:"pddComment_$versionName"]
-            buildConfigField "int","taskType","1"
+            manifestPlaceholders = [app_name: "pddComment_$versionName"]
+            buildConfigField "int", "taskType", "1"
         }
 
-        confirmSigned{
+        confirmSigned {
             applicationId "com.shopping.pdd"
             versionCode 1
             versionName "1.0.0"
-            manifestPlaceholders = [app_name:"pddConfirm_$versionName"]
-            buildConfigField "int","taskType","2"
+            manifestPlaceholders = [app_name: "pddConfirm_$versionName"]
+            buildConfigField "int", "taskType", "2"
         }
     }
 }

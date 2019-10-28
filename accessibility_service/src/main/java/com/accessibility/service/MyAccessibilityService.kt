@@ -117,7 +117,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        try {
+       /* try {
             clickPermission(event)
             val pkgName = event?.packageName
             if(!pkgName.isNullOrEmpty() && pkgName==Constant.BUY_TOGETHER_PKG)    //避免打开支付宝时进入自动化
@@ -126,7 +126,7 @@ class MyAccessibilityService : BaseAccessibilityService() {
             }
         } catch (e: Exception) {
             L.e(e.message)
-        }
+        }*/
     }
 
 

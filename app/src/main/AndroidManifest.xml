@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
-          package="com.buy.together">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        package="com.buy.together">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.READ_SMS"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission
+            android:name="android.permission.WRITE_SECURE_SETTINGS"
             tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES"
+    <uses-permission
+            android:name="android.permission.FORCE_STOP_PACKAGES"
             tools:ignore="ProtectedPermissions" />
-
-
     <uses-permission
             android:name="android.permission.INTERACT_ACROSS_USERS"
-            tools:ignore="ProtectedPermissions"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+            tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
-
 
     <application
             android:name=".MyBaseApplication"
@@ -30,71 +30,78 @@
             android:label="${app_name}"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
-            tools:replace="android:label"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            tools:replace="android:label">
         <!-- 配置APP ID -->
         <meta-data
                 android:name="BUGLY_APPID"
-                android:value="bddd8c650b"/>
-        <!-- 配置APP版本号 -->
+                android:value="bddd8c650b" /> <!-- 配置APP版本号 -->
         <meta-data
                 android:name="BUGLY_APP_VERSION"
-                android:value="1.0.0"/>
-        <!-- Xposed -->
+                android:value="1.0.0" /> <!-- Xposed -->
         <meta-data
                 android:name="xposedmodule"
-                android:value="true"/>
+                android:value="true" />
         <meta-data
                 android:name="xposedminversion"
-                android:value="54"/>
+                android:value="54" />
         <meta-data
                 android:name="xposeddescription"
-                android:value="拼多多辅助插件"/>
+                android:value="拼多多辅助插件" />
+
         <service
                 android:name=".service.KeepLiveService"
                 android:enabled="true"
-                android:priority="1000"
-                android:exported="true">
-        </service>
+                android:exported="true"
+                android:priority="1000"></service>
 
-        <activity android:name=".MainActivity"
-                  android:launchMode="singleInstance">
+        <activity android:name=".BackupTestActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
+        <activity
+                android:name=".MainActivity"
+                android:launchMode="singleInstance">
+           <!-- <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>-->
+        </activity>
         <activity
                 android:name="com.utils.common.screen.ScreenShotActivity"
                 android:exported="true"
                 android:theme="@android:style/Theme.Dialog">
             <intent-filter>
-                <action android:name="android.screen.shot"></action>
-                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="android.screen.shot" />
+
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity
+                android:name="com.utils.common.PermissionUtils$PermissionActivity"
+                android:launchMode="singleTask"></activity>
 
-        <activity android:name="com.utils.common.PermissionUtils$PermissionActivity"
-                  android:launchMode="singleTask">
+        <provider
+                android:name=".hook.sp.PreferenceProvider"
+                android:authorities="com.shopping.pdd"
+                android:exported="true" />
 
-        </activity>
-        <provider android:name="com.buy.together.hook.sp.PreferenceProvider"
-                  android:authorities="com.shopping.pdd"
-                  android:exported="true"/>
-
-        <receiver android:name=".receiver.BootReceiver"
+        <receiver
+                android:name=".receiver.BootReceiver"
                 android:enabled="true"
                 android:exported="true"
                 android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
     </application>
-
-
 
 </manifest>
